@@ -1,0 +1,22 @@
+name: Publish to WinGet
+on:
+  release:
+    types: [released]
+  push:
+    branches: [test-winget]
+jobs:
+  publish:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-24.04
+    environment: build
+    steps:
+      - name: Sync winget-pkgs fork with upstream
+        run: gh api -X POST repos/electerm/winget-pkgs/merge-upstream -f branch=master || echo "Fork already in sync or nothing to merge"
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      - uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: electerm.electerm
+          installers-regex: 'win-(x64|arm64)-installer\.exe$'
+          max-versions-to-keep: 30
+          token: ${{ secrets.WINGET_TOKEN }}
