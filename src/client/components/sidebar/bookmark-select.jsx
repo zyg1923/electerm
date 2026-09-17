@@ -1,0 +1,55 @@
+/**
+ * bookmark select
+ */
+
+import { useState } from 'react'
+import { auto } from 'manate/react'
+import TreeList from '../tree-list/tree-list'
+
+export default auto(function BookmarkSelect (props) {
+  const { store, from, autoFocus } = props
+  const {
+    listStyle,
+    openedSideBar,
+    leftSidePanelWidth,
+    expandedKeys,
+    bookmarks,
+    bookmarksMap,
+    initLoadingData
+  } = store
+  const [activeItemId, setActiveItemId] = useState('')
+  if (from === 'sidebar' && openedSideBar !== 'bookmarks') {
+    return null
+  }
+  const onClickItem = (item) => {
+    if (!store.pinned) {
+      store.setOpenedSideBar('')
+    }
+    store.onSelectBookmark(item.id)
+  }
+  const base = {
+    bookmarks: bookmarks || [],
+    type: 'bookmarks',
+    onClickItem,
+    onHighlightItem: setActiveItemId,
+    activeItemId,
+    listStyle,
+    staticList: true
+  }
+  const propsTree = {
+    ...base,
+    shouldConfirmDel: true,
+    bookmarksMap,
+    bookmarkGroups: store.getBookmarkGroupsTotal(),
+    expandedKeys,
+    leftSidePanelWidth,
+    bookmarkGroupTree: store.bookmarkGroupTree,
+    autoFocus,
+    initLoadingData
+  }
+  return (
+    <TreeList
+      {...propsTree}
+    />
+  )
+})

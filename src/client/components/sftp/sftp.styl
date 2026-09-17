@@ -1,0 +1,404 @@
+.sftp-wrap
+  display flex
+  flex-direction row
+  &.ssh-sftp-split
+    flex-direction column
+    .sftp-section
+      width 100% !important
+      left auto !important
+      top auto !important
+      position relative
+      overflow hidden
+      flex none
+    .sftp-remote-section
+      border-top none
+    .sftp-local-section
+      border-top 1px solid var(--border)
+    .sftp-section-alone
+      flex 1 !important
+      height 100% !important
+      border-top none
+.sftp-wrap.sftp-has-toggles
+  flex-direction column
+  overflow hidden
+  width 100%
+  min-height 0
+.sftp-panels-closed
+  display flex
+  flex-direction column
+  align-items center
+  justify-content center
+  flex 1
+  min-height 0
+  width 100%
+  gap 16px
+  color var(--text)
+  pointer-events auto
+.sftp-panels-closed-msg
+  opacity 0.7
+.sftp-panels-closed-actions
+  display flex
+  align-items center
+  gap 12px
+  .sftp-panel-toggle
+    padding 8px 16px
+    font-size 14px
+.sftp-panel-toggles
+  display flex
+  flex-shrink 0
+  align-items center
+  gap 8px
+  width 100%
+  min-height 36px
+  padding 6px 8px
+  position relative
+  z-index 20
+  background var(--main)
+  border-bottom 1px solid var(--border)
+.sftp-panel-toggle
+  display inline-flex
+  align-items center
+  gap 4px
+  cursor pointer
+  border 1px solid var(--border)
+  background var(--main)
+  color var(--text)
+  padding 2px 8px
+  line-height 20px
+  font-size 12px
+  &:hover
+    color var(--primary)
+    border-color var(--primary)
+  &.open
+    color var(--primary)
+.sftp-section
+  flex 1
+  overflow hidden
+.sftp-title-wrap
+  position relative
+.sftp-panel-title
+  display flex
+  align-items center
+  justify-content space-between
+  gap 8px
+.sftp-panel-title-text
+  min-width 0
+  flex 1
+.sftp-panel-title-ops
+  display inline-flex
+  align-items center
+  flex-shrink 0
+  flex-wrap wrap
+  z-index 2
+.sftp-view-controls
+  display inline-flex
+  align-items center
+  flex-wrap wrap
+  gap 8px
+  margin-right 8px
+.sftp-view-btn
+  cursor pointer
+  font-size 16px
+  padding 2px
+  color var(--text)
+  &:hover
+    color var(--primary)
+  &.active
+    color var(--primary)
+.sftp-tree-depth
+  width 76px
+  min-width 76px
+.sftp-item
+  position relative
+  z-index 3
+  padding 0
+  line-height 26px
+  height 32px
+  user-select none
+  margin-bottom 4px
+  &:nth-child(even)
+    .sftp-file-prop
+      background var(--main)
+  &:hover
+    .sftp-file-prop
+    .sftp-tree-row
+      background-color var(--primary)
+      color var(--primary-contrast)
+  &.selected
+    .sftp-file-prop
+    .sftp-tree-row
+      background-color var(--primary)
+      color var(--primary-contrast)
+  &.sftp-tree-item
+    margin-bottom 2px
+.sftp-history
+  position absolute
+  left 0
+  top 100%
+  right 0
+  z-index 30
+  box-shadow none
+  border none
+  height 0
+  background var(--main)
+  overflow hidden
+  border-radius 3px
+  &.focused
+    height auto
+    border 1px solid var(--main-darker)
+    box-shadow 0px 0px 3px 3px var(--main-lighter)
+
+.sftp-history-item
+  padding 5px 10px
+  cursor pointer
+  border-bottom 1px solid var(--main-darker)
+  &:hover
+    background var(--primary)
+    color var(--primary-contrast)
+
+.sftp-item-title
+  width 100%
+.sftp-item-title
+    width 75%
+.sftp-item-size
+  width 24%
+.sftp-status-success
+  color var(--success)
+.sftp-status-exception
+  color var(--error)
+.sftp-status-active
+  color var(--primary)
+
+.virtual-file
+  .sftp-item
+    position absolute
+    left 0
+    right 10px
+    bottom 0
+    top 0
+    z-index 1
+    height 100%
+    padding 0
+    margin 0
+
+.file-icon
+  position absolute
+  left 10px
+  top 10px
+  font-size 50px
+.file-props-div
+  display flex
+  width 100%
+.file-props
+  margin-left 70px
+
+.sftp-sort-btn
+  &.active
+    font-weight bold
+    color var(--text-light)
+
+//list table
+.sftp-file-prop
+  flex 0 0 auto
+  height 32px
+  line-height 30px
+  padding 0 5px
+  background var(--main)
+  overflow hidden
+  white-space nowrap
+  text-overflow ellipsis
+  pointer-events none
+  cursor default
+  color var(--text)
+
+.file-bg
+  position absolute
+  left 0
+  top 0
+  right 0
+  height 32px
+  z-index 3
+
+.sftp-header-item
+  height 28px
+  line-height 25px
+  padding 0 5px
+  background var(--main)
+  overflow hidden
+  white-space nowrap
+  text-overflow ellipsis
+
+.sftp-file-table-header
+  height 30px
+.sftp-table
+  z-index 2
+  &:hover
+    ::-webkit-scrollbar
+      width 12px
+.sftp-item
+  &.sftp-dragover
+    .sftp-file-prop
+      background var(--primary) !important
+      color var(--text) !important
+  &.sftp-dragover-multi
+    &:after
+    &:before
+      position absolute
+      left 2px
+      top 2px
+      width 100%
+      height 100%
+      background var(--main-lighter)
+      content ''
+      z-index -1
+    &:after
+      left 4px
+      top 4px
+.icon-holder
+  width 1em
+  display inline-block
+.symbolic-link-icon
+  margin-right 2px
+
+//sftp
+.sftp-panel
+  background var(--main)
+
+.file-list
+  ::-webkit-scrollbar-thumb
+    background-color var(--primary) !important
+
+.pager-wrap
+  z-index 4
+  position relative
+
+.sftp-has-pager
+  .sftp-table-content
+    padding-bottom 42px
+  .pager-wrap
+    position absolute
+    bottom 0
+    left 0
+    width 100%
+    background var(--main)
+    height 40px
+    border-top 1px solid var(--main-darker)
+
+.file-header-context-menu
+  position fixed
+  z-index 999
+
+.keyword-filter-icon
+  &:hover
+  &.active
+    color var(--success)
+
+.sftp-addr-menu-icon
+  cursor pointer
+  font-size 14px
+  color var(--text)
+  &:hover
+    color var(--text-light)
+
+.sftp-addr-menu-content
+  display flex
+  align-items center
+  padding 4px 0
+  flex-wrap wrap
+  gap 4px
+
+.symbolic-link-icon
+  margin-right 2px
+.sftp-link-target
+  opacity 0.8
+.sftp-file-hover-tip
+  font-size 12px
+  line-height 1.7
+  white-space nowrap
+.sftp-tree-row
+  display flex
+  align-items center
+  height 32px
+  padding-right 8px
+  background var(--main)
+  color var(--text)
+  pointer-events none
+.sftp-tree-toggle
+  width 16px
+  height 16px
+  display inline-flex
+  align-items center
+  justify-content center
+  flex-shrink 0
+  cursor pointer
+  margin-right 2px
+  position relative
+  z-index 5
+  pointer-events auto
+.sftp-tree-leaf
+  cursor default
+.sftp-tree-name
+  flex 1
+  min-width 0
+  padding-right 22px
+.sftp-tree-content
+  .virtual-file
+    .sftp-item
+      height 100%
+.sftp-file-info-btn
+  position absolute
+  right 4px
+  top 0
+  height 32px
+  z-index 6
+  pointer-events auto
+  display inline-flex
+  align-items center
+  justify-content center
+  width 18px
+  color var(--text)
+  opacity 1
+  cursor pointer
+  &:hover
+    color var(--primary)
+.sftp-item.selected .sftp-file-info-btn
+  color var(--primary)
+.sftp-item
+  .file-props-div
+    padding-right 22px
+.sftp-path-bar
+  display flex
+  align-items center
+  min-height 32px
+  border 1px solid var(--border)
+  border-radius 4px
+  background var(--main)
+  padding 0 8px
+.sftp-path-prefix
+  display inline-flex
+  align-items center
+  flex-shrink 0
+.sftp-path-crumbs
+  flex 1
+  min-width 0
+  display flex
+  align-items center
+  flex-wrap wrap
+  overflow hidden
+  cursor text
+  padding 0 6px
+  color var(--text)
+.sftp-path-crumb
+  cursor pointer
+  padding 0 2px
+  border-radius 2px
+  &:hover
+    color var(--primary)
+    background var(--main-lighter)
+.sftp-path-sep
+  opacity 0.45
+  margin 0 1px
+.sftp-path-suffix
+  display inline-flex
+  align-items center
+  flex-shrink 0

@@ -1,0 +1,91 @@
+.float-window
+  position fixed
+  display flex
+  flex-direction column
+  background var(--main)
+  border 1px solid var(--border, var(--main-darker))
+  border-radius 6px
+  box-shadow 0 8px 28px rgba(0, 0, 0, 0.35)
+  overflow hidden
+  min-width 320px
+  min-height 40px
+  &.is-centered
+    left 50%
+    top 50%
+    transform translate(-50%, -50%)
+  &.is-max
+    border-radius 0
+    transform none
+  &.is-min
+    min-height 40px
+
+.float-window-header
+  display flex
+  align-items center
+  height 40px
+  padding 0 8px 0 14px
+  flex-shrink 0
+  cursor move
+  user-select none
+  border-bottom 1px solid var(--main-darker)
+  background var(--main-lighter)
+
+.float-window-title
+  flex 1
+  font-weight 600
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+  color var(--text)
+
+.float-window-actions
+  display flex
+  align-items center
+  flex-shrink 0
+
+.float-window-btn
+  display flex
+  align-items center
+  justify-content center
+  width 32px
+  height 28px
+  padding 0
+  margin-left 2px
+  background transparent
+  border none
+  border-radius 4px
+  color var(--text)
+  cursor pointer
+  &:hover
+    background var(--main-darker)
+  &.is-close:hover
+    background var(--error)
+    color #fff
+
+.float-window-max-icon
+  width 10px
+  height 8px
+  border 1px solid var(--text)
+  display inline-block
+  &.is-max
+    width 8px
+    height 6px
+    position relative
+    &:before
+      position absolute
+      content ''
+      left -3px
+      top 2px
+      width 8px
+      height 6px
+      border 1px solid var(--text)
+      border-bottom none
+      border-right none
+
+.float-window-body
+  flex 1
+  min-height 0
+  overflow auto
+  color var(--text)
+  display flex
+  flex-direction column
