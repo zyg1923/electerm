@@ -1,8 +1,3 @@
-# Electerm Community Code of Conduct
+# 行为准则
 
-1. **Be Respectful**: Treat everyone with kindness. No harassment or discrimination.
-2. **Collaborate Constructively**: Critique ideas, not people.
-3. **Support Others**: Help newcomers and value diverse perspectives.
-4. **Report Responsibly**: Flag issues via [GitHub Issues](https://github.com/electerm/electerm/issues) or contact maintainers privately.
-
-We foster an open, welcoming environment for all contributors.
+讨论和问题都放在 https://github.com/zyg1923/electerm/issues 。

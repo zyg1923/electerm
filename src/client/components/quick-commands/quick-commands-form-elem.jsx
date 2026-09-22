@@ -111,7 +111,7 @@ export default function QuickCommandForm (props) {
   const templatesStr = templates.map(t => {
     return `{{${t}}}`
   }).join(', ')
-  const wiki = 'https://github.com/electerm/electerm/wiki/quick-command-templates'
+  const wiki = 'https://github.com/zyg1923/electerm/wiki/quick-command-templates'
   return (
     <>
       <Form

@@ -411,13 +411,13 @@ test('applyProxy: does not proxy non-GitHub URLs', () => {
 test('applyProxy: proxies GitHub URLs when GITHUB_PROXY is set', () => {
   // Test the logic directly since module caches GITHUB_PROXY at load time
   const proxy = 'https://electerm-mirror.html5beta.com'
-  const url = 'https://github.com/electerm/electerm/releases/download/v1.0.0/test.tar.gz'
+  const url = 'https://github.com/zyg1923/electerm/releases/download/v1.0.0/test.tar.gz'
 
   // Simulate the applyProxy logic
   const cleanProxy = proxy.replace(/\/+$/, '')
   const result = `${cleanProxy}/${url}`
 
-  expect(result).toBe('https://electerm-mirror.html5beta.com/https://github.com/electerm/electerm/releases/download/v1.0.0/test.tar.gz')
+  expect(result).toBe('https://electerm-mirror.html5beta.com/https://github.com/zyg1923/electerm/releases/download/v1.0.0/test.tar.gz')
 })
 
 test('applyProxy: handles proxy URL with trailing slash', () => {

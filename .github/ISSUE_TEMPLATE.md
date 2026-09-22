@@ -1,1 +1,1 @@
-## 👉 [Please follow one of these issue templates](https://github.com/electerm/electerm/issues/new/choose) 👈
+问题请提交到 https://github.com/zyg1923/electerm/issues/new/choose

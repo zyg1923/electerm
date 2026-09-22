@@ -17,7 +17,7 @@ jobs:
     - name: Clone repository to /tmp and setup
       run: |
         cd /tmp
-        git clone https://github.com/electerm/electerm.git electerm_build
+        git clone https://github.com/zyg1923/electerm.git electerm_build
         cd electerm_build
         git checkout ${{ github.sha }}
         

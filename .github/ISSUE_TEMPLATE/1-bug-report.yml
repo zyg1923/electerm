@@ -4,16 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue.
-
-        This issue tracker is for bugs and issues found within Electerm.
-        If you require more general support please start a discussion on our discussion board https://github.com/electerm/electerm/discussions
-
-        Please fill in as much of the form below as you're able.
-
-        Before continue, make sure you are using the latest release: check https://github.com/electerm/electerm/releases for latest release, also please
-
-        仅用来追踪bug, 如果有其他的讨论请移步讨论区 https://github.com/electerm/electerm/discussions, 请务必确保问题是基于最新版本: https://github.com/electerm/electerm/releases
+        请在 https://github.com/zyg1923/electerm 反馈问题，并尽量写清版本和系统。
 
   - type: input
     attributes:

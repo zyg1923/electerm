@@ -153,7 +153,7 @@ export default function WidgetForm ({ widget, onSubmit, loading, hasRunningInsta
         <h4>
           {info.name}
           {info.name === 'MCP Server' && (
-            <HelpIcon link='https://github.com/electerm/electerm/wiki/MCP-Widget-Usage-Guide' />
+            <HelpIcon link='https://github.com/zyg1923/electerm/wiki/MCP-Widget-Usage-Guide' />
           )}
         </h4>
         <p>{info.description}</p>

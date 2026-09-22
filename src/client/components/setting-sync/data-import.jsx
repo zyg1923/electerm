@@ -112,7 +112,7 @@ export default function DataTransport (props) {
           </Space>
         )}
         <HelpIcon
-          link='https://github.com/electerm/electerm/wiki/Auto-data-Sync'
+          link='https://github.com/zyg1923/electerm/wiki/Auto-data-Sync'
         />
       </div>
     </div>

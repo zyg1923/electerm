@@ -208,8 +208,7 @@ export const mobileBreakpoint = 600
 // must be kept in sync with setting-wrap.styl
 export const settingPanelMobileBreakpoint = 800
 export const baseUpdateCheckUrls = [
-  packInfo.homepage,
-  'https://gitee.com/github-zxdong262/electerm/raw/gh-pages'
+  packInfo.homepage
 ]
 export const syncTypes = buildConst([
   'github',
@@ -229,11 +228,11 @@ export const allowedSyncTypes = () => {
     : Object.keys(syncTypes)
 }
 export const syncTokenCreateUrls = {
-  gitee: 'https://gitee.com/github-zxdong262/electerm/wikis/Create%20personal%20access%20token?sort_id=3028409',
-  github: 'https://github.com/electerm/electerm/wiki/Create-personal-access-token',
-  custom: 'https://github.com/electerm/electerm/wiki/Custom-sync-server',
+  gitee: 'https://github.com/zyg1923/electerm',
+  github: 'https://github.com/zyg1923/electerm/wiki/Create-personal-access-token',
+  custom: 'https://github.com/zyg1923/electerm/wiki/Custom-sync-server',
   cloud: 'https://sync.electerm.org',
-  webdav: 'https://github.com/electerm/electerm/wiki/WebDAV-sync'
+  webdav: 'https://github.com/zyg1923/electerm/wiki/WebDAV-sync'
 }
 export const settingSyncId = 'setting-sync'
 export const settingMigrateId = 'setting-migrate'
@@ -281,11 +280,11 @@ export const checkedKeysLsKey = 'checked-keys'
 export const quickCommandLabelsLsKey = 'quick-command-label'
 export const localAddrBookmarkLsKey = 'local-addr-bookmark-keys'
 export const treeSortLsKey = 'tree-sort'
-export const sshTunnelHelpLink = 'https://github.com/electerm/electerm/wiki/How-to-use-ssh-tunnel'
-export const proxyHelpLink = 'https://github.com/electerm/electerm/wiki/proxy-format'
-export const regexHelpLink = 'https://github.com/electerm/electerm/wiki/Terminal-keywords-highlight-regular-expression-exmaples'
-export const connectionHoppingWikiLink = 'https://github.com/electerm/electerm/wiki/Connection-Hopping-Behavior-Change-in-electerm-since-v1.50.65'
-export const aiConfigWikiLink = 'https://github.com/electerm/electerm/wiki/AI-model-config-guide'
+export const sshTunnelHelpLink = 'https://github.com/zyg1923/electerm/wiki/How-to-use-ssh-tunnel'
+export const proxyHelpLink = 'https://github.com/zyg1923/electerm/wiki/proxy-format'
+export const regexHelpLink = 'https://github.com/zyg1923/electerm/wiki/Terminal-keywords-highlight-regular-expression-exmaples'
+export const connectionHoppingWikiLink = 'https://github.com/zyg1923/electerm/wiki/Connection-Hopping-Behavior-Change-in-electerm-since-v1.50.65'
+export const aiConfigWikiLink = 'https://github.com/zyg1923/electerm/wiki/AI-model-config-guide'
 export const aiChatModeLsKey = 'ai-chat-mode'
 export const lastAiChatSessionIdKey = 'last-ai-chat-session-id'
 export const aiTermOfUseConfirmedLsKey = 'ai-term-of-use-confirmed'

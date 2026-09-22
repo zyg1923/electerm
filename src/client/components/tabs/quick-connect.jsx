@@ -97,7 +97,7 @@ export default function QuickConnect ({ batch, inputOnly }) {
       </Space.Compact>
     )
   }
-  const wiki = 'https://github.com/electerm/electerm/wiki/quick-connect'
+  const wiki = 'https://github.com/zyg1923/electerm/wiki/quick-connect'
 
   // If inputOnly is true, don't show the button, just render input directly
   if (inputOnly) {

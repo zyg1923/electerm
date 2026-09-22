@@ -152,14 +152,14 @@ function buildMenu () {
           label: e('reportIssue'),
           click () {
             shell
-              .openExternal('https://github.com/electerm/electerm/issues/new')
+              .openExternal('https://github.com/zyg1923/electerm/issues/new')
           }
         },
         {
           label: 'github',
           click () {
             shell
-              .openExternal('https://github.com/electerm/electerm')
+              .openExternal('https://github.com/zyg1923/electerm')
           }
         },
         {

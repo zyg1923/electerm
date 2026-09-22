@@ -3,5 +3,5 @@
  */
 
 export default (lang) => {
-  return `https://github.com/electerm/electerm-locales/edit/master/locales/${lang}.js`
+  return `https://github.com/zyg1923/electerm/edit/master/locales/${lang}.js`
 }

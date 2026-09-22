@@ -34,18 +34,13 @@
     "lock": "npm i --package-lock-only"
   },
   "license": "MIT",
-  "languageRepo": "https://github.com/electerm/electerm-locales",
-  "privacyNoticeLink": "https://github.com/electerm/electerm/wiki/privacy-notice",
-  "knownIssuesLink": "https://github.com/electerm/electerm/wiki/Know-issues",
-  "sponsorLink": "https://github.com/zyg1923/electerm",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zyg1923/electerm.git"
   },
   "author": {
-    "name": "ZHAO Xudong",
-    "email": "zxdong@gmail.com",
-    "url": "https://github.com/zxdong262"
+    "name": "zyg1923",
+    "url": "https://github.com/zyg1923"
   },
   "bugs": {
     "url": "https://github.com/zyg1923/electerm/issues"

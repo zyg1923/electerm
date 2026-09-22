@@ -10,7 +10,7 @@
 
 const net = require('net')
 
-const X11_HELP_URL = 'https://github.com/electerm/electerm/wiki/Use-X11'
+const X11_HELP_URL = 'https://github.com/zyg1923/electerm/wiki/Use-X11'
 const unixSocketDir = '/tmp/.X11-unix'
 const defaultTcpPort = 6000
 const probeTimeout = 800
