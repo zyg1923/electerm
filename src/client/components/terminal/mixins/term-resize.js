@@ -69,9 +69,11 @@ export const resizeMixin = {
     if (this.originalFontSize == null) {
       this.originalFontSize = next - changed
     }
+    window.store.terminalFontSize = next
+    window.store.terminalFontBase = this.originalFontSize
     this.setState({
       fontSizeChanged: next !== this.originalFontSize
-    })
+    }, () => this.onResize())
   },
 
   handleResetFontSize () {
@@ -80,8 +82,10 @@ export const resizeMixin = {
       return
     }
     term.options.fontSize = this.originalFontSize
+    window.store.terminalFontSize = this.originalFontSize
+    window.store.terminalFontBase = this.originalFontSize
     window.store.triggerResize()
-    this.setState({ fontSizeChanged: false })
+    this.setState({ fontSizeChanged: false }, () => this.onResize())
     term.focus()
   }
 }

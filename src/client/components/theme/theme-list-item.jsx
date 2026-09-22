@@ -33,29 +33,20 @@ export default function ThemeListItem (props) {
   function handleClickApply () {
     setTooltipVisible(false)
     setIsPreviewing(false)
+    window.store.previewThemeId = ''
     delete window.originalTheme
     store.setTheme(item.id)
   }
 
   function handleClickPreview () {
-    if (!isPreviewing) {
-      // Store current theme ID before changing
-      const currentTheme = window.store.config.theme
-      window.originalTheme = currentTheme
-      // Apply the preview theme
-      store.setTheme(item.id)
-      setIsPreviewing(true)
-    }
+    window.store.previewThemeId = item.id
+    setIsPreviewing(true)
   }
 
   function handleTooltipVisibleChange (visible) {
     setTooltipVisible(visible)
     if (!visible && isPreviewing) {
-      // Restore original theme when tooltip closes during preview
-      if (window.originalTheme) {
-        store.setTheme(window.originalTheme)
-        delete window.originalTheme
-      }
+      window.store.previewThemeId = ''
       setIsPreviewing(false)
     }
   }

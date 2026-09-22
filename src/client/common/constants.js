@@ -236,6 +236,7 @@ export const syncTokenCreateUrls = {
   webdav: 'https://github.com/electerm/electerm/wiki/WebDAV-sync'
 }
 export const settingSyncId = 'setting-sync'
+export const settingMigrateId = 'setting-migrate'
 export const settingTerminalId = 'setting-terminal'
 export const settingShortcutsId = 'setting-shortcuts'
 export const settingAiId = 'setting-ai'
@@ -380,6 +381,11 @@ export const syncDataMaps = {
   workspaces: ['workspaces'],
   triggers: ['triggers']
 }
+// Extra in-memory collections included in local migrate files
+// (not gist-synced). DB collections come from dbNames.
+export const migrateMemoryKeys = [
+  'transferHistory'
+]
 export const terminalTypes = [
   'xterm-256color',
   'xterm-new',

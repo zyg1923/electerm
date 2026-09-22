@@ -25,6 +25,9 @@ export default Store => {
       nl = minZoom
     }
     window.pre.setZoomFactor(nl)
+    document.documentElement.style.setProperty('--app-zoom', String(nl))
+    window.store.uiZoom = nl
+    window.store.triggerResize()
     if (zoomOnly) {
       return
     }

@@ -25,12 +25,13 @@ class TerminalLocal extends TerminalBase {
     this.isLocal = true
     const { platform } = process
     const isWin = platform.startsWith('win')
+    const winExec = execWindows || 'System32\\WindowsPowerShell\\v1.0\\powershell.exe'
     const exec = isWin
       ? pathResolve(
         process.env.windir,
-        execWindows
+        winExec
       )
-      : platform === 'darwin' ? execMac : execLinux
+      : platform === 'darwin' ? (execMac || 'bash') : (execLinux || 'bash')
     if ((exec || '').includes('..')) {
       return Promise.reject(new Error('execWindows should not contain ".."'))
     }

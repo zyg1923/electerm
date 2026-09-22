@@ -1,5 +1,6 @@
 import { debounce } from 'lodash-es'
 import { refsStatic } from '../../common/ref.js'
+import { markTerminalInput } from '../../remote-monitor/session-monitor.js'
 
 /**
  * Command suggestions: reading the current input straight from the terminal
@@ -107,6 +108,7 @@ export const suggestionsMixin = {
   },
 
   onData (d) {
+    markTerminalInput()
     this.handleInputEvent(d)
     // Skip normal suggestion logic when in password mode
     const suggestions = refsStatic.get('terminal-suggestions')

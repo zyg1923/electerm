@@ -12,6 +12,7 @@ export const leftSidebarIconOptions = [
   { id: 'quickConnect', text: 'quickConnect' },
   { id: 'bookmarks', text: 'bookmarks' },
   { id: 'transferHistory', text: 'transferHistory' },
+  { id: 'opsCenter', text: 'opsCenter' },
   { id: 'terminalThemes', text: 'terminalThemes' },
   { id: 'setting', text: 'setting' },
   { id: 'settingSync', text: 'settingSync' },

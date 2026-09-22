@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="41630144-c123-4a86-870c-ce91bf9e1ab7" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/google-java-format.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PROGRESS-FULL.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PROGRESS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/common/ops-constants.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/approval-gate.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/approval-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/bandwidth-gate.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/cache-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/command-center-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/command-templates.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-engine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/cron-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-engine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/docker-engine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/docker-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/history-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-engine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-cache.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.styl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-file-editor.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-i18n.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-tab-select.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-crypto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-transfer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/resume-upload.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-engine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/tools-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/wizards-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-migrate.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/terminal/clear-marks.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/store/ops.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/nedb.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/nedb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/sqlite.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/sqlite.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/window-drag-move.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/window-drag-move.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-local.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-local.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-sftp.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-sftp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/terminal-api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/terminal-api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/constants.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/constants.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/db.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/default-setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/default-setting.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/left-sidebar-icon-defs.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/left-sidebar-icon-defs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/new-terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/new-terminal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/setting-list.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/setting-list.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/footer/footer-entry.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/footer-entry.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/footer/footer.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/footer.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/footer/multi-tab-run-modal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/multi-tab-run-modal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/main/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/main/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/session-monitor.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/session-monitor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/session/session.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/session/session.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/list.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/list.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-common.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-common.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-terminal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-terminal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/tab-settings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/tab-settings.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/owner-list.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/owner-list.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/sftp-entry.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/sftp-entry.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/sftp.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/sftp.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-control.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-control.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/shortcuts/shortcuts-defaults.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/shortcuts/shortcuts-defaults.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/history.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/history.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/left-sidebar-icons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/left-sidebar-icons.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history-modal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history-modal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/app-drag.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/app-drag.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/no-session.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/no-session.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/no-session.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/no-session.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-context-menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-context-menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-init.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-resize.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-resize.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-suggestions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-suggestions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal-command-dropdown.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal-command-dropdown.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/theme/theme-list-item.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/theme/theme-list-item.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/entry/basic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/entry/basic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/init-state.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/init-state.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/load-data.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/load-data.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/session.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/session.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/store.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/store.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/sync.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/sync.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/system-menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/system-menu.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/terminal-theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/terminal-theme.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/ui-theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/ui-theme.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/zyg1923/electerm.git",
+    "accountId": "7217ec96-fa00-4701-95bd-a132c704a086"
+  }
+}]]></component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="customMavenHome" value="F:\job\maven\apache-maven-3.6.3" />
+        <option name="localRepository" value="F:\job\idea\maven\repository" />
+        <option name="mavenHomeTypeForPersistence" value="CUSTOM" />
+        <option name="userSettingsFile" value="F:\job\idea\maven\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3JJ3WKTr9YlqeD05d72Ebl4Fixg" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="electerm" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="electerm" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="electerm" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="electerm" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="electerm" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="electerm" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="electerm" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="electerm" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.23892.409" />
+        <option value="bundled-js-predefined-d6986cc7102b-e03c56caf84a-JavaScript-IU-252.23892.409" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="41630144-c123-4a86-870c-ce91bf9e1ab7" name="更改" comment="" />
+      <created>1789365374260</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1789365374260</updated>
+      <workItem from="1789365376078" duration="1677000" />
+      <workItem from="1789441753352" duration="496000" />
+      <workItem from="1789520279960" duration="191000" />
+      <workItem from="1789537329136" duration="1000" />
+      <workItem from="1789537338457" duration="2501000" />
+      <workItem from="1789609583799" duration="280000" />
+      <workItem from="1789633979452" duration="142000" />
+      <workItem from="1789638098072" duration="63000" />
+      <workItem from="1789693787316" duration="2475000" />
+      <workItem from="1789867432560" duration="595000" />
+      <workItem from="1789965601557" duration="1419000" />
+      <workItem from="1790039607102" duration="1269000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="javascript:npm:react" />
+    <option featureType="dependencySupport" implementationName="executable:docker" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:stylus" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:pug" />
+    <option featureType="dependencySupport" implementationName="executable:kubectl" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>

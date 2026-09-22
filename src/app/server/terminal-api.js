@@ -7,14 +7,30 @@ const { testConnection, terminal, terminals } = require('./session-process')
 async function runCmd (ws, msg) {
   const { id, pid, cmd } = msg
   const term = terminals(pid)
-  let txt = ''
-  if (term) {
-    txt = await term.runCmd(cmd, id)
+  if (!term) {
+    ws.s({
+      id,
+      error: {
+        message: 'Terminal session not found'
+      }
+    })
+    return
   }
-  ws.s({
-    id,
-    data: txt
-  })
+  try {
+    const txt = await term.runCmd(cmd, id)
+    ws.s({
+      id,
+      data: txt
+    })
+  } catch (err) {
+    ws.s({
+      id,
+      error: {
+        message: err.message || String(err),
+        stack: err.stack
+      }
+    })
+  }
 }
 
 async function execCmd (ws, msg) {

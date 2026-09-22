@@ -146,7 +146,6 @@ export default class TerminalCmdSuggestions extends Component {
     const h = window.innerHeight
 
     const position = {}
-    const reverse = top > h / 2
 
     // Use right position if close to right edge
     if (left > w / 2) {
@@ -155,11 +154,14 @@ export default class TerminalCmdSuggestions extends Component {
       position.left = left
     }
 
-    // Use bottom position if close to bottom edge
+    // Sit well below the prompt so the panel is not glued to the tab bar.
+    const line = cellHeight || 18
+    const below = Math.max(220, top + line + 96)
+    const reverse = top > h / 2 || below + 280 > h
     if (reverse) {
-      position.bottom = h - top + cellHeight * 1.5
+      position.bottom = Math.max(24, h - top + line + 12)
     } else {
-      position.top = top + cellHeight
+      position.top = below
     }
     this._suggestionsCache = null
     this.setState({
@@ -187,7 +189,6 @@ export default class TerminalCmdSuggestions extends Component {
     const h = window.innerHeight
 
     const position = {}
-    const reverse = top > h / 2
 
     if (left > w / 2) {
       position.right = w - left
@@ -195,10 +196,13 @@ export default class TerminalCmdSuggestions extends Component {
       position.left = left
     }
 
+    const line = cellHeight || 18
+    const below = Math.max(220, top + line + 96)
+    const reverse = top > h / 2 || below + 280 > h
     if (reverse) {
-      position.bottom = h - top + cellHeight * 1.5
+      position.bottom = Math.max(24, h - top + line + 12)
     } else {
-      position.top = top + cellHeight
+      position.top = below
     }
     this.setState({
       showSuggestions: true,

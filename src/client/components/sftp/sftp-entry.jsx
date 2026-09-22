@@ -2,7 +2,7 @@ import { Component } from 'react'
 import { refs } from '../common/ref'
 import generate from '../../common/uid'
 import runIdle from '../../common/run-idle'
-import { Spin, Tooltip } from 'antd'
+import { Spin } from 'antd'
 import { notification } from '../common/notification'
 import Modal from '../common/modal'
 import clone from '../../common/to-simple-obj'
@@ -19,6 +19,12 @@ import {
   fileTypeMap,
   terminalSerialType,
   terminalFtpType,
+  terminalTelnetType,
+  terminalRdpType,
+  terminalVncType,
+  terminalSpiceType,
+  terminalLocalType,
+  terminalWebType,
   unexpectedPacketErrorDesc,
   sftpRetryInterval
 } from '../../common/constants'
@@ -37,7 +43,9 @@ import { createTerm } from '../terminal/terminal-apis'
 import './sftp.styl'
 
 const e = window.translate
-const viewModeKey = type => `electerm-sftp-view-v3-${type}`
+const viewModeKey = type => type === typeMap.local
+  ? 'electerm-sftp-view-v4-local'
+  : `electerm-sftp-view-v3-${type}`
 const panelOpenKey = type => `electerm-sftp-panel-v4-${type}`
 const treeDepthKey = type => `electerm-sftp-tree-depth-${type}`
 
@@ -88,7 +96,9 @@ export default class Sftp extends Component {
       this.state.inited
     ) {
       this.onGoto(typeMap.local)
-      this.onGoto(typeMap.remote)
+      if (this.shouldRenderRemote()) {
+        this.onGoto(typeMap.remote)
+      }
     }
     if (
       prevState.remotePath !== this.state.remotePath &&
@@ -196,12 +206,12 @@ export default class Sftp extends Component {
         [`${k}UidTree`]: new Map(),
         [`${k}Keyword`]: '',
         [`${k}ViewMode`]: readStored(viewModeKey(k), 'tree'),
-        [`${k}TreeDepth`]: 1,
+        [`${k}TreeDepth`]: Number(readStored(treeDepthKey(k), '1')) || 1,
         [`${k}TreeCache`]: {},
         [`${k}Expanded`]: {},
         [`${k}TreeLoading`]: {},
         [`${k}PanelOpen`]: k === typeMap.local &&
-          (this.props.tab?.host || this.props.tab?.authType || this.props.tab?.type === 'ssh' || this.props.sshSftpSplitView)
+          (this.props.tab?.host || this.props.tab?.authType || this.props.tab?.type === 'ssh')
           ? readStored(panelOpenKey(k), '0') === '1'
           : readStored(panelOpenKey(k), '1') !== '0'
       })
@@ -596,11 +606,24 @@ export default class Sftp extends Component {
 
   shouldRenderRemote = () => {
     const tab = this.props.tab || {}
-    if (tab.type === terminalSerialType) {
+    const nonSshTypes = [
+      terminalSerialType,
+      terminalTelnetType,
+      terminalRdpType,
+      terminalVncType,
+      terminalSpiceType,
+      terminalLocalType,
+      terminalWebType,
+      terminalFtpType
+    ]
+    if (nonSshTypes.includes(tab.type)) {
+      return false
+    }
+    // Local terminal tabs have no host; never open remote SFTP against them.
+    if (!tab.host && !tab.authType && tab.type !== 'ssh') {
       return false
     }
     return !!(
-      this.props.sshSftpSplitView ||
       tab.host ||
       tab.authType ||
       tab.type === 'ssh'
@@ -616,6 +639,9 @@ export default class Sftp extends Component {
   }
 
   initRemoteAll = async () => {
+    if (!this.shouldRenderRemote()) {
+      return
+    }
     await Promise.all([
       this.remoteList(),
       this.remoteListOwner().catch(e => console.debug('remoteListOwner error:', e))
@@ -769,6 +795,9 @@ export default class Sftp extends Component {
   }
 
   togglePanel = (type) => {
+    if (type === typeMap.remote && !this.shouldRenderRemote()) {
+      return
+    }
     const key = `${type}PanelOpen`
     const next = !this.state[key]
     try {
@@ -786,7 +815,7 @@ export default class Sftp extends Component {
         this.localListOwner()
         this.localList()
       }
-      if (type === typeMap.remote && !(this.state.remote || []).length) {
+      if (type === typeMap.remote && this.shouldRenderRemote() && !(this.state.remote || []).length) {
         this.remoteList()
       }
     })
@@ -1065,6 +1094,19 @@ export default class Sftp extends Component {
     }
     const files = this.state[type] || []
     this.storeTreeFiles(type, dirPath, files)
+    const depth = Number(this.state[`${type}TreeDepth`]) || 1
+    if (depth <= 1 || !files.length) {
+      return
+    }
+    const key = `${dirPath}:${depth}:${files.length}`
+    if (this._treePrefetchKey?.[type] === key) {
+      return
+    }
+    this._treePrefetchKey = {
+      ...this._treePrefetchKey,
+      [type]: key
+    }
+    this.prefetchTree(type, files, depth)
   }
 
   prefetchTree = async (type, files, remaining, acc) => {
@@ -1122,6 +1164,12 @@ export default class Sftp extends Component {
     remotePathReal,
     oldPath
   ) => {
+    if (!this.shouldRenderRemote()) {
+      if (!returnList) {
+        this.setState({ remoteLoading: false })
+      }
+      return returnList ? [] : undefined
+    }
     const { tab, sessionOptions } = this.props
     const { username, startDirectory } = tab
     let remotePath
@@ -1171,6 +1219,16 @@ export default class Sftp extends Component {
                 sftpRetryInterval
               )
               this.retryCount++
+            } else if (
+              e &&
+              /SSH connection not ready|Terminal session not found/i.test(e.message || '') &&
+              (this.retryCount || 0) < 3
+            ) {
+              this.retryCount = (this.retryCount || 0) + 1
+              this.retryHandler = setTimeout(
+                () => this.initData(this.terminalId, this.port),
+                800
+              )
             } else {
               throw e
             }
@@ -1362,6 +1420,9 @@ export default class Sftp extends Component {
   }
 
   handleReloadRemoteSftp = async () => {
+    if (!this.shouldRenderRemote()) {
+      return
+    }
     if (this.sftp) {
       this.sftp.destroy()
       this.sftp = null
@@ -1422,8 +1483,11 @@ export default class Sftp extends Component {
 
   onGoto = async (type, e) => {
     e && e.preventDefault()
+    if (type === typeMap.remote && !this.shouldRenderRemote()) {
+      return
+    }
     if (type === typeMap.remote && !this.sftp) {
-      return this.initData(true)
+      return this.initData(this.terminalId, this.port)
     }
     const n = `${type}Path`
     const nt = n + 'Temp'
@@ -1623,7 +1687,7 @@ export default class Sftp extends Component {
   }
 
   renderPanelToggles () {
-    if (!this.shouldRenderRemote() && !this.props.sshSftpSplitView) {
+    if (!this.shouldRenderRemote()) {
       return null
     }
     const localOpen = this.state.localPanelOpen !== false
@@ -1649,11 +1713,10 @@ export default class Sftp extends Component {
   }
 
   renderViewControls (type) {
-    const viewMode = this.state[`${type}ViewMode`]
     const other = type === typeMap.local ? typeMap.remote : typeMap.local
     const otherOpen = this.state[`${other}PanelOpen`] !== false
     const selfOpen = this.state[`${type}PanelOpen`] !== false
-    const showRemoteToggles = this.shouldRenderRemote() || this.props.sshSftpSplitView
+    const showRemoteToggles = this.shouldRenderRemote()
     return (
       <span className='sftp-view-controls'>
         {
@@ -1684,19 +1747,29 @@ export default class Sftp extends Component {
               )
             : null
         }
-        <Tooltip title='文件列表'>
-          <UnorderedListOutlined
-            className={classnames('sftp-view-btn', { active: viewMode === 'list' })}
-            onClick={() => this.setViewMode(type, 'list')}
-          />
-        </Tooltip>
-        <Tooltip title='目录树'>
-          <ApartmentOutlined
-            className={classnames('sftp-view-btn', { active: viewMode === 'tree' })}
-            onClick={() => this.setViewMode(type, 'tree')}
-          />
-        </Tooltip>
       </span>
+    )
+  }
+
+  renderViewModeBar (type) {
+    const viewMode = this.state[`${type}ViewMode`]
+    return (
+      <div className='sftp-view-bar'>
+        <span
+          className={classnames('sftp-panel-toggle', { open: viewMode !== 'tree' })}
+          onClick={() => this.setViewMode(type, 'list')}
+        >
+          <UnorderedListOutlined />
+          <span>列表</span>
+        </span>
+        <span
+          className={classnames('sftp-panel-toggle', { open: viewMode === 'tree' })}
+          onClick={() => this.setViewMode(type, 'tree')}
+        >
+          <ApartmentOutlined />
+          <span>树形</span>
+        </span>
+      </div>
     )
   }
 
@@ -1815,6 +1888,7 @@ export default class Sftp extends Component {
             {
               this.renderSftpPanelTitle(type, username, host)
             }
+            {this.renderViewModeBar(type)}
             <AddressBar
               {...addrProps}
             />
@@ -1843,20 +1917,26 @@ export default class Sftp extends Component {
     const shouldRenderRemote = this.shouldRenderRemote()
     const showLocal = this.state.localPanelOpen !== false
     const showRemote = shouldRenderRemote && this.state.remotePanelOpen !== false
-    const barH = (shouldRenderRemote || this.props.sshSftpSplitView) ? 36 : 0
+    const barH = shouldRenderRemote ? 36 : 0
     const bodyH = Math.max(80, height - barH)
     if (!showLocal && !showRemote) {
       return (
         <div className='sftp-panels-closed'>
           <div className='sftp-panels-closed-msg'>本地和远程都已关闭</div>
           <div className='sftp-panels-closed-actions'>
-            <span
-              className='sftp-panel-toggle'
-              onClick={() => this.togglePanel(typeMap.remote)}
-            >
-              <PlusOutlined />
-              <span>打开远程</span>
-            </span>
+            {
+              shouldRenderRemote
+                ? (
+                  <span
+                    className='sftp-panel-toggle'
+                    onClick={() => this.togglePanel(typeMap.remote)}
+                  >
+                    <PlusOutlined />
+                    <span>打开远程</span>
+                  </span>
+                  )
+                : null
+            }
             <span
               className='sftp-panel-toggle'
               onClick={() => this.togglePanel(typeMap.local)}
@@ -1945,7 +2025,7 @@ export default class Sftp extends Component {
     const all = {
       className: classnames('sftp-wrap relative', {
         'ssh-sftp-split': this.props.sshSftpSplitView,
-        'sftp-has-toggles': this.shouldRenderRemote() || this.props.sshSftpSplitView
+        'sftp-has-toggles': this.shouldRenderRemote()
       }),
       id: `id-${id}`,
       style: { height }

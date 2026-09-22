@@ -98,14 +98,24 @@ export default auto(function HistoryPanel (props) {
       {renderHeader()}
       <div className='history-body'>
         {
-          arr.map((item, i) => {
-            return (
-              <HistoryItem
-                key={item.id}
-                item={item}
-              />
-            )
-          })
+          arr.length
+            ? arr.map((item) => {
+              return (
+                <HistoryItem
+                  key={item.id}
+                  item={item}
+                />
+              )
+            })
+            : (
+              <div className='pd2x pd2y color-grey' style={{ opacity: 0.65 }}>
+                {store.config.disableConnectionHistory
+                  ? (e('disableConnectionHistory') === 'disableConnectionHistory'
+                    ? '连接历史已在设置中关闭'
+                    : e('disableConnectionHistory'))
+                  : '暂无链接历史，连接后会显示在这里'}
+              </div>
+              )
         }
       </div>
     </div>

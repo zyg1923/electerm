@@ -28,6 +28,7 @@ import addressBookmarkExtend from './address-bookmark'
 import widgetsExtend from './widgets'
 import mcpHandlerExtend from './mcp-handler'
 import workspaceExtend from './workspace'
+import opsExtend from './ops'
 import isColorDark from '../common/is-color-dark'
 import { getReverseColor } from '../common/reverse-color'
 import { uniq } from 'lodash-es'
@@ -328,5 +329,6 @@ addressBookmarkExtend(Store)
 widgetsExtend(Store)
 mcpHandlerExtend(Store)
 workspaceExtend(Store)
+opsExtend(Store)
 
 export const StateStore = Store

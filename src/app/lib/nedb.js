@@ -65,9 +65,14 @@ function createDb (appPath, defaultUserName, { enc, dec } = {}) {
     'triggers',
     'history',
     'terminalCommandHistory',
-    'aiChatHistory',
-    'autoRunWidgets'
-  ]
+  'aiChatHistory',
+  'autoRunWidgets',
+  'opsTasks',
+  'opsAuditLogs',
+  'opsApprovalRequests',
+  'opsApprovalRules',
+  'opsApprovalWhitelist'
+]
 
   tables.forEach(table => {
     const conf = {

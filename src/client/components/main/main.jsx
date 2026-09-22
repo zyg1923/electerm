@@ -38,6 +38,8 @@ import WorkspaceSaveModal from '../tabs/workspace-save-modal'
 import BookmarkFromHistoryModal from '../bookmark-form/bookmark-from-history-modal'
 import AutoSync from '../setting-sync/auto-sync'
 import BatchOpRunner from '../batch-op/batch-op-runner'
+import OpsCenter from '../ops/ops-center'
+import OpsFileEditorModal from '../ops/ops-file-editor'
 import UnixTimestampTooltip from '../terminal/unix-timestamp-tooltip'
 import ImportProgress from '../common/import-progress.jsx'
 import { pick } from 'lodash-es'
@@ -216,7 +218,8 @@ export default auto(function Index (props) {
       'leftSideBarWidth',
       'transferTab',
       'sidebarPanelTab',
-      'openWidgetsModal'
+      'openWidgetsModal',
+      'openOpsCenter'
     ]),
     zoom: config.zoom,
     fileTransfers: copiedTransfer,
@@ -355,6 +358,8 @@ export default auto(function Index (props) {
         <BookmarkFromHistoryModal />
         <NotificationContainer />
         <BatchOpRunner />
+        <OpsCenter />
+        <OpsFileEditorModal />
         <ImportProgress />
         <ShortcutBarEntry store={store} />
         {!isAIDisabled() && store.showAIConfigModal && (

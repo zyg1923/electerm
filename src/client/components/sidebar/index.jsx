@@ -42,6 +42,7 @@ export default function Sidebar (props) {
   } = props
 
   const { store } = window
+  const openOpsCenter = props.openOpsCenter || store.openOpsCenter
 
   const handleClickOutside = (event) => {
     const { store } = window
@@ -140,6 +141,7 @@ export default function Sidebar (props) {
           openSettingSync={openSettingSync}
           openTerminalThemes={openTerminalThemes}
           openWidgetsModal={openWidgetsModal}
+          openOpsCenter={openOpsCenter}
           bookmarksActive={bookmarksActive}
           themeActive={themeActive}
           settingActive={settingActive}

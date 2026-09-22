@@ -16,7 +16,8 @@ import {
   PictureOutlined,
   PlusCircleOutlined,
   SettingOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  ToolOutlined
 } from '@ant-design/icons'
 import { Badge, Popover } from 'antd'
 import SideIcon from './side-icon'
@@ -37,6 +38,7 @@ export default function LeftSidebarIcons (props) {
     openSettingSync,
     openTerminalThemes,
     openWidgetsModal,
+    openOpsCenter,
     bookmarksActive,
     themeActive,
     settingActive,
@@ -99,6 +101,17 @@ export default function LeftSidebarIcons (props) {
         <HistoryOutlined
           className='font20 iblock control-icon'
           onClick={() => setHistoryOpen(true)}
+        />
+      </SideIcon>
+    ),
+    opsCenter: (
+      <SideIcon
+        key='opsCenter'
+        title={e('opsCenter') === 'opsCenter' ? '运维中心' : e('opsCenter')}
+      >
+        <ToolOutlined
+          className='font20 iblock control-icon'
+          onClick={() => (openOpsCenter || window.store.openOpsCenter)()}
         />
       </SideIcon>
     ),
@@ -171,7 +184,7 @@ export default function LeftSidebarIcons (props) {
               open={historyOpen}
               title={e('transferHistory')}
               width={Math.min(980, Math.round(window.innerWidth * 0.8))}
-              height={Math.min(560, Math.round(window.innerHeight * 0.7))}
+              height={Math.min(640, Math.round(window.innerHeight * 0.8))}
               onClose={() => setHistoryOpen(false)}
             >
               <TransportHistory

@@ -225,6 +225,20 @@ class Term extends Component {
     if (window.store.activeTerminalId === this.props.tab.id) {
       window.store.activeTerminalId = ''
     }
+    if (this._clearWheelEl && this._clearWheel) {
+      this._clearWheelEl.removeEventListener('wheel', this._clearWheel, true)
+    }
+    if (this._lineSelectEl) {
+      if (this._lineDown) {
+        this._lineSelectEl.removeEventListener('mousedown', this._lineDown, true)
+      }
+      if (this._lineUp) {
+        this._lineSelectEl.removeEventListener('mouseup', this._lineUp, true)
+      }
+    }
+    clearTimeout(this._restoreTimer)
+    this._clearKeepDisp?.dispose?.()
+    this._clearKeepDisp = null
     if (this.term) {
       this.term.parent = null
     }
@@ -346,6 +360,15 @@ class Term extends Component {
     )
   }
 
+  terminalContentPad () {
+    const fontSize = this.term?.options?.fontSize
+      || this.props.tab?.fontSize
+      || this.props.config?.fontSize
+      || 16
+    const lineHeight = Number(this.term?.options?.lineHeight) || 1
+    return Math.ceil(fontSize * Math.max(lineHeight, 1))
+  }
+
   render () {
     const { loading } = this.state
     const { height, width, left, top, fullscreen } = this.props
@@ -387,7 +410,8 @@ class Term extends Component {
         left: 0,
         top: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
+        '--term-pad': `${this.terminalContentPad()}px`
       }
     }
     const dropdownProps = {

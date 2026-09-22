@@ -85,15 +85,15 @@ export default () => {
     // },
     {
       name: 'terminal_copy',
-      shortcut: 'ctrl+c,ctrl+shift+c',
-      shortcutMac: 'meta+c',
+      shortcut: 'ctrl+shift+c',
+      shortcutMac: 'ctrl+shift+c',
       skipMac: true,
       readonly: true
     },
     {
       name: 'terminal_paste',
-      shortcut: 'ctrl+v,ctrl+shift+v',
-      shortcutMac: 'meta+v',
+      shortcut: 'ctrl+shift+v',
+      shortcutMac: 'ctrl+shift+v',
       readonly: true
     },
     {

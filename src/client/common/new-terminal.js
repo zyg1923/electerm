@@ -4,7 +4,8 @@
 
 import uid from './id-with-stamp'
 import {
-  paneMap
+  paneMap,
+  terminalLocalType
 } from './constants'
 
 const e = window.translate
@@ -16,14 +17,19 @@ export function updateCount (tab) {
 }
 
 export default (removeTitle) => {
+  const titleRaw = e('newTerminal')
   const res = {
     id: uid(),
     status: 'processing',
-    pane: paneMap.terminal,
-    title: e('newTerminal')
+    pane: paneMap.terminal
   }
-  if (removeTitle) {
-    delete res.title
+  // Only a brand-new empty tab is local. Bookmark/history open passes
+  // removeTitle and must keep the original type (ssh must not become local).
+  if (!removeTitle) {
+    res.type = terminalLocalType
+    res.title = (titleRaw === 'newTerminal' || !titleRaw)
+      ? '本地终端'
+      : titleRaw
   }
   return res
 }

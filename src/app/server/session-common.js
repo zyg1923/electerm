@@ -32,6 +32,10 @@ exports.commonExtends = function (Cls) {
   Cls.prototype.runCmd = function (cmd, conn) {
     return new Promise((resolve, reject) => {
       const client = conn || this.conn || this.client
+      if (!client || typeof client.exec !== 'function') {
+        reject(new Error('Exec channel not supported for this session type'))
+        return
+      }
       // Watchdog: ssh2 may never invoke the exec callback on a dead
       // connection (channel-open queued forever). Fail fast instead of
       // hanging the caller forever.

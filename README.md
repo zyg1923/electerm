@@ -231,6 +231,63 @@ npm run pb
 ./node_modules/.bin/electron-builder --linux --arm64
 ```
 
+## Windows 本地编译 / 打包（完整命令）
+
+在 **PowerShell** 中执行。先进入项目根目录：
+
+```powershell
+cd F:\job\peoject\practice\electerm
+```
+
+### 一次性完整流程（推荐复制整段）
+
+```powershell
+cd F:\job\peoject\practice\electerm
+
+# 1) 清理 + 编译前端/资源 + 准备 work/app
+npm run b
+
+# 2) 若上一步 prepare 因 peer deps 失败，补装依赖（可反复执行）
+if (-not (Test-Path .\work\app\node_modules)) {
+  Set-Location .\work\app
+  npm i --omit=dev --legacy-peer-deps
+  Set-Location ..\..
+}
+
+# 3) 生成 electron-builder 配置
+npm run pb
+
+# 4) 打 Windows x64 免安装目录包（跳过本机 VS 原生重建）
+#    打包前请先关闭正在运行的 electerm，否则可能 EPERM 无法覆盖 exe
+Get-Process electerm -ErrorAction SilentlyContinue | Stop-Process -Force
+$env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+npx electron-builder --win dir --x64 --publish never --config.npmRebuild=false
+```
+
+### 产物路径
+
+```text
+F:\job\peoject\practice\electerm\dist\win-unpacked\electerm.exe
+```
+
+双击该 exe 即可运行。
+
+### 分步说明
+
+| 步骤 | 命令 | 说明 |
+|------|------|------|
+| 进入目录 | `cd F:\job\peoject\practice\electerm` | 必须在仓库根目录 |
+| 编译 | `npm run b` | = `clean` + `compile` + `prepare-file` |
+| 补依赖 | `cd work\app` → `npm i --omit=dev --legacy-peer-deps` → `cd ..\..` | 仅当 `work\app\node_modules` 不存在时需要 |
+| 准备打包 | `npm run pb` | 复制/生成 `electron-builder.json` |
+| 打包 | `npx electron-builder --win dir --x64 --publish never --config.npmRebuild=false` | 输出到 `dist\win-unpacked\` |
+
+### 常见问题
+
+- **`EPERM ... unlink electerm.exe`**：先关掉正在运行的 electerm，再重跑第 4 步。
+- **`ERESOLVE` peer deps**：用上面的 `--legacy-peer-deps` 补装即可。
+- **`--config.npmRebuild=false`**：本机没有 VS C++ 工具链时需要；有完整 VS 可去掉该参数。
+
 ## Video guide
 
 - [https://electerm.org/videos](https://electerm.org/videos)

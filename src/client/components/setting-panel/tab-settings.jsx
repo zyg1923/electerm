@@ -11,11 +11,13 @@ import List from './list'
 import {
   settingMap,
   settingSyncId,
+  settingMigrateId,
   settingTerminalId,
   settingAiId,
   settingShortcutsId,
   settingPasswordsId
 } from '../../common/constants'
+import SettingMigrate from './setting-migrate'
 import { aiConfigsArr } from '../ai/ai-config-props'
 import { pick } from 'lodash-es'
 
@@ -63,6 +65,8 @@ export default auto(function TabSettings (props) {
       'syncServerStatus'
     ])
     elem = <SyncSetting {...syncProps} />
+  } else if (sid === settingMigrateId) {
+    elem = <SettingMigrate />
   } else if (sid === settingAiId) {
     elem = <SettingAi {...aiConfProps} />
   } else if (sid === settingTerminalId) {

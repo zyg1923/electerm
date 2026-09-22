@@ -603,6 +603,12 @@ export default class SettingTerminal extends Component {
           ].map(d => this.renderToggle(d))
         }
         {
+          this.renderToggle('confirmOnMultilinePaste', 'pd2b', '多行粘贴确认')
+        }
+        {
+          this.renderToggle('clearMarkEnabled', 'pd2b', 'Clear 彩色标记')
+        }
+        {
           // label differs from the config key
           this.renderToggle('remoteMonitorBarEnabled', 'pd2b', e('monitorBar'))
         }

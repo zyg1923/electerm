@@ -1,16 +1,15 @@
 /**
- * Run one command (usually picked from the command history) in several
- * terminals at once.
- *
- * Reuses the footer batch input tab panel (`TabSelectList`) for picking the
- * target terminals, and the same selection state + `batchInput` terminal API
- * the footer batch input uses, so both entry points stay consistent.
+ * Run one command in several terminals — parallel or rolling.
  */
 
+import { useState } from 'react'
 import { auto } from 'manate/react'
 import {
   Button,
-  Modal
+  Modal,
+  Radio,
+  InputNumber,
+  Space
 } from 'antd'
 import { TabSelectList } from './tab-select'
 import { refs } from '../common/ref'
@@ -19,18 +18,27 @@ import {
   terminalRdpType,
   terminalVncType
 } from '../../common/constants'
+import RollingEngine from '../ops/rolling-engine'
+import {
+  opsFailPolicy,
+  opsStrategy
+} from '../../common/ops-constants'
+import { ot } from '../ops/ops-i18n'
+import ModalConfirm from '../common/modal'
 
 const e = window.translate
 
 export default auto(function MultiTabRunModal (props) {
   const { store, cmd, onClose } = props
+  const [strategy, setStrategy] = useState(opsStrategy.parallel)
+  const [maxConcurrency, setMaxConcurrency] = useState(1)
+  const [failPolicy, setFailPolicy] = useState(opsFailPolicy.stop)
   const selectedTabIds = store.batchInputSelectedTabIds
   const tabs = store.tabs.filter(tab => {
     return tab.type !== terminalWebType &&
       tab.type !== terminalRdpType &&
       tab.type !== terminalVncType
   }).sort((a, b) => {
-    // current tab goes first
     if (a.id === store.activeTabId) return -1
     if (b.id === store.activeTabId) return 1
     return 0
@@ -43,15 +51,72 @@ export default auto(function MultiTabRunModal (props) {
     onSelectAll: store.selectAllBatchInputTabs,
     onSelectNone: store.selectNoneBatchInputTabs
   }
-  function handleRun () {
-    selectedTabIds.map(id => {
-      return refs.get('term-' + id)
-    }).forEach(term => {
-      term?.batchInput(cmd)
+
+  async function handleRun () {
+    const check = store.checkOpsApproval?.(cmd, { hostIds: selectedTabIds })
+    if (check?.needsApproval) {
+      const req = store.createApprovalRequest({
+        command: cmd,
+        targets: selectedTabIds,
+        riskMatchedRules: check.matchedRules.map(r => r.id),
+        approvalMode: 'modal'
+      })
+      const ok = await new Promise((resolve) => {
+        ModalConfirm.confirm({
+          title: ot('needsApproval'),
+          content: cmd,
+          okText: ot('approve'),
+          cancelText: ot('reject'),
+          onOk: async () => {
+            store.decideApproval(req.id, 'approve')
+            resolve(true)
+          },
+          onCancel: async () => {
+            store.decideApproval(req.id, 'reject', 'user reject')
+            resolve(false)
+          }
+        })
+      })
+      if (!ok) return
+    }
+
+    if (strategy === opsStrategy.parallel && maxConcurrency >= selectedTabIds.length) {
+      selectedTabIds.map(id => refs.get('term-' + id)).forEach(term => {
+        term?.batchInput(cmd)
+      })
+      store.addCmdHistory(cmd)
+      onClose()
+      return
+    }
+
+    const engine = new RollingEngine({
+      command: cmd,
+      tabIds: selectedTabIds,
+      strategy,
+      maxConcurrency,
+      failPolicy,
+      useExec: false,
+      onAskConfirm: () => new Promise((resolve) => {
+        ModalConfirm.confirm({
+          title: ot('waitingConfirm'),
+          okText: ot('continueNext'),
+          cancelText: ot('stopAll'),
+          onOk: () => resolve('continue'),
+          onCancel: () => resolve('stop')
+        })
+      })
+    })
+    store.createOpsTask?.({
+      id: engine.id,
+      type: 'rolling',
+      status: 'running',
+      meta: { command: cmd, tabIds: selectedTabIds }
     })
     store.addCmdHistory(cmd)
     onClose()
+    engine.start()
   }
+
   return (
     <Modal
       open
@@ -77,6 +142,35 @@ export default auto(function MultiTabRunModal (props) {
       ]}
     >
       <div className='multi-tab-run-cmd'>{cmd}</div>
+      <Space wrap className='mg1b'>
+        <Radio.Group
+          size='small'
+          value={strategy}
+          onChange={ev => setStrategy(ev.target.value)}
+        >
+          <Radio.Button value={opsStrategy.parallel}>{ot('parallel')}</Radio.Button>
+          <Radio.Button value={opsStrategy.rolling}>{ot('rolling')}</Radio.Button>
+        </Radio.Group>
+        <span>{ot('maxConcurrency')}</span>
+        <InputNumber
+          size='small'
+          min={1}
+          max={32}
+          value={maxConcurrency}
+          onChange={v => setMaxConcurrency(v || 1)}
+        />
+        {strategy === opsStrategy.rolling && (
+          <Radio.Group
+            size='small'
+            value={failPolicy}
+            onChange={ev => setFailPolicy(ev.target.value)}
+          >
+            <Radio.Button value={opsFailPolicy.stop}>{ot('failStop')}</Radio.Button>
+            <Radio.Button value={opsFailPolicy.skip}>{ot('failSkip')}</Radio.Button>
+            <Radio.Button value={opsFailPolicy.ask}>{ot('failAsk')}</Radio.Button>
+          </Radio.Group>
+        )}
+      </Space>
       <TabSelectList {...listProps} />
     </Modal>
   )

@@ -54,9 +54,15 @@ class Sftp extends TerminalBase {
     this.initOptions = initOptions
     this.transfers = {}
     const terminalInst = globalState.getSession(initOptions.terminalId)
+    if (!terminalInst) {
+      throw new Error('Terminal session not found for SFTP')
+    }
     const {
       conn
     } = terminalInst
+    if (!conn || typeof conn.sftp !== 'function') {
+      throw new Error('SSH connection not ready for SFTP (no exec/sftp channel)')
+    }
     this.client = conn
     this.enableSsh = initOptions.enableSsh
     try {
@@ -112,6 +118,9 @@ class Sftp extends TerminalBase {
         return reject(new Error(`do not support ${cmd.split(' ')[0]} operation in sftp mode`))
       }
       const { client } = this
+      if (!client || typeof client.exec !== 'function') {
+        return reject(new Error('Exec channel not supported for this session type'))
+      }
       client.exec(cmd, this.getExecOpts(), (err, stream) => {
         if (err) {
           return reject(err)

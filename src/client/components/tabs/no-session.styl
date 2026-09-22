@@ -26,25 +26,45 @@
   padding 32px 0
 .no-session-history
   flex 1
-  min-height 0
+  min-height 120px
   display flex
   flex-direction column
   overflow hidden
+  width 100%
+  max-width 480px
+  margin 0 auto
+  text-align left
+.no-session-history-title
+  flex-shrink 0
+  font-size 14px
+  font-weight 600
+  color var(--text)
+  opacity 0.85
+  padding 8px 16px 4px
+.no-session-history
   .sidebar-panel-history
     // override the global sidebar absolute positioning (top:112px) so the
     // history fills this flex item instead.
-    position static
+    position static !important
+    top auto !important
+    bottom auto !important
+    left auto !important
+    right auto !important
     flex 1
     min-height 0
+    width 100%
     .pd2x
-      width 400px
+      width 100%
       margin 0 auto
+    .history-body
+      min-height 40px
 .is-mobile
   .no-sessions
     padding 20px 0
   .no-session-logo
     padding 8px 0
   .no-session-history
+    max-width none
     .sidebar-panel-history
       .pd2x
         width auto

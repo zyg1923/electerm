@@ -203,12 +203,12 @@ class ShortcutControl extends React.PureComponent {
   zoominShortcut = throttle((e) => {
     e.stopPropagation()
     window.store.zoom(0.25, true)
-  }, 1000)
+  }, 16)
 
   zoomoutShortcut = throttle((e) => {
     e.stopPropagation()
     window.store.zoom(-0.25, true)
-  }, 1000)
+  }, 16)
 
   zoominTerminalShortcut = throttle((event) => {
     if (window.store.inActiveTerminal) {
@@ -217,7 +217,7 @@ class ShortcutControl extends React.PureComponent {
       const plus = 0.2
       window.store.zoom(plus, true)
     }
-  }, 1000)
+  }, 16)
 
   zoomoutTerminalShortcut = throttle((event) => {
     if (window.store.inActiveTerminal) {
@@ -226,7 +226,7 @@ class ShortcutControl extends React.PureComponent {
       const plus = -0.2
       window.store.zoom(plus, true)
     }
-  }, 1000)
+  }, 16)
 
   clickSftpIcon = () => {
     const icon = document.querySelector('.session-current .sftp-follow-ssh-icon')

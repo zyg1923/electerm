@@ -54,7 +54,12 @@ function createDb (appPath, defaultUserName, { enc, dec } = {}) {
     'history',
     'terminalCommandHistory',
     'aiChatHistory',
-    'autoRunWidgets'
+    'autoRunWidgets',
+    'opsTasks',
+    'opsAuditLogs',
+    'opsApprovalRequests',
+    'opsApprovalRules',
+    'opsApprovalWhitelist'
   ]
 
   // Create tables in appropriate databases

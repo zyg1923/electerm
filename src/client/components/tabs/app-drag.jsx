@@ -33,7 +33,10 @@ export default function AppDrag (props) {
   }, [])
 
   function onMouseDown (e) {
-    // e.stopPropagation()
+    // The second click of a double-click is for maximize, not drag.
+    if (e.detail > 1) {
+      return
+    }
     if (canOperate(e)) {
       isDraggingRef.current = true
       window.pre.runSync('windowMove', true)
@@ -49,6 +52,8 @@ export default function AppDrag (props) {
 
   function onDoubleClick (e) {
     e.stopPropagation()
+    isDraggingRef.current = false
+    window.pre.runSync('windowMove', false)
     if (!canOperate(e)) {
       return
     }
@@ -57,8 +62,10 @@ export default function AppDrag (props) {
     } = window.store
     if (isMaximized) {
       window.pre.runGlobalAsync('unmaximize')
+      window.store.isMaximized = false
     } else {
       window.pre.runGlobalAsync('maximize')
+      window.store.isMaximized = true
     }
   }
   const props0 = {

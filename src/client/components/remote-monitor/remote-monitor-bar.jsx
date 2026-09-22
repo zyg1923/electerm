@@ -1,5 +1,5 @@
 import { auto } from 'manate/react'
-import { Button, Popover } from 'antd'
+import { Button, Popover, Select, Switch } from 'antd'
 import {
   CloseOutlined,
   WarningOutlined
@@ -322,6 +322,28 @@ export default auto(function RemoteMonitorBar ({ store, style }) {
         }
       </div>
       <div className='remote-monitor-controls'>
+        <span className='remote-monitor-refresh'>
+          <span>刷新</span>
+          <Switch
+            size='small'
+            checked={store.config.remoteMonitorRefreshEnabled !== false}
+            onChange={v => store.setConfig({ remoteMonitorRefreshEnabled: v })}
+          />
+          <Select
+            size='small'
+            disabled={store.config.remoteMonitorRefreshEnabled === false}
+            value={store.config.remoteMonitorIntervalMs || 5000}
+            onChange={v => store.setConfig({ remoteMonitorIntervalMs: v })}
+            popupMatchSelectWidth={false}
+            options={[
+              { value: 3000, label: '3秒' },
+              { value: 5000, label: '5秒' },
+              { value: 10000, label: '10秒' },
+              { value: 30000, label: '30秒' },
+              { value: 60000, label: '60秒' }
+            ]}
+          />
+        </span>
         <ItemFilter
           className='remote-monitor-filter'
           ids={REMOTE_MONITOR_ITEM_IDS}

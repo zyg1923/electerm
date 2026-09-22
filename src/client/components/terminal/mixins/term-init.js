@@ -40,6 +40,9 @@ export const initMixin = {
     term.parent = this
     term.onSelectionChange(this.onSelection)
     term.open(this.domRef.current, true)
+    this.bindClearHistoryWheel(term)
+    this.bindLineSelect(term)
+    this.bindKeepScrollbackOnClear(term)
     this.registerTerminalColorQueryHandlers(term, themeConfig)
     await this.loadRenderer(term, config)
     this.fixSelectionColors(term)
@@ -57,10 +60,11 @@ export const initMixin = {
     this.cmdAddon = new CommandTrackerAddon()
     const SerializeAddon = await loadSerializeAddon()
     this.serializeAddon = new SerializeAddon()
-    this.cmdAddon.onCommandExecuted((cmd) => {
+  this.cmdAddon.onCommandExecuted((cmd) => {
       if (cmd && cmd.trim()) {
         window.store.addCmdHistory(cmd.trim())
       }
+      this.maybeInterceptVi?.(cmd)
     })
     this.cmdAddon.onCwdChanged((cwd) => {
       this.setCwd(cwd)
@@ -106,6 +110,33 @@ export const initMixin = {
     const txt = hasSelection ? this.term.getSelection().trim() : ''
     this.setState({ hasSelection })
     refsStatic.get('unix-timestamp-tooltip')?.onSelection(txt)
+  },
+
+  maybeInterceptVi (cmd) {
+    const enabled = this.props.config?.opsViIntercept !== false &&
+      window.store.opsViIntercept !== false
+    if (!enabled) return
+    // dynamic import avoid cycle
+    import('../../ops/ops-file-editor.jsx').then(({ parseViCommand, openOpsFileEditor }) => {
+      const parsed = parseViCommand(cmd)
+      if (!parsed) return
+      // interrupt raw vim if it already started
+      try {
+        this.attachAddon?._sendData('\x03')
+      } catch (e) {}
+      const cwd = this.cmdAddon?.cwd || ''
+      let path = parsed.path
+      if (path && !path.startsWith('/') && cwd) {
+        path = cwd.replace(/\/$/, '') + '/' + path
+      }
+      openOpsFileEditor({
+        tabId: this.props.tab?.id,
+        path
+      })
+      try {
+        this.term?.writeln?.('\r\n\x1b[33m[electerm] 已拦截 vi，打开 GUI 编辑器。使用 vi --raw 可绕过。\x1b[0m\r\n')
+      } catch (e) {}
+    }).catch(() => {})
   },
 
   webLinkHandler (event, url) {

@@ -10,11 +10,10 @@ const { startSession } = require('./session')
 async function runCmd (body) {
   const { pid, cmd } = body
   const term = terminals(pid)
-  let txt = ''
-  if (term) {
-    txt = await term.runCmd(cmd)
+  if (!term) {
+    throw new Error('Terminal session not found')
   }
-  return txt
+  return term.runCmd(cmd)
 }
 
 async function execCmd (body) {

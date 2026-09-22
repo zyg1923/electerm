@@ -1,5 +1,6 @@
 import {
   settingSyncId,
+  settingMigrateId,
   settingShortcutsId,
   settingTerminalId,
   settingAiId,
@@ -22,6 +23,10 @@ export default () => {
     {
       id: settingSyncId,
       title: e('settingSync')
+    },
+    {
+      id: settingMigrateId,
+      title: e('dataMigrate') === 'dataMigrate' ? '数据迁移' : e('dataMigrate')
     },
     {
       id: settingAiId,

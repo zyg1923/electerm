@@ -257,6 +257,7 @@ export default (Store) => {
       store.fetchSshConfigItems()
       store.initCommandLine().catch(store.onError)
       initWatch(store)
+      store.ensureOpsDefaults?.().catch(() => {})
       setTimeout(
         () => {
           store.fixProfiles()
@@ -279,6 +280,23 @@ export default (Store) => {
                   icons.splice(idx + 1, 0, 'transferHistory')
                 } else {
                   icons.push('transferHistory')
+                }
+                store.updateConfig({
+                  leftSideBarIcons: icons
+                })
+              }
+            }
+            if (!window.localStorage.getItem('electerm-sidebar-ops-v1')) {
+              window.localStorage.setItem('electerm-sidebar-ops-v1', '1')
+              const icons = Array.isArray(store.config.leftSideBarIcons)
+                ? [...store.config.leftSideBarIcons]
+                : []
+              if (icons.length && !icons.includes('opsCenter')) {
+                const idx = icons.indexOf('transferHistory')
+                if (idx >= 0) {
+                  icons.splice(idx + 1, 0, 'opsCenter')
+                } else {
+                  icons.push('opsCenter')
                 }
                 store.updateConfig({
                   leftSideBarIcons: icons

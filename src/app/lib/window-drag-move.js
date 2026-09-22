@@ -22,6 +22,15 @@ function windowMove (canMoving) {
     }
 
     movingInterval = setInterval(() => {
+      if (!win || win.isDestroyed() || win.isMaximized()) {
+        clearInterval(movingInterval)
+        movingInterval = null
+        dragCount = 0
+        try {
+          win.setResizable(true)
+        } catch (err) {}
+        return
+      }
       dragCount = dragCount + 1
       if (dragCount > 1000) {
         dragCount = 1000
@@ -37,8 +46,9 @@ function windowMove (canMoving) {
     }, 1)
   } else {
     win.setResizable(true)
-    dragCount = 0 // Reset the count when moving is not allowed
+    dragCount = 0
     clearInterval(movingInterval)
+    movingInterval = null
   }
 }
 

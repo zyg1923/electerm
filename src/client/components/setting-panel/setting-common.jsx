@@ -35,6 +35,7 @@ import isColorDark from '../../common/is-color-dark'
 import DeepLinkControl from './deep-link-control'
 import HotkeySetting from './hotkey'
 import SettingLeftSidebarIcons from './setting-left-sidebar-icons'
+import FontSelect from '../common/font-select'
 import './setting.styl'
 
 const { Option } = Select
@@ -46,7 +47,8 @@ export default class SettingCommon extends Component {
     submittingPass: false,
     passInputFocused: false,
     placeholderLogin: window.pre.requireAuth ? '********' : e('notSet'),
-    loginPass: ''
+    loginPass: '',
+    previewThemeId: ''
   }
 
   componentDidMount () {
@@ -60,6 +62,9 @@ export default class SettingCommon extends Component {
   componentWillUnmount () {
     clearTimeout(this.timer)
     clearTimeout(this.timer1)
+    if (this.props.store.previewThemeId) {
+      this.props.store.previewThemeId = ''
+    }
   }
 
   handleLoginSubmit = async () => {
@@ -152,7 +157,25 @@ export default class SettingCommon extends Component {
   }
 
   handleChangeTerminalTheme = id => {
+    this.setState({ previewThemeId: id })
+    this.props.store.previewThemeId = id
+  }
+
+  handleApplyTheme = () => {
+    const id = this.state.previewThemeId
+    if (!id) {
+      return
+    }
+    this.props.store.previewThemeId = ''
     this.props.store.setTheme(id)
+    this.setState({ previewThemeId: '' })
+  }
+
+  handleChangeFont = (values) => {
+    this.onChangeValue(
+      (values || []).join(', '),
+      'fontFamily'
+    )
   }
 
   handleCustomCss = (value) => {
@@ -481,7 +504,7 @@ export default class SettingCommon extends Component {
           <Select
             onChange={this.handleChangeTerminalTheme}
             popupMatchSelectWidth={false}
-            value={theme}
+            value={this.state.previewThemeId || theme}
           >
             {
               terminalThemes
@@ -513,6 +536,40 @@ export default class SettingCommon extends Component {
                 })
             }
           </Select>
+          <Button
+            className='mg1l'
+            type='primary'
+            disabled={!this.state.previewThemeId || this.state.previewThemeId === theme}
+            onClick={this.handleApplyTheme}
+          >
+            {e('apply')}
+          </Button>
+          {
+            this.state.previewThemeId && this.state.previewThemeId !== theme
+              ? (
+                <div className='pd1t' style={{ color: 'var(--text-dark)' }}>
+                  当前是预览，点击「应用」后才会保存
+                </div>
+                )
+              : null
+          }
+        </div>
+
+        {
+          this.renderNumber('fontSize', {
+            step: 1,
+            min: 8,
+            max: 72
+          }, e('fontSize'))
+        }
+        <div className='pd2b'>
+          <span className='inline-title mg1r'>{e('fontFamily')}</span>
+          <div style={{ display: 'inline-block', width: 320, verticalAlign: 'middle' }}>
+            <FontSelect
+              onChange={this.handleChangeFont}
+              value={(props.config.fontFamily || '').split(/, */g).filter(d => d.trim())}
+            />
+          </div>
         </div>
 
         <div className='pd2b'>

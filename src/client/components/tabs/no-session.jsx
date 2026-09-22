@@ -1,5 +1,5 @@
 import { Button } from 'antd'
-import { RobotOutlined } from '@ant-design/icons'
+import { DesktopOutlined, PlusOutlined, RobotOutlined, ToolOutlined } from '@ant-design/icons'
 import LogoElem from '../common/logo-elem.jsx'
 import HistoryPanel from '../sidebar/history'
 import QuickConnect from './quick-connect'
@@ -22,13 +22,16 @@ export default function NoSessionPanel ({ height, onNewTab, onNewSsh, batch }) {
     window.store.onNewSshAI()
   }
 
+  // Local terminal only — never opens remote/SFTP
   const newTabDom = window.store.hasNodePty
     ? (
       <Button
         onClick={onNewTab}
         className='add-new-tab-btn'
+        icon={<DesktopOutlined />}
+        title='打开新链接'
       >
-        {e('newTab')}
+        打开新链接
       </Button>
       )
     : null
@@ -38,15 +41,26 @@ export default function NoSessionPanel ({ height, onNewTab, onNewSsh, batch }) {
         {newTabDom}
         <Button
           onClick={onNewSsh}
+          icon={<PlusOutlined />}
+          title='新增链接'
         >
-          {e('newBookmark')}
+          新增链接
+        </Button>
+        <Button
+          icon={<ToolOutlined />}
+          title='运维中心'
+          onClick={() => window.store.openOpsCenter()}
+        >
+          运维中心
         </Button>
         {!isAIDisabled() && (
           <Button
             onClick={handleCreateAIBookmark}
             icon={<RobotOutlined />}
           >
-            {e('createBookmarkByAI')}
+            {e('createBookmarkByAI') === 'createBookmarkByAI'
+              ? 'AI 智能创建书签'
+              : e('createBookmarkByAI')}
           </Button>
         )}
         <QuickConnect batch={batch} />
@@ -55,6 +69,9 @@ export default function NoSessionPanel ({ height, onNewTab, onNewSsh, batch }) {
         <LogoElem />
       </div>
       <div className='no-session-history' onClick={handleClick}>
+        <div className='no-session-history-title'>
+          {e('history') === 'history' ? '链接历史' : e('history')}
+        </div>
         <HistoryPanel sort />
       </div>
     </div>

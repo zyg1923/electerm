@@ -6,15 +6,17 @@ import { get, pick, debounce } from 'lodash-es'
 import copy from 'json-deep-copy'
 import { action } from 'manate'
 import {
-  settingMap, packInfo, syncTypes, syncDataMaps
+  settingMap, packInfo, syncTypes, syncDataMaps, migrateMemoryKeys
 } from '../common/constants'
-import { update, getData } from '../common/db'
+import { update, getData, dbNames } from '../common/db'
 import fetch from '../common/fetch-from-server'
 import download from '../common/download'
 import { fixBookmarks } from '../common/db-fix'
 import dayjs from 'dayjs'
 import parseJsonSafe from '../common/parse-json-safe'
 import { runImportTask } from '../common/import-task'
+import Modal from '../components/common/modal'
+import message from '../components/common/message'
 
 const e = window.translate
 
@@ -704,14 +706,24 @@ export default (Store) => {
     update('lastDataUpdateTime', store.lastDataUpdateTime)
   }, 1000)
 
+  Store.prototype.getMigrateNames = function () {
+    return [...new Set([...dbNames, ...(migrateMemoryKeys || [])])]
+      .filter(n => n && n !== settingMap.setting && n !== settingMap.widgets)
+  }
+
   Store.prototype.handleExportAllData = async function () {
     const { store } = window
-    const objs = {}
-    const { names } = store.getDataSyncNames(true)
+    const names = store.getMigrateNames()
+    const objs = {
+      type: 'electerm-migrate',
+      version: packVer,
+      exportedAt: Date.now()
+    }
     for (const n of names) {
-      objs[n] = store.getItems(n)
+      const items = store.getItems(n)
+      objs[n] = Array.isArray(items) ? items : []
       const order = await getData(`${n}:order`)
-      if (order && order.length) {
+      if (order && order.length && objs[n].length) {
         objs[n].sort((a, b) => {
           const ai = order.findIndex(r => r === a.id)
           const bi = order.findIndex(r => r === b.id)
@@ -719,19 +731,15 @@ export default (Store) => {
         })
       }
     }
-    objs.config = store.config
-    const text = JSON.stringify(objs)
-    const name = dayjs().format('YYYY-MM-DD-HH-mm-ss') + '-electerm-all-data.json'
+    objs.config = stripServerManagedKeys(copy(store.config))
+    const text = JSON.stringify(objs, null, 2)
+    const name = dayjs().format('YYYY-MM-DD-HH-mm-ss') + '-electerm-migrate.json'
     download(name, text)
   }
 
-  Store.prototype.importAll = async function (file) {
-    const txt = file.fileContent !== undefined
-      ? file.fileContent
-      : await window.fs.readFile(file.filePath)
+  Store.prototype.applyMigrateImport = async function (objs) {
     const { store } = window
-    const objs = JSON.parse(txt)
-    const { names } = store.getDataSyncNames(true)
+    const names = store.getMigrateNames().filter(n => Array.isArray(objs[n]))
     const fixed = {}
     for (const n of names) {
       let arr = objs[n] || []
@@ -742,34 +750,67 @@ export default (Store) => {
       }
       fixed[n] = arr
     }
-    // clear all targets first - importAll replaces data sets, not appends.
-    // watchers are stopped inside runImportTask, so this is silent until restart
+    const watchNames = names.filter(n => typeof window[`watch${n}`] !== 'undefined')
     action(() => {
       for (const n of names) {
-        store.setItems(n, [])
+        if (Array.isArray(store.getItems(n))) {
+          store.setItems(n, [])
+        }
       }
     })()
     await runImportTask({
-      title: e('import'),
+      title: e('import') === 'import' ? '导入' : e('import'),
       batch: 200,
-      stopWatchers: names,
-      // one chunked step per data set (bookmarks, groups, themes, ...),
-      // so the progress bar advances per batch instead of per data set
+      stopWatchers: watchNames,
       steps: names.map((n) => {
         const arr = fixed[n]
         return {
           label: n,
           items: arr,
           process: (chunk) => {
+            if (!Array.isArray(store[n])) {
+              store[n] = []
+            }
             store[n].push(...chunk)
           }
         }
       })
     })
-    store.updateConfig(stripServerManagedKeys(objs.config))
-    if (objs.config?.theme) {
-      store.setTheme(objs.config.theme)
+    if (objs.config && typeof objs.config === 'object') {
+      store.updateConfig(stripServerManagedKeys(objs.config))
+      if (objs.config.theme) {
+        store.setTheme(objs.config.theme)
+      }
     }
+    message.success('导入完成，连接和历史已恢复')
+  }
+
+  Store.prototype.importAll = async function (file) {
+    const txt = file.fileContent !== undefined
+      ? file.fileContent
+      : await window.fs.readFile(file.filePath)
+    let objs
+    try {
+      objs = JSON.parse(txt)
+    } catch (err) {
+      message.error('导入失败：不是有效的 JSON 文件')
+      return
+    }
+    if (!objs || typeof objs !== 'object') {
+      message.error('导入失败：文件内容无效')
+      return
+    }
+    const bm = Array.isArray(objs.bookmarks) ? objs.bookmarks.length : 0
+    const hist = Array.isArray(objs.history) ? objs.history.length : 0
+    Modal.confirm({
+      title: '确认导入并覆盖？',
+      content: `将覆盖当前数据。文件中约有 ${bm} 条连接、${hist} 条链接历史。`,
+      okText: '导入',
+      cancelText: '取消',
+      onOk: () => {
+        window.store.applyMigrateImport(objs)
+      }
+    })
   }
 
   Store.prototype.handleAutoSync = function (v) {

@@ -6,7 +6,7 @@ import {
 } from 'antd'
 import { BarChartOutlined, TranslationOutlined, DoubleRightOutlined, FunctionOutlined } from '@ant-design/icons'
 import './footer.styl'
-import { statusMap } from '../../common/constants'
+import { statusMap, minTerminalFontSize } from '../../common/constants'
 import BatchInput from './batch-input'
 import encodes from '../bookmark-form/common/encodes'
 import { refs } from '../common/ref'
@@ -194,6 +194,74 @@ export default auto(function FooterEntry (props) {
     )
   }
 
+  const zoomChoices = [50, 75, 100, 125, 150, 175, 200, 250, 300]
+
+  function withCurrent (current) {
+    const list = zoomChoices.includes(current)
+      ? zoomChoices
+      : [...zoomChoices, current].sort((a, b) => a - b)
+    return list.map(n => ({ value: n, label: `${n}%` }))
+  }
+
+  function setUiZoom (percent) {
+    props.store.zoom(percent / 100)
+  }
+
+  function setTermZoom (percent) {
+    const inst = refs.get('term-' + props.store.activeTabId)
+    if (!inst?.term) {
+      return
+    }
+    const base = props.store.config?.fontSize || inst.term.options.fontSize
+    const next = Math.max(minTerminalFontSize, Math.round(base * percent / 100))
+    inst.originalFontSize = base
+    inst.term.options.fontSize = next
+    props.store.terminalFontSize = next
+    props.store.terminalFontBase = base
+    inst.setState({ fontSizeChanged: next !== base }, () => inst.onResize?.())
+  }
+
+  function renderZoomRatio () {
+    const { store } = props
+    const ui = Math.round((store.uiZoom || store.config?.zoom || 1) * 100)
+    const base = store.terminalFontBase || store.config?.fontSize
+    const size = store.terminalFontSize || base
+    const inTerm = store.inActiveTerminal
+    const term = inTerm && base > 0 && size > 0
+      ? Math.round(size / base * 100)
+      : null
+    return (
+      <div className='terminal-footer-zoom'>
+        <span>界面</span>
+        <Select
+          size='small'
+          value={ui}
+          options={withCurrent(ui)}
+          onChange={setUiZoom}
+          popupMatchSelectWidth={false}
+          placement='topRight'
+        />
+        {
+          term == null
+            ? null
+            : (
+              <>
+                <span>终端</span>
+                <Select
+                  size='small'
+                  value={term}
+                  options={withCurrent(term)}
+                  onChange={setTermZoom}
+                  popupMatchSelectWidth={false}
+                  placement='topRight'
+                />
+              </>
+              )
+        }
+      </div>
+    )
+  }
+
   function handleShowSidebar () {
     window.store.toggleLeftSideBar()
   }
@@ -233,6 +301,7 @@ export default auto(function FooterEntry (props) {
     return (
       <div className='main-footer' {...sideProps}>
         {showSidebarIcon}
+        {renderZoomRatio()}
       </div>
     )
   }
@@ -247,6 +316,7 @@ export default auto(function FooterEntry (props) {
         {renderBatchInputs()}
         {renderEncodingInfo()}
         {renderInfoIcon()}
+        {renderZoomRatio()}
       </div>
     </div>
   )

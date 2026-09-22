@@ -57,14 +57,24 @@ async function load () {
     if (String(langCode).startsWith('zh')) {
       const zhMap = {
         bookmarks: '连接设置',
-        newBookmark: '新建连接',
+        newBookmark: '新增链接',
+        newTab: '打开新链接',
+        newTerminal: '打开新链接',
+        history: '链接历史',
         bookmarkCategory: '连接分类',
         closeTabLeft: '关闭左侧连接',
         closeTabRight: '关闭右侧连接',
         closeOtherTabs: '关闭其他连接',
         sessionLogDir: 'Log地址',
         sessionLogEnabled: '日志已启用',
-        sessionLogDirHint: '不选择文件夹则不记录日志；连接后会在窗口顶部显示实际路径'
+        sessionLogDirHint: '不选择文件夹则不记录日志；连接后会在窗口顶部显示实际路径',
+        createBookmarkByAI: 'AI 智能创建书签',
+        quickConnect: '快速连接',
+        transferHistory: '传输历史',
+        settingSync: '云同步',
+        dataMigrate: '数据迁移',
+        export: '导出',
+        importFromFile: '从文件导入'
       }
       if (zhMap[txt]) {
         return zhMap[txt]

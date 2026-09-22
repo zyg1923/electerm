@@ -18,7 +18,11 @@ function loadModule (type) {
  * @returns {Promise} Terminal session
  */
 exports.startSession = async function (initOptions, ws, func = 'session') {
-  const type = initOptions.termType || initOptions.type || 'ssh'
+  let type = initOptions.termType || initOptions.type || 'ssh'
+  // A host means SSH even if type was overwritten to local.
+  if (initOptions.host && (type === 'local' || type === 'remote')) {
+    type = 'ssh'
+  }
   const tail = [
     'telnet',
     'serial',

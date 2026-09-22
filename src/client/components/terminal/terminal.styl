@@ -23,6 +23,13 @@
   background var(--main)
   position absolute
   overflow hidden
+.term-wrap-2
+  top 0
+  box-sizing border-box
+  .xterm
+    // Cell height plus a physical-pixel cushion. Small page zoom must not
+    // shrink that cushion, or the first row gets clipped again.
+    padding-top calc(var(--term-pad, 20px) + (22px / var(--app-zoom, 1))) !important
 
 .vertical
   .term-wrap.not-first-term
@@ -148,7 +155,7 @@
   width calc(100% - 80px)
 
 .terminal-suggestions-wrap
-  position absolute
+  position fixed
   z-index 100
   max-height 300px
   max-width 480px

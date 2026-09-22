@@ -36,8 +36,12 @@ const linuxListGroup = 'cat /etc/group'
 const noLocalShell = isWin || window.et.hasNodePty === false
 
 export async function remoteListUsers (pid) {
-  const users = await runCmd(pid, linuxListUser)
-    .catch(console.error)
+  if (!pid) {
+    return {}
+  }
+  // Best-effort nicety for the remote file panel; never surface as a toast.
+  const users = await runCmd(pid, linuxListUser, { silent: true })
+    .catch(() => null)
   if (users) {
     return parseNames(users)
   }
@@ -45,8 +49,11 @@ export async function remoteListUsers (pid) {
 }
 
 export async function remoteListGroups (pid) {
-  const groups = await runCmd(pid, linuxListGroup)
-    .catch(console.error)
+  if (!pid) {
+    return {}
+  }
+  const groups = await runCmd(pid, linuxListGroup, { silent: true })
+    .catch(() => null)
   if (groups) {
     return parseNames(groups)
   }

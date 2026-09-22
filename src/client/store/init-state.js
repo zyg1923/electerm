@@ -216,6 +216,23 @@ export default () => {
     // batch inputs
     batchInputs: ls.getItemJSON(batchInputLsKey, []),
 
+    // ops center
+    opsCenterVisible: false,
+    opsCenterTab: 'commands',
+    opsTasks: [],
+    opsAuditLogs: [],
+    opsApprovalRequests: [],
+    opsApprovalRules: [],
+    opsApprovalWhitelist: [],
+    opsCommandTemplates: [],
+    opsCacheEnabled: true,
+    opsCacheTtl: {
+      machineStatus: 30000,
+      dockerPs: 15000,
+      dockerImages: 60000
+    },
+    opsViIntercept: true,
+
     // ui
     innerWidth: window.innerWidth,
     height: 500,
@@ -229,6 +246,10 @@ export default () => {
     isTouchDevice: false,
     fullscreen: false,
     tabsHeight: 36,
+    uiZoom: 1,
+    terminalFontSize: 0,
+    terminalFontBase: 0,
+    previewThemeId: '',
 
     // widgets
     widgets: [],

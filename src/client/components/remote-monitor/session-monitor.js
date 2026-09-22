@@ -14,6 +14,16 @@ import {
   parseUsers
 } from './monitor-model.js'
 
+let lastTerminalInputAt = 0
+
+export function markTerminalInput () {
+  lastTerminalInputAt = Date.now()
+}
+
+export function terminalInputIsRecent (ms = 3000) {
+  return Date.now() - lastTerminalInputAt < ms
+}
+
 const GROUP_NAMES = Object.keys(REMOTE_MONITOR_COMMANDS)
 const monitors = new Map()
 
@@ -205,6 +215,17 @@ export class SessionMonitor {
     if (this.runners.get(name) !== runner) {
       return
     }
+    if (terminalInputIsRecent()) {
+      runner.timer = setTimeout(() => this.runGroup(name, runner), 1000)
+      return
+    }
+    if (
+      REMOTE_MONITOR_INTERVALS[name] > 0 &&
+      window.store?.config?.remoteMonitorRefreshEnabled === false
+    ) {
+      runner.timer = setTimeout(() => this.runGroup(name, runner), 1000)
+      return
+    }
     const previous = this.snapshot.groups[name]
     if (previous.data === null || previous.data === undefined) {
       this.updateGroup(name, {
@@ -294,9 +315,15 @@ export class SessionMonitor {
     if (this.runners.get(name) !== runner) {
       return
     }
+    const refreshOn = window.store?.config?.remoteMonitorRefreshEnabled !== false
+    const customMs = Number(window.store?.config?.remoteMonitorIntervalMs) || 0
     const interval = REMOTE_MONITOR_INTERVALS[name]
+    if (interval > 0 && !refreshOn) {
+      runner.timer = setTimeout(() => this.runGroup(name, runner), 1000)
+      return
+    }
     if (interval > 0 || runner.failures > 0) {
-      const baseInterval = interval || 5000
+      const baseInterval = customMs > 0 ? customMs : (interval || 5000)
       const backoff = Math.min(baseInterval * (2 ** runner.failures), 60000)
       runner.timer = setTimeout(() => this.runGroup(name, runner), backoff)
     } else {

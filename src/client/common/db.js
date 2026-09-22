@@ -32,7 +32,12 @@ export const dbNames = [
   'history',
   'terminalCommandHistory',
   'aiChatHistory',
-  'autoRunWidgets'
+  'autoRunWidgets',
+  'opsTasks',
+  'opsAuditLogs',
+  'opsApprovalRequests',
+  'opsApprovalRules',
+  'opsApprovalWhitelist'
 ]
 export const dbNamesForSync = [
   ...without(
@@ -47,7 +52,12 @@ export const dbNamesForWatch = [
   'history',
   'terminalCommandHistory',
   'aiChatHistory',
-  'autoRunWidgets'
+  'autoRunWidgets',
+  'opsTasks',
+  'opsAuditLogs',
+  'opsApprovalRequests',
+  'opsApprovalRules',
+  'opsApprovalWhitelist'
 ]
 
 /**

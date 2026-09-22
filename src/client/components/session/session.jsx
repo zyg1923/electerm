@@ -17,6 +17,7 @@ import copy from 'json-deep-copy'
 import classnames from 'classnames'
 import {
   paneMap,
+  terminalLocalType,
   terminalRdpType,
   terminalVncType,
   terminalWebType,
@@ -52,10 +53,14 @@ export default class SessionWrapper extends Component {
       keepaliveEnabled: false,
       wrapDisabled: false
     }
-    if (props.tab.authType || props.tab.type === 'ssh' || props.tab.host) {
+    // SSH: terminal + local/remote files. Local: terminal + local files only.
+    // Other types (telnet/rdp/...) never open a file pane.
+    const isSsh = !!(props.tab.authType || props.tab.type === 'ssh' || props.tab.host)
+    const isLocal = !isSsh && (props.tab.type === terminalLocalType || !props.tab.type)
+    if (isSsh || isLocal) {
       props.tab.sshSftpSplitView = true
-    } else if (props.tab.sshSftpSplitView === undefined) {
-      props.tab.sshSftpSplitView = props.config.sshSftpSplitView !== false
+    } else {
+      props.tab.sshSftpSplitView = false
     }
   }
 
@@ -103,17 +108,25 @@ export default class SessionWrapper extends Component {
     return this.isSsh() || this.props.tab.type === 'ssh'
   }
 
+  isLocalSession = (tab = this.props.tab) => {
+    return !tab.host &&
+      !tab.authType &&
+      tab.type !== 'ssh' &&
+      (tab.type === terminalLocalType || !tab.type)
+  }
+
   isSplitViewEnabled = () => {
     if (this.isSftpDisabled()) {
       return false
     }
-    if (this.isSshSession()) {
-      return true
+    // Local: left local file panel + terminal. SSH: local + remote files.
+    if (!this.isSshSession() && !this.isLocalSession()) {
+      return false
     }
     if (!this.canSplitView()) {
       return false
     }
-    return !!this.props.tab.sshSftpSplitView
+    return this.props.tab.sshSftpSplitView !== false
   }
 
   getSplitDirection = () => {
