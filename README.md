@@ -1,322 +1,82 @@
-<h1 align="center" style="padding-top: 60px;padding-bottom: 40px;">
-    <a href="https://electerm.org">
-        <img src="https://github.com/electerm/electerm-resource/raw/master/static/images/electerm.png", alt="" />
-    </a>
-</h1>
+# electerm
 
-[![GitHub version](https://badgers.space/github/release/electerm/electerm?corner_radius=m)](https://github.com/electerm/electerm/releases)
-[![Build Status](https://github.com/electerm/electerm/actions/workflows/mac-test-1.yml/badge.svg)](https://github.com/electerm/electerm/actions)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/electerm/electerm/blob/master/LICENSE)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/electerm?label=Sponsors)](https://github.com/sponsors/electerm)
-[![star](https://atomgit.com/electerm/electerm/star/badge.svg)](https://atomgit.com/electerm/electerm)
+仓库地址：https://github.com/zyg1923/electerm
 
-[English](README.md) | [中文](build/docs/README_cn.md) | [日本語](build/docs/README_jp.md)
+```powershell
+git clone https://github.com/zyg1923/electerm.git
+```
 
 本仓库不提交依赖目录和安装包。克隆后如何安装、如何打 Windows 包、缺了哪些文件，见 [打包与部署.md](打包与部署.md)。
 
-Open-sourced terminal/ssh/sftp/telnet/serialport/RDP/VNC/Spice/ftp client(Linux, Mac, Windows, Android, HarmonyOS, iOS).
-
-Besides mainstream Windows/macOS/Linux/Android, electerm also supports HarmonyOS, iOS, and older systems — Ubuntu 18, Windows 7, macOS 10+, and special Chinese Linux distributions such as UOS, Kylin, and LoongArch (both old-world and new-world).
-
-<p>
-  <a href="https://electerm.org">Homepage / Downloads</a> ·
-  <a href="https://theme.electerm.org">Theme</a> ·
-  <a href="https://github.com/electerm/electerm-web-docker">Docker</a> ·
-  <a href="https://demo.electerm.org">Online demo</a> ·
-  <a href="https://github.com/electerm/electerm-android">Android</a> ·
-  <a href="https://github.com/electerm/electerm-harmony">HarmonyOS</a> ·
-  <a href="https://apps.apple.com/cn/app/electerm/id6792971552">Apple App Store</a> ·
-  <a href="https://appgallery.huawei.com/app/detail?id=org.electerm.electerm">Huawei AppGallery</a> ·
-  <a href="https://www.microsoft.com/store/apps/9NCN7272GTFF">Microsoft Store</a> ·
-  <a href="https://snapcraft.io/electerm">Snap Store</a> ·
-  <a href="https://repos.electerm.org/deb">deb repo</a> ·
-  <a href="https://repos.electerm.org/rpm">rpm repo</a>
-</p>
-
-<div>🌐 <strong><a href="https://cloud.electerm.org">electerm online</a></strong> — Public free online electerm app</div>
-<div>🤖 <strong><a href="https://ai.electerm.org">electerm AI</a></strong> — Free AI for electerm users</div>
-<div>💻 <strong><a href="https://github.com/electerm/electerm-web">electerm-web</a></strong> — Web app version running in browser (including mobile device)</div>
-
-## Sponsors
-
-<div align="center">
-  <a href="https://www.atlascloud.ai/?ref=PCAEL2&utm_source=github&utm_medium=link&utm_campaign=electerm">
-    <img src="https://github.com/electerm/electerm-resource/blob/master/static/images/atlas-cloud.png?raw=true" alt="Atlas Cloud" height="200" />
-  </a>
-</div>
-
-[Atlas Cloud](https://www.atlascloud.ai/?ref=PCAEL2&utm_source=github&utm_medium=link&utm_campaign=electerm) provides OpenAI-compatible AI APIs and model access for AI-powered workflows in electerm.
-
-----
-
-<div align="center">
-  <br />
-  <br />
-  <a href="https://go.apimart.ai/gh-electerm">
-    <img src="https://github.com/electerm/electerm-resource/blob/master/static/images/apimart.jpg?raw=true" alt="ApiMart" width="200" />
-  </a>
-  <br />
-  <br />
-</div>
-
-Thanks to APIMart for sponsoring electerm! APIMart is a low-cost API platform for AI image & video generation — GPT-Image-2 from $0.006/image, 160+ images per dollar. One async API covers both image and video: submit a task, get an ID, fetch results via polling or callback. Batch tens of thousands of images without timeouts, switch models without changing code. Pay-as-you-go with no monthly fee — [sign up here to get started](https://go.apimart.ai/gh-electerm).
-
-----
-
-<div align="center">
-  <a href="https://www.apismart.ai">
-    <img src="https://github.com/electerm/electerm-resource/blob/master/static/images/apismart400x400.png?raw=true" alt="ApiSmart" width="200" />
-  </a>
-</div>
-
-[ApiSmart](https://www.apismart.ai) provides unified access to leading AI models through a single API. Use one API key to connect with LLM, image, and video models through an OpenAI-compatible interface, without managing multiple providers separately. Switch models easily, simplify billing, and improve reliability with intelligent routing and automatic failover. Build and scale AI applications faster with one streamlined API platform.
-
-----
-
-<div align="center">
-
-<a href="https://www.digitalocean.com/?refcode=c10bcb28b846&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge"><img align="middle" src="https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%202.svg" alt="DigitalOcean Referral Badge" /></a>&nbsp;&nbsp;&nbsp;<a href="https://oss-directory.vercel.app"><img align="middle" src="https://github.com/electerm/electerm-resource/blob/master/static/images/vercel-oss-2005.png?raw=true" alt="Vercel OSS Program" /></a>
-
-</div>
-
-<div align="center">
-    <img src="https://github.com/electerm/electerm-resource/raw/master/static/images/electerm-banner-1.jpg", alt="" />
-</div>
+终端 / SSH / SFTP / FTP / Telnet / 串口 / RDP / VNC / Spice 客户端，支持 Linux、macOS、Windows。
 
 ## Features
 
 - Works as a terminal/file manager, ssh/sftp/ftp/telnet/serialport/RDP/VNC/Spice client
-- Support Window 7+(X64/ARM64), HarmonyOS，Android, iOS, Mac OS 10.15+(x64/arm64), Linux(x64/arm64/Loong64 new world & old world), even old Linux with glibc 2.17+ like UOS/Kylin/Ubuntu 18.04 etc
+- Support Window 7+(X64/ARM64), HarmonyOS, Android, iOS, Mac OS 10.15+(x64/arm64), Linux(x64/arm64/Loong64), including older Linux with glibc 2.17+ such as UOS, Kylin, Ubuntu 18.04
 - Global hotkey to toggle window visibility (similar to guake, default is `ctrl + 2`)
-- 🇺🇸 🇨🇳 🇧🇷 🇷🇺 🇪🇸 🇫🇷 🇹🇷 🇭🇰 🇯🇵 🇸🇦 🇩🇪 🇰🇷 🇮🇩 🇵🇱 Multi-language support([electerm-locales](https://github.com/electerm/electerm-locales), contributions/fixes welcome)
-- Double click to directly edit (small) remote files.
-- All kind of auth methods: publicKey, password, ssh agent, certificates, otp, netbird etc.
-- Support Zmodem(rz, sz), and [Trzsz](https://github.com/trzsz/trzsz)(trz/tsz).
-- Support ssh related features: tunnel, connection hopping.
-- Customizable UI: themes, background image, transparent window(Mac, win).
-- Global/session proxy.
-- Quick commands/triggers to do predefined tasks and automattic operations
-- Sync data including bookmarks to github/gitee secret gist/webdav/custom server/electerm cloud
-- Quick input/mirror input to one or all terminals.
-- AI assistant integration (supporting multiple LLM API formats — OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages) to help with command suggestions, script writing, and explaining selected terminal content, create bookmarks/themes, and agent mode to directly do terminal operations
-- MCP (Model Context Protocol) widget for AI assistants and external tools integration - see [MCP Widget Usage Guide](https://github.com/electerm/electerm/wiki/MCP-Widget-Usage-Guide)
-- Deep link support: Open connections with URLs like `telnet://192.168.2.31:34554` or `ssh://user@host:22` - see [Deep link support wiki](https://github.com/electerm/electerm/wiki/Deep-link-support)
-- Command line usage: check [wiki](https://github.com/electerm/electerm/wiki/Command-line-usage)
+- Multi-language support
+- Double click to directly edit (small) remote files
+- Auth methods: publicKey, password, ssh agent, certificates, otp, netbird
+- Zmodem (rz, sz) and trzsz (trz/tsz)
+- SSH tunnel and connection hopping
+- Customizable UI: themes, background image, transparent window (Mac, Windows)
+- Global/session proxy
+- Quick commands and triggers
+- Sync bookmarks to GitHub/Gitee secret gist, WebDAV, or a custom server
+- Quick input and mirror input to one or all terminals
+- AI assistant for command suggestions, scripts, and explaining selected terminal content
+- Deep link support, for example `ssh://user@host:22` or `telnet://192.168.2.31:34554`
 
-## Install
-
-- For Mac user: `brew install --cask electerm`
-- With snap: `sudo snap install electerm --classic`
-- For some Linux distribution, you can find it from OS default App store(Ubuntu, Deepin, Mint...).
-- For some linux OS, the `rpm`, `deb`, or `snap` release may not work, you can try the `tar.gz` or `.appImage` release.
-- For Windows users, you can install it from [windows store](https://www.microsoft.com/store/apps/9NCN7272GTFF), command-line installer [winget](https://github.com/microsoft/winget-cli) and [scoop](https://github.com/lukesampson/scoop) is also recommended:
+## 开发
 
 ```powershell
-# winget https://github.com/microsoft/winget-cli
-winget install electerm.electerm
-
-# scoop https://github.com/lukesampson/scoop
-scoop bucket add dorado https://github.com/chawyehsu/dorado
-scoop install dorado/electerm
-```
-
-- Install from Debian repository (for Debian/Ubuntu-based systems) with `apt` command
-
-Check [https://repos.electerm.org/deb](https://repos.electerm.org/deb)
-
-- Install from npm
-
-```bash
-npm i -g electerm
-
-```
-
-## Upgrade
-
-- Auto upgrade: When a new version is released, you will get an upgrade notification after you start electerm again. You can then click the upgrade button to upgrade.
-- Download: Just download the latest edition, reinstall.
-- Npm: If you install from npm, just run `npm i -g electerm` again.
-- If use Snap or some other distribution system, these systems may provide upgrades.
-
-## Known issues
-
-[https://github.com/electerm/electerm/wiki/Know-issues](https://github.com/electerm/electerm/wiki/Know-issues)
-
-## Troubleshoot
-
-[https://github.com/electerm/electerm/wiki/Troubleshoot](https://github.com/electerm/electerm/wiki/Troubleshoot)
-
-## Discussion
-
-[![Discord](https://img.shields.io/badge/Discord-Join-blue?logo=discord)](https://discord.gg/855W7g8EVd)
-
-[Discussion board](https://github.com/electerm/electerm/discussions)
-
-![electerm-wechat-group-qr.jpg](https://electerm.org/electerm-wechat-group-qr.jpg)
-
-## Support
-
-Would love to hear from you, please tell me what you think, [submit an issue](https://github.com/electerm/electerm/issues), [Start a new discussion](https://github.com/electerm/electerm/discussions/new), [create/fix language files](https://github.com/electerm/electerm-locales) or create pull requests, all welcome.
-
-## Sponsor this project
-
-github sponsor
-
-[https://github.com/sponsors/electerm](https://github.com/sponsors/electerm)
-
-kofi
-
-[https://ko-fi.com/zhaoxudong](https://ko-fi.com/zhaoxudong)
-
-wechat donate
-
-[![wechat donate](https://electerm.org/electerm-wechat-donate.png)](https://github.com/electerm)
-
-TRON TRN20
-
-[![TRN20 donate](https://github.com/electerm/electerm-resource/blob/master/static/images/trn20.png?raw=true)]
-
-Address: TXk3pQNmQu1vihH76RaEFnK9wg13x4LLCZ
-
-## Dev
-
-```bash
-# May only works in Linux
-# needs nodejs/npm, suggest using nvm to install nodejs/npm
-# with nodejs 24.x
-
-git clone git@github.com:electerm/electerm.git
+git clone https://github.com/zyg1923/electerm.git
 cd electerm
 npm config set legacy-peer-deps true
 npm i
-
-# start vite dev server, requires port 5570
 npm start
+```
 
-# in a separate terminal session run app
+另开一个终端运行：
+
+```powershell
 npm run app
-
-# code format check
-npm run lint
-
-# code format fix
-npm run fix
 ```
 
-## Test
+## Windows 本地编译 / 打包
 
-```bash
-npm run b
-npm run prepare-test
-cp ./build/.sample.env ./.env
-
-# edit .env, fill your test host/username/password, may only works in mac OS
-npm run test
-```
-
-## Test build
-
-```bash
-# May only works in Linux
-# Install yarn first(to do yarn autoclean)
-# See https://yarnpkg.com/en/docs/install
-
-# Build linux only with -l
-npm i
-npm run b
-npm run pb
-./node_modules/.bin/electron-builder --linux tar.gz
-# or replace tar.gz to rpm/deb/AppImage
-# check dist/ folder
-
-# build for linux arm/
-./node_modules/.bin/electron-builder --linux --arm64
-```
-
-## Windows 本地编译 / 打包（完整命令）
-
-在 **PowerShell** 中执行。先进入项目根目录：
+在 PowerShell 中进入仓库根目录后执行：
 
 ```powershell
-cd F:\job\peoject\practice\electerm
-```
-
-### 一次性完整流程（推荐复制整段）
-
-```powershell
-cd F:\job\peoject\practice\electerm
-
-# 1) 清理 + 编译前端/资源 + 准备 work/app
 npm run b
 
-# 2) 若上一步 prepare 因 peer deps 失败，补装依赖（可反复执行）
 if (-not (Test-Path .\work\app\node_modules)) {
   Set-Location .\work\app
   npm i --omit=dev --legacy-peer-deps
   Set-Location ..\..
 }
 
-# 3) 生成 electron-builder 配置
 npm run pb
 
-# 4) 打 Windows x64 免安装目录包（跳过本机 VS 原生重建）
-#    打包前请先关闭正在运行的 electerm，否则可能 EPERM 无法覆盖 exe
 Get-Process electerm -ErrorAction SilentlyContinue | Stop-Process -Force
 $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
 npx electron-builder --win dir --x64 --publish never --config.npmRebuild=false
 ```
 
-### 产物路径
-
-```text
-F:\job\peoject\practice\electerm\dist\win-unpacked\electerm.exe
-```
-
-双击该 exe 即可运行。
-
-### 分步说明
+产物在 `dist\win-unpacked\electerm.exe`。
 
 | 步骤 | 命令 | 说明 |
 |------|------|------|
-| 进入目录 | `cd F:\job\peoject\practice\electerm` | 必须在仓库根目录 |
-| 编译 | `npm run b` | = `clean` + `compile` + `prepare-file` |
-| 补依赖 | `cd work\app` → `npm i --omit=dev --legacy-peer-deps` → `cd ..\..` | 仅当 `work\app\node_modules` 不存在时需要 |
-| 准备打包 | `npm run pb` | 复制/生成 `electron-builder.json` |
+| 编译 | `npm run b` | clean + compile + prepare-file |
+| 补依赖 | 在 `work\app` 里执行 `npm i --omit=dev --legacy-peer-deps` | 仅当 `work\app\node_modules` 不存在时需要 |
+| 准备打包 | `npm run pb` | 生成 `electron-builder.json` |
 | 打包 | `npx electron-builder --win dir --x64 --publish never --config.npmRebuild=false` | 输出到 `dist\win-unpacked\` |
 
-### 常见问题
-
-- **`EPERM ... unlink electerm.exe`**：先关掉正在运行的 electerm，再重跑第 4 步。
-- **`ERESOLVE` peer deps**：用上面的 `--legacy-peer-deps` 补装即可。
-- **`--config.npmRebuild=false`**：本机没有 VS C++ 工具链时需要；有完整 VS 可去掉该参数。
-
-## Video guide
-
-- [https://electerm.org/videos](https://electerm.org/videos)
-
-## Change log
-
-Visit [Releases](https://github.com/electerm/electerm/releases).
-
-## Contact author
-
-[zxdong@gmail.com](mailto:zxdong@gmail.com)
-
+- `EPERM ... unlink electerm.exe`：先关掉正在运行的 electerm，再打包。
+- `ERESOLVE` peer deps：使用上面的 `--legacy-peer-deps`。
+- 本机没有 VS C++ 工具链时保留 `--config.npmRebuild=false`。
 
 ## License
 
 MIT
-
-## Star History
-
-<p>
- <a href="https://www.star-history.com/electerm/electerm"><img src="https://api.star-history.com/badge?repo=electerm/electerm" alt="Star History Rank" /></a>
-</p>
-
-<a href="https://www.star-history.com/?repos=electerm%2Felecterm&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=electerm/electerm&type=date&legend=top-left&sealed_token=DvPlttPaLtq6RPIWRANYX08-8ZJyrJalhombrkDcg1IwWOMPMIplgi85q0FiwrbhE3lRIi_yxvOWdell731CGQvzlfJMt2Sa6VfCvQ80BwEtQ6RpPchEiw" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=electerm/electerm&type=date&legend=top-left&sealed_token=DvPlttPaLtq6RPIWRANYX08-8ZJyrJalhombrkDcg1IwWOMPMIplgi85q0FiwrbhE3lRIi_yxvOWdell731CGQvzlfJMt2Sa6VfCvQ80BwEtQ6RpPchEiw" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=electerm/electerm&type=date&legend=top-left&sealed_token=DvPlttPaLtq6RPIWRANYX08-8ZJyrJalhombrkDcg1IwWOMPMIplgi85q0FiwrbhE3lRIi_yxvOWdell731CGQvzlfJMt2Sa6VfCvQ80BwEtQ6RpPchEiw" />
- </picture>
-</a>

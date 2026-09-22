@@ -37,10 +37,10 @@
   "languageRepo": "https://github.com/electerm/electerm-locales",
   "privacyNoticeLink": "https://github.com/electerm/electerm/wiki/privacy-notice",
   "knownIssuesLink": "https://github.com/electerm/electerm/wiki/Know-issues",
-  "sponsorLink": "https://electerm.org/sponsor-electerm",
+  "sponsorLink": "https://github.com/zyg1923/electerm",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electerm/electerm.git"
+    "url": "git+https://github.com/zyg1923/electerm.git"
   },
   "author": {
     "name": "ZHAO Xudong",
@@ -48,10 +48,10 @@
     "url": "https://github.com/zxdong262"
   },
   "bugs": {
-    "url": "https://github.com/electerm/electerm/issues"
+    "url": "https://github.com/zyg1923/electerm/issues"
   },
-  "homepage": "https://electerm.org",
-  "releases": "https://github.com/electerm/electerm/releases",
+  "homepage": "https://github.com/zyg1923/electerm",
+  "releases": "https://github.com/zyg1923/electerm/releases",
   "engines": {
     "node": ">=16.0.0"
   },
