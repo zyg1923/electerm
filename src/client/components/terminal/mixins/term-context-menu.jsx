@@ -115,6 +115,14 @@ export const contextMenuMixin = {
         key: recording ? 'onStopRecord' : 'onRecord',
         icon: recording ? <iconsMap.StopOutlined /> : <iconsMap.PlayCircleFilled />,
         label: e(recording ? 'stopRecord' : 'record')
+      },
+      {
+        type: 'divider'
+      },
+      {
+        key: 'onRestartApp',
+        icon: <iconsMap.RedoOutlined />,
+        label: '重启'
       }
     ]
     if (isSerial) {
@@ -305,6 +313,10 @@ export const contextMenuMixin = {
     }
     this.term.paste(selected || '')
     this.term.focus()
+  },
+
+  onRestartApp () {
+    window.store.restart()
   },
 
   onPasteSelected () {

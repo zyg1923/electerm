@@ -30,11 +30,28 @@ export const resizeMixin = {
       return
     }
     try {
+      // Font zoom updates cell size asynchronously relative to layout.
+      // Measure first so fit does not lock in a short screen.
+      this.term._core?._charSizeService?.measure?.()
       this.fitAddon.fit()
-      this.term.refresh(0, this.term.rows - 1)
+      this.term.refresh(0, Math.max(0, this.term.rows - 1))
     } catch (e) {
       console.info('resize failed', e)
     }
+  },
+
+  // Split view keeps the terminal at height 100%, so zoom does not change
+  // the height prop and componentDidUpdate never refits. Watch the box.
+  bindContainerFit () {
+    const el = this.domRef?.current
+    if (!el || typeof ResizeObserver === 'undefined') {
+      return
+    }
+    this._fitObserver?.disconnect()
+    this._fitObserver = new ResizeObserver(() => {
+      this.onResize()
+    })
+    this._fitObserver.observe(el)
   },
 
   // One throttled runner per terminal: a module level one would let tabs

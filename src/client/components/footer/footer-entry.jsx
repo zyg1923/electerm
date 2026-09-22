@@ -218,7 +218,10 @@ export default auto(function FooterEntry (props) {
     inst.term.options.fontSize = next
     props.store.terminalFontSize = next
     props.store.terminalFontBase = base
-    inst.setState({ fontSizeChanged: next !== base }, () => inst.onResize?.())
+    inst.setState({ fontSizeChanged: next !== base }, () => {
+      inst.fitAndRefresh?.()
+      setTimeout(() => inst.fitAndRefresh?.(), 60)
+    })
   }
 
   function renderZoomRatio () {

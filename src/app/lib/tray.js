@@ -31,6 +31,16 @@ function showWindow () {
   win.focus()
 }
 
+function restartApp () {
+  globalState.set('closeAction', '')
+  globalState.set('willQuit', true)
+  const win = globalState.get('win')
+  if (win && !win.isDestroyed()) {
+    win.close()
+  }
+  app.relaunch()
+}
+
 function quitApp () {
   globalState.set('willQuit', true)
   const win = globalState.get('win')
@@ -61,6 +71,10 @@ function initTray () {
     {
       label: '显示',
       click: showWindow
+    },
+    {
+      label: '重启',
+      click: restartApp
     },
     { type: 'separator' },
     {

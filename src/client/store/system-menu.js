@@ -28,6 +28,12 @@ export default Store => {
     document.documentElement.style.setProperty('--app-zoom', String(nl))
     window.store.uiZoom = nl
     window.store.triggerResize()
+    // Electron applies the zoom after this call. A later pass picks up the
+    // real CSS pixel size so the terminal rows fill the pane again.
+    clearTimeout(window.store._zoomResizeTimer)
+    window.store._zoomResizeTimer = setTimeout(() => {
+      window.store.triggerResize()
+    }, 180)
     if (zoomOnly) {
       return
     }

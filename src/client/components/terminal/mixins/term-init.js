@@ -43,6 +43,7 @@ export const initMixin = {
     this.bindClearHistoryWheel(term)
     this.bindLineSelect(term)
     this.bindKeepScrollbackOnClear(term)
+    this.bindContainerFit()
     this.registerTerminalColorQueryHandlers(term, themeConfig)
     await this.loadRenderer(term, config)
     this.fixSelectionColors(term)

@@ -237,6 +237,8 @@ class Term extends Component {
       }
     }
     clearTimeout(this._restoreTimer)
+    this._fitObserver?.disconnect()
+    this._fitObserver = null
     this._clearKeepDisp?.dispose?.()
     this._clearKeepDisp = null
     if (this.term) {

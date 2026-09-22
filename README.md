@@ -12,6 +12,8 @@
 
 [English](README.md) | [中文](build/docs/README_cn.md) | [日本語](build/docs/README_jp.md)
 
+本仓库不提交依赖目录和安装包。克隆后如何安装、如何打 Windows 包、缺了哪些文件，见 [打包与部署.md](打包与部署.md)。
+
 Open-sourced terminal/ssh/sftp/telnet/serialport/RDP/VNC/Spice/ftp client(Linux, Mac, Windows, Android, HarmonyOS, iOS).
 
 Besides mainstream Windows/macOS/Linux/Android, electerm also supports HarmonyOS, iOS, and older systems — Ubuntu 18, Windows 7, macOS 10+, and special Chinese Linux distributions such as UOS, Kylin, and LoongArch (both old-world and new-world).

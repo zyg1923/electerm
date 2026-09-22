@@ -128,3 +128,12 @@ ftp-root
 .catpaw
 .workbuddy-ai
 /test-results*
+
+# 编译与安装包产物（可重新生成，不入库）
+*.exe
+*.blockmap
+*.AppImage
+*.dmg
+*.snap
+*.msi
+*.msix
