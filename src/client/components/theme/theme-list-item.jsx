@@ -23,7 +23,8 @@ export default function ThemeListItem (props) {
     item,
     activeItemId,
     theme,
-    keyword
+    keyword,
+    previewThemeId
   } = props
   const { store } = window
 
@@ -45,10 +46,6 @@ export default function ThemeListItem (props) {
 
   function handleTooltipVisibleChange (visible) {
     setTooltipVisible(visible)
-    if (!visible && isPreviewing) {
-      window.store.previewThemeId = ''
-      setIsPreviewing(false)
-    }
   }
 
   function renderTooltipContent () {
@@ -94,6 +91,13 @@ export default function ThemeListItem (props) {
   }
 
   function handleClickTheme () {
+    if (item.id && item.id !== props.theme) {
+      window.store.previewThemeDraft = null
+      window.store.previewThemeId = item.id
+    } else if (item.id) {
+      window.store.previewThemeDraft = null
+      window.store.previewThemeId = ''
+    }
     props.onClickItem(item)
   }
 
@@ -121,6 +125,7 @@ export default function ThemeListItem (props) {
   }
 
   const { name, id, type } = item
+  const previewing = !!(id && previewThemeId && previewThemeId === id && theme !== id)
   const cls = classnames(
     'item-list-unit theme-item',
     {
@@ -128,6 +133,9 @@ export default function ThemeListItem (props) {
     },
     {
       active: activeItemId === id
+    },
+    {
+      'theme-previewing': previewing
     }
   )
   let title = id === defaultTheme().id
@@ -150,6 +158,23 @@ export default function ThemeListItem (props) {
             : null
         }
         {renderTag()}{title}
+        {
+          previewing
+            ? (
+              <Button
+                size='small'
+                type='primary'
+                className='mg1l'
+                onClick={(ev) => {
+                  ev.stopPropagation()
+                  handleClickApply()
+                }}
+              >
+                {e('apply')}
+              </Button>
+              )
+            : null
+        }
       </div>
       {
         id === defaultTheme().id || type === 'iterm'

@@ -33,12 +33,51 @@ export default class ThemeList extends List {
         [
           'onClickItem',
           'theme',
-          'keyword'
+          'keyword',
+          'previewThemeId'
         ]
       )
     }
     return (
       <ThemeListItem key={item.id} {...itemProps} />
+    )
+  }
+
+  renderPreviewHint () {
+    const { previewThemeId, theme, list = [] } = this.props
+    if (!previewThemeId || previewThemeId === theme) {
+      return null
+    }
+    const item = list.find(d => d.id === previewThemeId)
+    if (!item) {
+      return null
+    }
+    const ui = item.uiThemeConfig || {}
+    const term = item.themeConfig || {}
+    const bar = ui.main || term.background || '#1e1e1e'
+    const barText = ui.text || term.foreground || '#d4d4d4'
+    const background = term.background || bar
+    const foreground = term.foreground || barText
+    return (
+      <div className='pd2x pd1b'>
+        <div
+          style={{
+            borderRadius: 6,
+            overflow: 'hidden',
+            border: '1px solid rgba(128,128,128,.35)'
+          }}
+        >
+          <div style={{ background: bar, color: barText, padding: '6px 10px' }}>
+            {item.name}
+          </div>
+          <div style={{ background, color: foreground, padding: '8px 10px', fontFamily: 'monospace' }}>
+            root@host:~# ls
+          </div>
+        </div>
+        <div className='pd1t' style={{ color: 'var(--text-dark)' }}>
+          当前是预览，点该主题上的「应用」后才会保存。关闭设置会恢复原来的主题。
+        </div>
+      </div>
     )
   }
 
@@ -120,6 +159,7 @@ export default class ThemeList extends List {
         {this.renderLabels ? this.renderLabels() : null}
         {this.renderSearch()}
         {this.renderCurrentTheme()}
+        {this.renderPreviewHint()}
         <div className='item-list-wrap' style={listStyle}>
           {this.renderNewItem()}
           {

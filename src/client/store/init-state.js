@@ -24,7 +24,11 @@ import {
   syncServerDataKey,
   splitMap,
   lastAiChatSessionIdKey,
-  mobileBreakpoint
+  mobileBreakpoint,
+  opsWizardLsKey,
+  opsPlaybooksLsKey,
+  opsQuickActionsLsKey,
+  opsDiaryLsKey
 } from '../common/constants'
 import * as ls from '../common/safe-local-storage'
 import { exclude } from 'manate'
@@ -219,17 +223,36 @@ export default () => {
     // ops center
     opsCenterVisible: false,
     opsCenterTab: 'commands',
+    opsFileEditRequest: null,
+    opsCenterReveal: 0,
     opsTasks: [],
     opsAuditLogs: [],
     opsApprovalRequests: [],
     opsApprovalRules: [],
     opsApprovalWhitelist: [],
     opsCommandTemplates: [],
+    opsWizardState: ls.getItemJSON(opsWizardLsKey, {
+      activeTool: 'chmod',
+      forms: {}
+    }),
+    opsPlaybooks: ls.getItemJSON(opsPlaybooksLsKey, []),
+    opsQuickActions: ls.getItemJSON(opsQuickActionsLsKey, []),
+    opsDiaryEntries: ls.getItemJSON(opsDiaryLsKey, []),
+    opsDownloadRenamePolicy: 'hostSuffix',
+    archiveDialog: {
+      open: false,
+      mode: 'compress',
+      tabId: '',
+      paths: [],
+      archive: ''
+    },
     opsCacheEnabled: true,
     opsCacheTtl: {
       machineStatus: 30000,
       dockerPs: 15000,
-      dockerImages: 60000
+      dockerImages: 60000,
+      codeNodeResult: 120000,
+      codeNodeBatch: 120000
     },
     opsViIntercept: true,
 
@@ -250,6 +273,7 @@ export default () => {
     terminalFontSize: 0,
     terminalFontBase: 0,
     previewThemeId: '',
+    previewThemeDraft: null,
 
     // widgets
     widgets: [],

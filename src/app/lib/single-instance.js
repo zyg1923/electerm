@@ -21,6 +21,7 @@ function getSocketPath () {
 }
 
 const socketPath = getSocketPath()
+let lockServer = null
 
 // Clean up stale socket file on Unix
 function cleanupSocket () {
@@ -60,14 +61,31 @@ function startSocketServer (onSecondInstance) {
   })
 
   server.listen(socketPath)
+  lockServer = server
 
   // Clean up on app quit
   app.on('will-quit', () => {
-    server.close()
-    cleanupSocket()
+    releaseInstanceLock()
   })
 
   return server
+}
+
+function releaseInstanceLock () {
+  try {
+    app.releaseSingleInstanceLock()
+  } catch (e) {
+    // ignore
+  }
+  if (lockServer) {
+    try {
+      lockServer.close()
+    } catch (e) {
+      // ignore
+    }
+    lockServer = null
+  }
+  cleanupSocket()
 }
 
 /**
@@ -124,5 +142,6 @@ async function handleSingleInstance (progs) {
 module.exports = {
   handleSingleInstance,
   sendToFirstInstance,
-  startSocketServer
+  startSocketServer,
+  releaseInstanceLock
 }

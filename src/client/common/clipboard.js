@@ -20,12 +20,16 @@ export const readClipboardAsync = () => {
 }
 
 export const copy = (str) => {
+  if (!String(str || '').length) {
+    return false
+  }
+  window.pre.writeClipboard(str)
   message.success({
     content: window.translate('copied'),
     duation: 2,
     key: 'copy-message'
   })
-  window.pre.writeClipboard(str)
+  return true
 }
 
 export const cut = (str, itemTitle = '') => {

@@ -27,6 +27,8 @@ import {
 } from '../../common/mode2permission'
 import FileHoverTip from './file-hover-tip'
 import wait from '../../common/wait'
+import { openArchiveDialog } from '../ops/archive-modal'
+import { detectFormatFromName } from '../ops/ops-archive'
 import {
   fileOperationsMap,
   isWin, transferTypeMap, typeMap,
@@ -38,7 +40,7 @@ import { getFolderFromFilePath, getLocalFileInfo } from './file-read'
 import { readClipboard, copy as copyToClipboard, hasFileInClipboardText } from '../../common/clipboard'
 import { getDropFileList } from '../../common/file-drop-utils'
 import time from '../../common/time'
-import { filesize } from 'filesize'
+import { formatBytes } from '../../common/byte-format'
 import { createTransferProps } from './transfer-common'
 import generate from '../../common/uid'
 import sanitizeFilename from '../../common/sanitize-filename'
@@ -138,12 +140,28 @@ export default class FileSection extends React.Component {
           ? this.props.getSelectedFiles()
           : [file]
       )
+    const realFiles = files.filter(f => f && !f.isParent && !f.isEmpty && f.name)
     const prefix = file.type === typeMap.remote
       ? 'remote:'
       : ''
-    const textToCopy = files.map(f => {
+    const textToCopy = realFiles.map(f => {
       return prefix + resolve(f.path, f.name)
     }).join('\n')
+    const transferProps = createTransferProps(this.props)
+    window._fileClipboardFiles = realFiles.map(f => {
+      return {
+        name: f.name,
+        path: f.path,
+        isDirectory: !!f.isDirectory,
+        size: f.size,
+        modifyTime: f.modifyTime,
+        type: file.type,
+        host: this.props.tab?.host,
+        tabId: transferProps.tabId,
+        tabType: this.props.tab?.type,
+        title: transferProps.title
+      }
+    })
     copyToClipboard(textToCopy)
     window.store.fileOperation = isCut ? fileOperationsMap.mv : fileOperationsMap.cp
   }
@@ -173,13 +191,70 @@ export default class FileSection extends React.Component {
       : transferTypeMap.download
   }
 
+  clipboardMatchesClips = (clips, text) => {
+    const expected = clips.map(f => {
+      const prefix = f.type === typeMap.remote ? 'remote:' : ''
+      return prefix + resolve(f.path, f.name)
+    }).join('\n')
+    const got = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+    return expected === got
+  }
+
   onPaste = async () => {
     const { type } = this.state.file
     const path = this.props[type + 'Path']
     const clickBoardText = readClipboard()
-    const fileNames = clickBoardText.split('\n')
-    const res = []
     const operation = this.props.fileOperation || fileOperationsMap.cp
+    const clips = Array.isArray(window._fileClipboardFiles)
+      ? window._fileClipboardFiles
+      : null
+    if (clips?.length && this.clipboardMatchesClips(clips, clickBoardText)) {
+      const relay = []
+      const normal = []
+      for (const f of clips) {
+        const cross = f.type === typeMap.remote &&
+          type === typeMap.remote &&
+          f.tabId &&
+          f.tabId !== this.props.tab?.id
+        if (cross) {
+          relay.push(f)
+        } else {
+          normal.push(f)
+        }
+      }
+      if (relay.length) {
+        refsStatic.get('remote2remote-handlers')?.relayToDirectory({
+          fromFiles: relay,
+          targetDir: path,
+          targetTab: this.props.tab
+        })
+      }
+      if (normal.length) {
+        const destProps = createTransferProps(this.props)
+        const res = normal.map(f => {
+          const fromPath = resolve(f.path, f.name)
+          const toPath = resolve(path, sanitizeFilename(f.name))
+          const typeFrom = f.type === typeMap.remote ? typeMap.remote : typeMap.local
+          const useSourceTab = typeFrom === typeMap.remote && type === typeMap.local && f.tabId
+          return {
+            typeFrom,
+            typeTo: type,
+            fromPath,
+            toPath,
+            id: generate(),
+            host: useSourceTab ? f.host : this.props.tab?.host,
+            tabType: useSourceTab ? f.tabType : this.props.tab?.type,
+            title: useSourceTab ? (f.title || destProps.title) : destProps.title,
+            tabId: useSourceTab ? f.tabId : destProps.tabId,
+            operation
+          }
+        })
+        this.props.addTransferList(res)
+      }
+      return
+    }
+    const fileNames = String(clickBoardText || '').split('\n').filter(Boolean)
+    const res = []
     for (let i = 0, len = fileNames.length; i < len; i++) {
       const item = fileNames[i]
       const isRemote = item.startsWith('remote:')
@@ -200,7 +275,9 @@ export default class FileSection extends React.Component {
         operation
       })
     }
-    this.props.addTransferList(res)
+    if (res.length) {
+      this.props.addTransferList(res)
+    }
   }
 
   onDragStart = e => {
@@ -222,9 +299,11 @@ export default class FileSection extends React.Component {
         host: this.props.tab?.host,
         tabType: this.props.tab?.type,
         tabId: transferProps.tabId,
-        title: transferProps.title
+        title: transferProps.title,
+        internalDrag: true
       }
     })
+    e.dataTransfer.effectAllowed = 'copyMove'
     e.dataTransfer.setData('fromFile', JSON.stringify(filesWithMeta))
   }
 
@@ -242,32 +321,43 @@ export default class FileSection extends React.Component {
     })
   }
 
-  onDrop = async e => {
+  onDrop = async (e, opts) => {
     e.preventDefault()
-    const fromFileManager = !!e?.dataTransfer?.files?.length
-    let { target } = e
-    if (!target) {
-      return
-    }
     const fromFiles = this.getDropFileList(e.dataTransfer)
-    if (!fromFiles) {
+    if (!fromFiles?.length) {
       return
     }
-
-    while (!target.className.includes(fileItemCls)) {
-      target = target.parentNode
-    }
-    const id = target.getAttribute('data-id')
-    const type = target.getAttribute('data-type')
-    if (!type) {
-      return
-    }
-    let toFile = this.props[type + 'FileTree'].get(id) || {}
-    if (!toFile.id || !toFile.isDirectory) {
+    const internalDrag = fromFiles.some(file => file?.internalDrag)
+    const fromFileManager = !internalDrag && !!e?.dataTransfer?.files?.length
+    const type = this.props.file?.type || this.props.type
+    let toFile
+    if (opts?.intoCurrent) {
       toFile = {
         type,
         ...getFolderFromFilePath(this.props[type + 'Path'], type === typeMap.remote),
-        isDirectory: false
+        isDirectory: true,
+        isParent: true
+      }
+    } else {
+      let { target } = e
+      if (!target) {
+        return
+      }
+      while (target && !String(target.className || '').includes(fileItemCls)) {
+        target = target.parentNode
+      }
+      if (!target) {
+        return
+      }
+      const id = target.getAttribute('data-id')
+      const rowType = target.getAttribute('data-type') || type
+      toFile = this.props[rowType + 'FileTree']?.get(id) || {}
+      if (!toFile.id || !toFile.isDirectory) {
+        toFile = {
+          type: rowType,
+          ...getFolderFromFilePath(this.props[rowType + 'Path'], rowType === typeMap.remote),
+          isDirectory: false
+        }
       }
     }
     this.onDropFile(fromFiles, toFile, fromFileManager)
@@ -282,16 +372,21 @@ export default class FileSection extends React.Component {
     } = toFile
 
     let operation = ''
-    const targetHost = this.props.tab?.host
-    const isCrossHostRemoteDrop = !fromFileManager &&
+    const sourceTabId = fromFiles.find(file => file?.tabId)?.tabId
+    const crossSessionRemote = !fromFileManager &&
       fromType === typeMap.remote &&
       toType === typeMap.remote &&
-      fromFiles.every(file => file?.host && file.host !== targetHost)
+      sourceTabId &&
+      sourceTabId !== this.props.tab?.id
 
-    if (isCrossHostRemoteDrop) {
-      const handled = refsStatic.get('remote2remote-handlers')?.onRemote2RemoteDrop({
+    if (crossSessionRemote) {
+      const intoFolder = isDirectoryTo && id && !toFile.isParent
+      const targetDir = intoFolder
+        ? resolve(toFile.path, toFile.name)
+        : this.props[toType + 'Path']
+      const handled = refsStatic.get('remote2remote-handlers')?.relayToDirectory({
         fromFiles,
-        toFile,
+        targetDir,
         targetTab: this.props.tab
       })
       if (handled) {
@@ -833,6 +928,24 @@ export default class FileSection extends React.Component {
     })
   }
 
+  openGuiEditor = () => {
+    const file = this.state.file
+    if (!file || file.isParent || file.isEmpty || file.isDirectory) {
+      return
+    }
+    const full = file.fullPath || (
+      file.type === typeMap.local
+        ? osResolve(normalizeWinLocalPath(file.path) || file.path, file.name)
+        : resolve(file.path, file.name)
+    )
+    window.store.opsFileEditRequest = {
+      tabId: this.props.tab?.id,
+      path: full,
+      token: Date.now()
+    }
+    window.store.openOpsCenter('editor')
+  }
+
   transferOrEnterDirectory = async (e, edit) => {
     const { file } = this.state
     const { isDirectory } = file
@@ -862,10 +975,17 @@ export default class FileSection extends React.Component {
     let toPath = isLocal
       ? this.props[typeMap.remote + 'Path']
       : this.props[typeMap.local + 'Path']
+    if (!toPath) {
+      toPath = isLocal
+        ? (this.props.remotePath || '/')
+        : (window.pre?.homeOrTmp || '')
+    }
     if (toPathBase) {
       toPath = toPathBase
     }
     toPath = resolve(toPath, sanitizeFilename(name))
+    const remoteName = this.props.tab?.title || this.props.tab?.host || '远程'
+    const fromLocal = type === typeMap.local
     const obj = {
       host: this.props.tab?.host,
       tabType: this.props.tab?.type,
@@ -874,6 +994,9 @@ export default class FileSection extends React.Component {
       fromPath: resolve(path, name),
       toPath,
       fromFile: file,
+      size: Number(file.size) || 0,
+      sourceMachine: fromLocal ? '本机' : remoteName,
+      targetMachine: fromLocal ? remoteName : '本机',
       id: generate(),
       ...createTransferProps(this.props),
       operation
@@ -914,10 +1037,32 @@ export default class FileSection extends React.Component {
 
   refresh = () => {
     const { file } = this.state
-    if (file.isDirectory && this.props.refreshTreeNode) {
-      return this.props.refreshTreeNode(file)
+    if (this.props.refreshFolder) {
+      return this.props.refreshFolder(file)
     }
     this.props.onGoto(file.type)
+  }
+
+  enqueueTransfer = async () => {
+    const hold = (item) => {
+      item.pausing = true
+      item.inited = false
+    }
+    if (this.shouldShowSelectedMenu()) {
+      let all = []
+      for (const file of this.props.getSelectedFiles()) {
+        const arr = await this.getTransferList(file)
+        arr.forEach(hold)
+        all = all.concat(arr)
+      }
+      if (all.length) {
+        this.props.addTransferList(all)
+        message.info('已加入传输队列，需要手动开始')
+      }
+      return
+    }
+    await this.transfer(hold)
+    message.info('已加入传输队列，需要手动开始')
   }
 
   openWithDefaultApp = async () => {
@@ -1013,12 +1158,111 @@ export default class FileSection extends React.Component {
     })
   }
 
+  openCompressDialog = () => {
+    const multi = this.shouldShowSelectedMenu()
+    const files = multi
+      ? this.props.getSelectedFiles()
+      : [this.props.file]
+    const paths = files
+      .filter(f => f && !f.isParent)
+      .map(f => {
+        const isRemote = f.type === typeMap.remote
+        return isRemote
+          ? resolve(f.path, f.name)
+          : osResolve(normalizeWinLocalPath(f.path) || f.path, f.name)
+      })
+      .filter(Boolean)
+    if (!paths.length) {
+      return
+    }
+    openArchiveDialog({
+      mode: 'compress',
+      tabId: this.props.tab.id,
+      paths
+    })
+  }
+
+  openExtractDialog = () => {
+    const { file } = this.props
+    const isRemote = file.type === typeMap.remote
+    const path = isRemote
+      ? resolve(file.path, file.name)
+      : osResolve(normalizeWinLocalPath(file.path) || file.path, file.name)
+    openArchiveDialog({
+      mode: 'extract',
+      tabId: this.props.tab.id,
+      archive: path,
+      paths: []
+    })
+  }
+
   newFile = () => {
     return this.newItem(false)
   }
 
   newDirectory = () => {
     return this.newItem(true)
+  }
+
+  uniqueNewName = (list, preset) => {
+    const names = new Set((list || []).map(f => f.name).filter(Boolean))
+    if (!names.has(preset)) {
+      return preset
+    }
+    const dot = preset.lastIndexOf('.')
+    const hasExt = dot > 0
+    const base = hasExt ? preset.slice(0, dot) : preset
+    const ext = hasExt ? preset.slice(dot) : ''
+    for (let i = 2; i < 100; i++) {
+      const next = `${base} (${i})${ext}`
+      if (!names.has(next)) {
+        return next
+      }
+    }
+    return `${base} (${Date.now()})${ext}`
+  }
+
+  newItem = (isDirectory, presetName = '') => {
+    const { type } = this.state.file
+    const list = copy(this.props[type])
+    const nameTemp = presetName
+      ? this.uniqueNewName(list, presetName)
+      : ''
+    list.unshift({
+      name: '',
+      nameTemp,
+      isDirectory,
+      isEditing: true,
+      type
+    })
+    this.props.modifier({
+      [type]: list,
+      onEditFile: true
+    })
+  }
+
+  newFolder = () => {
+    return this.newItem(true, '新建文件夹')
+  }
+
+  newTextFile = () => {
+    return this.newItem(false, '新建文本文档.txt')
+  }
+
+  newMarkdown = () => {
+    return this.newItem(false, '新建 Markdown.md')
+  }
+
+  newJson = () => {
+    return this.newItem(false, '新建 JSON.json')
+  }
+
+  newShell = () => {
+    return this.newItem(false, '新建脚本.sh')
+  }
+
+  newEmpty = () => {
+    return this.newItem(false, '新建文件')
   }
 
   showInDefaultFileManager = () => {
@@ -1045,22 +1289,6 @@ export default class FileSection extends React.Component {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(a.href)
-  }
-
-  newItem = (isDirectory) => {
-    const { type } = this.state.file
-    const list = copy(this.props[type])
-    list.unshift({
-      name: '',
-      nameTemp: '',
-      isDirectory,
-      isEditing: true,
-      type
-    })
-    this.props.modifier({
-      [type]: list,
-      onEditFile: true
-    })
   }
 
   renderDelConfirmTitle (shouldShowSelectedMenu) {
@@ -1226,16 +1454,22 @@ export default class FileSection extends React.Component {
   }
 
   itemToMenuFormat = (r) => {
-    const { func, text, disabled, icon, subText, requireConfirm } = r
+    const { func, text, disabled, icon, subText, requireConfirm, children } = r
     const IconCom = iconsMap[icon]
-    return {
+    const item = {
       key: func,
       label: text,
       disabled,
-      icon: <IconCom />,
       extra: subText,
       danger: requireConfirm
     }
+    if (IconCom) {
+      item.icon = <IconCom />
+    }
+    if (children?.length) {
+      item.children = children.map(this.itemToMenuFormat)
+    }
+    return item
   }
 
   renderContextMenu = () => {
@@ -1317,9 +1551,9 @@ export default class FileSection extends React.Component {
     }
     if (shouldShowSelectedMenu && hasHost) {
       res.push({
-        func: 'doTransferSelected',
+        func: 'enqueueTransfer',
         icon: iconType,
-        text: `${transferText}:${e('selected')}(${len})`
+        text: `加入传输队列:${e('selected')}(${len})`
       })
     }
     if (
@@ -1338,9 +1572,9 @@ export default class FileSection extends React.Component {
     }
     if (!(!isRealFile || !hasHost || shouldShowSelectedMenu)) {
       res.push({
-        func: 'doTransfer',
+        func: 'enqueueTransfer',
         icon: iconType,
-        text: transferText
+        text: '加入传输队列'
       })
       // if (isDirectory && !this.props.isFtp) {
       //   res.push({
@@ -1351,6 +1585,11 @@ export default class FileSection extends React.Component {
       // }
     }
     if (!isDirectory && isRealFile) {
+      res.push({
+        func: 'openGuiEditor',
+        icon: 'EditOutlined',
+        text: '打开内置编辑'
+      })
       res.push({
         func: 'openWithDefaultApp',
         icon: 'ArrowRightOutlined',
@@ -1384,6 +1623,22 @@ export default class FileSection extends React.Component {
       })
     }
     if (isRealFile) {
+      const compressTxt = shouldShowSelectedMenu
+        ? `压缩为…:${e('selected')}(${len})`
+        : '压缩为…'
+      res.push({
+        func: 'openCompressDialog',
+        icon: 'FileZipOutlined',
+        text: compressTxt
+      })
+      const fileName = this.props.file?.name || ''
+      if (!shouldShowSelectedMenu && detectFormatFromName(fileName)) {
+        res.push({
+          func: 'openExtractDialog',
+          icon: 'FileZipOutlined',
+          text: '解压到…'
+        })
+      }
       res.push({
         func: 'del',
         icon: 'CloseCircleOutlined',
@@ -1424,14 +1679,41 @@ export default class FileSection extends React.Component {
     }
     if (enableSsh !== false || isLocal) {
       res.push({
-        func: 'newFile',
+        func: 'new-submenu',
         icon: 'FileAddOutlined',
-        text: e('newFile')
-      })
-      res.push({
-        func: 'newDirectory',
-        icon: 'FolderAddOutlined',
-        text: e('newFolder')
+        text: '新增',
+        children: [
+          {
+            func: 'newFolder',
+            icon: 'FolderAddOutlined',
+            text: '文件夹'
+          },
+          {
+            func: 'newTextFile',
+            icon: 'FileAddOutlined',
+            text: '文本文档'
+          },
+          {
+            func: 'newMarkdown',
+            icon: 'FileAddOutlined',
+            text: 'Markdown 文档'
+          },
+          {
+            func: 'newJson',
+            icon: 'FileAddOutlined',
+            text: 'JSON 文件'
+          },
+          {
+            func: 'newShell',
+            icon: 'FileAddOutlined',
+            text: 'Shell 脚本'
+          },
+          {
+            func: 'newEmpty',
+            icon: 'FileAddOutlined',
+            text: '空文件'
+          }
+        ]
       })
     }
     res.push({
@@ -1476,9 +1758,10 @@ export default class FileSection extends React.Component {
 
   onContextMenu = ({ key }) => {
     // If it's not the submenu itself
-    if (key !== 'more-submenu') {
-      this[key]()
+    if (key === 'more-submenu' || key === 'new-submenu' || typeof this[key] !== 'function') {
+      return
     }
+    this[key]()
   }
 
   renderEditing (file) {
@@ -1514,7 +1797,7 @@ export default class FileSection extends React.Component {
     if (isDirectory && id === 'size') {
       value = null
     } else if (!isDirectory && id === 'size') {
-      value = filesize(Number(value) || 0)
+      value = formatBytes(Number(value) || 0)
     } else if (id === 'owner') {
       const { type } = this.props
       value = this.props[`${type}UidTree`]['' + value] || value
@@ -1523,9 +1806,6 @@ export default class FileSection extends React.Component {
       value = this.props[`${type}GidTree`]['' + value] || value
     }
     if (id === 'name') {
-      // const Icon = isDirectory
-      //   ? FolderOutlined
-      //   : FileOutlined
       typeIcon = <ExtIcon file={file} className='mg1r' />
       symbolicLinkText = (isSymbolicLink || file.isSymbol)
         ? <sup className='color-blue symbolic-link-icon'>*</sup>
@@ -1551,8 +1831,6 @@ export default class FileSection extends React.Component {
     if (isParent && id !== 'name') {
       value = null
       divProps.title = ''
-    } else if (isParent && id === 'name') {
-      value = '..'
     }
     return (
       <div
@@ -1600,7 +1878,6 @@ export default class FileSection extends React.Component {
       >
         <div className='file-bg' />
         {this.renderItemInner()}
-        {this.renderInfoBtn()}
       </div>
     )
   }

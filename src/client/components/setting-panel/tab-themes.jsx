@@ -26,6 +26,7 @@ export default function TabThemes (props) {
         <TerminalThemeList
           {...listProps}
           theme={store.config.theme}
+          previewThemeId={props.previewThemeId}
         />
         <TerminalThemeForm {...formProps} key={settingItem.id} />
       </SettingCol>

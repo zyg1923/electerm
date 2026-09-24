@@ -12,7 +12,7 @@ const {
   shell
 } = require('electron')
 const globalState = require('./glob-state')
-const { hideWindow, showWindow, quitApp } = require('./tray')
+const { hideWindow, showWindow, quitApp, restartApp } = require('./tray')
 const ipcSyncFuncs = require('./ipc-sync')
 const { dbAction } = require('./db')
 const { listItermThemes } = require('./iterm-theme')
@@ -221,12 +221,8 @@ function initIpc () {
     exit: () => {
       quitApp()
     },
-    restart: (closeAction = '') => {
-      globalState.set('closeAction', '')
-      globalState.set('willQuit', true)
-      const win = globalState.get('win')
-      win && win.close()
-      app.relaunch()
+    restart: () => {
+      restartApp()
     },
     setCloseAction: (closeAction = '') => {
       globalState.set('closeAction', closeAction)

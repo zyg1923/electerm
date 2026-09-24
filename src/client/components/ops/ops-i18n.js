@@ -104,21 +104,81 @@ const zh = {
   commandTemplate: '命令模板',
   user: '用户',
   reason: '原因',
+  name: '名称',
   save: '保存',
   cancel: '取消',
   ok: '确定',
   refresh: '刷新',
-  close: '关闭'
+  close: '关闭',
+  docker: '容器',
+  cron: '定时任务',
+  terminal: '终端',
+  exitCode: '退出码',
+  error: '错误',
+  createdAt: '创建时间',
+  at: '时间',
+  action: '动作',
+  detail: '详情',
+  taskId: '编号',
+  src: '源路径',
+  dst: '目标路径',
+  leftSide: '左侧机器',
+  rightSide: '右侧机器',
+  summary: '摘要',
+  tag: '标签',
+  compose: '编排',
+  result: '结果',
+  diff: '对比',
+  selectAll: '全选',
+  selectNone: '全不选',
+  refId: '对象',
+  yes: '是',
+  total: '合计',
+  catFile: '文件',
+  catDisk: '磁盘',
+  catNetwork: '网络',
+  catProcess: '进程',
+  catDocker: '容器',
+  catSystem: '系统',
+  dangerSafe: '安全',
+  dangerConfirm: '需确认',
+  dangerDanger: '危险'
+}
+
+const enums = {
+  rolling: '滚动执行',
+  distribute: '文件分发',
+  relay: '跨链接传输',
+  configDiff: '配置对比',
+  running: '执行中',
+  success: '成功',
+  failed: '失败',
+  pending: '等待',
+  paused: '已暂停',
+  aborted: '已中止',
+  done: '完成',
+  error: '错误',
+  safe: '安全',
+  confirm: '需确认',
+  danger: '危险',
+  file: '文件',
+  disk: '磁盘',
+  network: '网络',
+  process: '进程',
+  docker: '容器',
+  system: '系统'
 }
 
 export function ot (key) {
-  try {
-    const t = window.translate?.(key)
-    if (t && t !== key) {
-      return t
-    }
-  } catch (e) {
-    // ignore
+  if (zh[key]) {
+    return zh[key]
   }
-  return zh[key] || key
+  return key
+}
+
+export function otEnum (value) {
+  if (value == null || value === '') {
+    return ''
+  }
+  return enums[value] || zh[value] || String(value)
 }

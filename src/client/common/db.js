@@ -37,7 +37,9 @@ export const dbNames = [
   'opsAuditLogs',
   'opsApprovalRequests',
   'opsApprovalRules',
-  'opsApprovalWhitelist'
+  'opsApprovalWhitelist',
+  'transferHistory',
+  'fileTransfers'
 ]
 export const dbNamesForSync = [
   ...without(
@@ -57,7 +59,9 @@ export const dbNamesForWatch = [
   'opsAuditLogs',
   'opsApprovalRequests',
   'opsApprovalRules',
-  'opsApprovalWhitelist'
+  'opsApprovalWhitelist',
+  'transferHistory',
+  'fileTransfers'
 ]
 
 /**

@@ -59,7 +59,9 @@ function createDb (appPath, defaultUserName, { enc, dec } = {}) {
     'opsAuditLogs',
     'opsApprovalRequests',
     'opsApprovalRules',
-    'opsApprovalWhitelist'
+    'opsApprovalWhitelist',
+    'transferHistory',
+    'fileTransfers'
   ]
 
   // Create tables in appropriate databases

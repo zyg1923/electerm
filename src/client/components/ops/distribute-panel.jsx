@@ -15,7 +15,7 @@ import {
   Table,
   message
 } from 'antd'
-import { ot } from './ops-i18n'
+import { ot, otEnum } from './ops-i18n'
 import { OpsTabSelect, useOpsTabSelect } from './ops-tab-select'
 import DistributeEngine from './distribute-engine'
 import {
@@ -121,9 +121,9 @@ export default function DistributePanel () {
 
   const columns = [
     { title: ot('host'), dataIndex: 'title', key: 'title' },
-    { title: 'src', dataIndex: 'srcPath', key: 'src', ellipsis: true },
-    { title: 'dst', dataIndex: 'dstPath', key: 'dst', ellipsis: true },
-    { title: ot('status'), dataIndex: 'status', key: 'status', width: 100 },
+    { title: ot('src'), dataIndex: 'srcPath', key: 'src', ellipsis: true },
+    { title: ot('dst'), dataIndex: 'dstPath', key: 'dst', ellipsis: true },
+    { title: ot('status'), dataIndex: 'status', key: 'status', width: 100, render: (v) => otEnum(v) },
     {
       title: '',
       key: 'act',
@@ -258,7 +258,7 @@ export default function DistributePanel () {
       {prog && (
         <div className='mg1b'>
           <div>
-            {ot('successCount')}: {prog.success} / {ot('failCount')}: {prog.failed} / {ot('runningCount')}: {prog.running} / total: {prog.total}
+            {ot('successCount')}: {prog.success} / {ot('failCount')}: {prog.failed} / {ot('runningCount')}: {prog.running} / {ot('total')}: {prog.total}
           </div>
           <Progress
             percent={prog.total ? Math.round(((prog.success + prog.failed) / prog.total) * 100) : 0}

@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import {
-  AimOutlined,
-  MenuFoldOutlined
+  AimOutlined
 } from '@ant-design/icons'
 import SideBarPanel from './sidebar-panel'
 import MenuBtn from '../sys-menu/menu-btn'
@@ -12,7 +11,6 @@ import {
 import SideIcon from './side-icon'
 import SidePanel from './side-panel'
 import LeftSidebarIcons from './left-sidebar-icons'
-import TransferList from './transfer-list'
 import hasActiveInput from '../../common/has-active-input'
 import './sidebar.styl'
 
@@ -29,10 +27,7 @@ export default function Sidebar (props) {
     // far-left icon bar (43px; 0 when hidden)
     leftSideBarWidth,
     pinned,
-    fileTransfers,
     openedSideBar,
-    transferHistory,
-    transferTab,
     showModal,
     sidebarPanelTab,
     openWidgetsModal,
@@ -88,10 +83,6 @@ export default function Sidebar (props) {
     store.onZoomReset()
   }
 
-  const handleToggleSidebar = () => {
-    store.toggleLeftSideBar()
-  }
-
   const {
     onNewSsh,
     openSetting,
@@ -122,11 +113,6 @@ export default function Sidebar (props) {
       height
     }
   }
-  const transferProps = {
-    fileTransfers,
-    transferTab,
-    transferHistory
-  }
   return (
     <div {...sidebarProps}>
       <div className='sidebar-bar btns'>
@@ -149,17 +135,7 @@ export default function Sidebar (props) {
           widgetsActive={widgetsActive}
           isSyncingSetting={isSyncingSetting}
           widgetInstancesLength={widgetInstancesLength}
-          transferHistory={transferHistory}
         />
-        <TransferList {...transferProps} />
-        <SideIcon
-          title={e('hide')}
-        >
-          <MenuFoldOutlined
-            className='iblock font16 control-icon hide-sidebar-icon'
-            onClick={handleToggleSidebar}
-          />
-        </SideIcon>
         {
           Math.round((zoom ?? 1) * 100) !== 100
             ? (

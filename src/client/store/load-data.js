@@ -239,6 +239,12 @@ export default (Store) => {
             // array assigned into the store, so seeding with `dt` itself would
             // alias snapshot and store to one backing array; the watcher's
             // no-change early-return would then skip DB writes forever
+            if (name === 'fileTransfers' && Array.isArray(dt)) {
+              dt.forEach(item => {
+                item.pausing = true
+                item.inited = false
+              })
+            }
             refsStatic.add('oldState-' + name, deepCopy(dt))
             if (name === 'bookmarks') {
               ext.bookmarksMap = new Map(

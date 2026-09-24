@@ -70,7 +70,9 @@ export default class Sftp extends Component {
       ...this.defaultState(),
       loadingSftp: false,
       inited: false,
-      ready: false
+      ready: false,
+      filePanelRatio: this.readFilePanelRatio(),
+      filePanelLayout: this.readFilePanelLayout()
     }
     this.retryCount = 0
   }
@@ -1048,6 +1050,40 @@ export default class Sftp extends Component {
     }
   }
 
+  refreshFolder = async (file) => {
+    const type = file?.type
+    if (type !== typeMap.local && type !== typeMap.remote) {
+      return
+    }
+    const dirPath = (file.isDirectory && !file.isParent && !file.isEmpty)
+      ? this.joinFsPath(type, file.path, file.name)
+      : this.state[`${type}Path`]
+    if (!dirPath) {
+      return
+    }
+    this.setState({
+      [`${type}Loading`]: true
+    })
+    try {
+      const files = await this.listDirFiles(type, dirPath)
+      const isCurrent = dirPath === this.state[`${type}Path`]
+      const patch = {
+        [`${type}Loading`]: false
+      }
+      if (isCurrent) {
+        patch[type] = files
+        patch[`${type}FileTree`] = this.buildTree(files, type)
+      }
+      this.setState(patch)
+      this.storeTreeFiles(type, dirPath, files)
+    } catch (e) {
+      this.setState({
+        [`${type}Loading`]: false
+      })
+      this.onError(e)
+    }
+  }
+
   refreshTreeNode = async (file) => {
     if (!file) return
     const { type } = file
@@ -1280,12 +1316,11 @@ export default class Sftp extends Component {
         ]).slice(0, maxSftpHistory)
       }
       this.setState(update, () => {
-        if (this.type !== 'ftp') {
+        if (this.type !== 'ftp' && remote.some(item => item.isSymbol)) {
           this.updateRemoteList(remote, remotePath, sftp)
         } else {
           this.rememberTreePath(typeMap.remote, remotePath, remote)
         }
-        this.fillHasChildren(typeMap.remote, remote)
         this.props.editTab(tab.id, {
           sftpCreated: true
         })
@@ -1367,7 +1402,6 @@ export default class Sftp extends Component {
         if (this.state[`${typeMap.local}ViewMode`] === 'tree') {
           this.rememberTreePath(typeMap.local, this.state.localPath, local)
         }
-        this.fillHasChildren(typeMap.local, local)
       })
     } catch (e) {
       const update = {
@@ -1563,6 +1597,7 @@ export default class Sftp extends Component {
         'getFileItemById',
         'toggleTreeNode',
         'refreshTreeNode',
+        'refreshFolder',
         'goToPath'
       ]),
       ...pick(this.state, [
@@ -1629,9 +1664,13 @@ export default class Sftp extends Component {
 
   renderParentItem = (type) => {
     const currentPath = this.state[`${type}Path`]
-    const parentPath = resolve(currentPath, '..')
-    // Don't render parent item if we're at the root
-    if (parentPath === currentPath) {
+    let parentPath = resolve(currentPath, '..')
+    if (type === typeMap.local) {
+      parentPath = normalizeWinLocalPath(parentPath) || parentPath
+    } else {
+      parentPath = normalizeRemotePath(parentPath)
+    }
+    if (!parentPath || parentPath === currentPath) {
       return null
     }
 
@@ -1640,8 +1679,9 @@ export default class Sftp extends Component {
     return {
       type,
       isDirectory: true,
-      ...getFolderFromFilePath(parentPath, type === typeMap.remote),
       id: uniqueId,
+      name: '..',
+      path: parentPath,
       size: 0,
       modifyTime: 0,
       accessTime: 0,
@@ -1695,6 +1735,18 @@ export default class Sftp extends Component {
     return (
       <div className='sftp-panel-toggles'>
         <span
+          className={classnames('sftp-panel-toggle', { open: this.state.filePanelLayout !== 'horizontal' })}
+          onClick={() => this.togglePanelLayout('vertical')}
+        >
+          <span>上下</span>
+        </span>
+        <span
+          className={classnames('sftp-panel-toggle', { open: this.state.filePanelLayout === 'horizontal' })}
+          onClick={() => this.togglePanelLayout('horizontal')}
+        >
+          <span>左右</span>
+        </span>
+        <span
           className={classnames('sftp-panel-toggle', { open: localOpen })}
           onClick={() => this.togglePanel(typeMap.local)}
         >
@@ -1743,6 +1795,26 @@ export default class Sftp extends Component {
                   {selfOpen ? <MinusOutlined /> : <PlusOutlined />}
                   <span>{selfOpen ? (type === typeMap.local ? '关闭本地' : '关闭远程') : (type === typeMap.local ? '打开本地' : '打开远程')}</span>
                 </span>
+                {
+                  showRemoteToggles && (type === typeMap.remote || this.state.remotePanelOpen === false)
+                    ? (
+                      <>
+                        <span
+                          className={classnames('sftp-panel-toggle', { open: this.state.filePanelLayout !== 'horizontal' })}
+                          onClick={() => this.togglePanelLayout('vertical')}
+                        >
+                          <span>上下</span>
+                        </span>
+                        <span
+                          className={classnames('sftp-panel-toggle', { open: this.state.filePanelLayout === 'horizontal' })}
+                          onClick={() => this.togglePanelLayout('horizontal')}
+                        >
+                          <span>左右</span>
+                        </span>
+                      </>
+                      )
+                    : null
+                }
               </>
               )
             : null
@@ -1883,7 +1955,7 @@ export default class Sftp extends Component {
         key={type}
         {...style}
       >
-        <Spin spinning={loading}>
+        <Spin spinning={loading} delay={200}>
           <div className='pd1 sftp-panel'>
             {
               this.renderSftpPanelTitle(type, username, host)
@@ -1905,6 +1977,123 @@ export default class Sftp extends Component {
         </Spin>
       </div>
     )
+  }
+
+  readFilePanelLayout () {
+    const saved = readStored('electerm-file-panel-layout', 'vertical')
+    return saved === 'horizontal' ? 'horizontal' : 'vertical'
+  }
+
+  togglePanelLayout = (layout) => {
+    const next = layout === 'horizontal' ? 'horizontal' : 'vertical'
+    this.setState({ filePanelLayout: next })
+    try {
+      localStorage.setItem('electerm-file-panel-layout', next)
+    } catch (err) {
+      // ignore
+    }
+  }
+  readFilePanelRatio () {
+    try {
+      const n = Number(localStorage.getItem('electerm-file-panel-ratio'))
+      if (n >= 0.15 && n <= 0.85) {
+        return n
+      }
+    } catch (e) {
+      // ignore
+    }
+    return 0.58
+  }
+
+  onPanelSplitDown = (e) => {
+    e.preventDefault()
+    const wrap = e.currentTarget.parentElement
+    const rect = wrap.getBoundingClientRect()
+    const horizontal = this.state.filePanelLayout === 'horizontal'
+    const move = (ev) => {
+      const pos = horizontal
+        ? ev.clientX - rect.left
+        : ev.clientY - rect.top
+      const total = horizontal ? rect.width : rect.height
+      const ratio = Math.min(0.85, Math.max(0.15, pos / Math.max(total, 1)))
+      this.setState({ filePanelRatio: ratio })
+    }
+    const up = () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', up)
+      try {
+        localStorage.setItem('electerm-file-panel-ratio', String(this.state.filePanelRatio))
+      } catch (err) {
+        // ignore
+      }
+    }
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', up)
+  }
+
+  renderSidePanels (width, bodyH) {
+    const ratio = this.state.filePanelRatio || 0.58
+    const bar = 8
+    const remoteW = Math.max(140, Math.floor((width - bar) * ratio))
+    const localW = Math.max(140, width - bar - remoteW)
+    return [
+      this.renderSection(typeMap.remote, {
+        width: remoteW,
+        left: 0,
+        top: 0,
+        height: bodyH,
+        flex: `0 0 ${remoteW}px`
+      }, remoteW),
+      <div
+        key='sftp-panel-resizer'
+        className='sftp-panel-resizer sftp-panel-resizer-x'
+        onMouseDown={this.onPanelSplitDown}
+        title='左右拖动，调整远程和本地宽度'
+      />,
+      this.renderSection(typeMap.local, {
+        width: localW,
+        left: 0,
+        top: 0,
+        height: bodyH,
+        flex: `0 0 ${localW}px`
+      }, localW)
+    ]
+  }
+
+  renderBothPanels (width, bodyH) {
+    if (this.state.filePanelLayout === 'horizontal') {
+      return this.renderSidePanels(width, bodyH)
+    }
+    return this.renderStackedPanels(width, bodyH)
+  }
+
+  renderStackedPanels (width, bodyH) {
+    const ratio = this.state.filePanelRatio || 0.58
+    const bar = 8
+    const remoteH = Math.max(80, Math.floor((bodyH - bar) * ratio))
+    const localH = Math.max(80, bodyH - bar - remoteH)
+    return [
+      this.renderSection(typeMap.remote, {
+        width,
+        left: 0,
+        top: 0,
+        height: remoteH,
+        flex: `0 0 ${remoteH}px`
+      }, width),
+      <div
+        key='sftp-panel-resizer'
+        className='sftp-panel-resizer'
+        onMouseDown={this.onPanelSplitDown}
+        title='上下拖动，调整远程和本地高度'
+      />,
+      this.renderSection(typeMap.local, {
+        width,
+        left: 0,
+        top: remoteH + bar,
+        height: localH,
+        flex: `0 0 ${localH}px`
+      }, width)
+    ]
   }
 
   renderSections () {
@@ -1950,22 +2139,7 @@ export default class Sftp extends Component {
     }
     if (sshSftpSplitView && shouldRenderRemote) {
       if (showLocal && showRemote) {
-        const remoteH = Math.floor(bodyH * 0.58)
-        const localH = bodyH - remoteH
-        return [
-          this.renderSection(typeMap.remote, {
-            width,
-            left: 0,
-            top: 0,
-            height: remoteH
-          }, width),
-          this.renderSection(typeMap.local, {
-            width,
-            left: 0,
-            top: remoteH,
-            height: localH
-          }, width)
-        ]
+        return this.renderBothPanels(width, bodyH)
       }
       const only = showLocal ? typeMap.local : typeMap.remote
       return this.renderSection(only, {
@@ -1991,22 +2165,7 @@ export default class Sftp extends Component {
         height: bodyH
       }, width, true)
     }
-    const remoteH = Math.floor(bodyH * 0.58)
-    const localH = bodyH - remoteH
-    return [
-      this.renderSection(typeMap.remote, {
-        width,
-        left: 0,
-        top: 0,
-        height: remoteH
-      }, width),
-      this.renderSection(typeMap.local, {
-        width,
-        left: 0,
-        top: remoteH,
-        height: localH
-      }, width)
-    ]
+    return this.renderBothPanels(width, bodyH)
   }
 
   render () {
@@ -2037,9 +2196,18 @@ export default class Sftp extends Component {
         {
           this.renderPanelToggles()
         }
-        {
-          this.renderSections()
-        }
+        <div
+          className={classnames('sftp-panels', {
+            'sftp-panels-side': this.state.filePanelLayout === 'horizontal' &&
+              this.state.localPanelOpen !== false &&
+              this.state.remotePanelOpen !== false &&
+              this.shouldRenderRemote()
+          })}
+        >
+          {
+            this.renderSections()
+          }
+        </div>
       </div>
     )
   }

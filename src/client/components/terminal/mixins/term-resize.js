@@ -29,11 +29,31 @@ export const resizeMixin = {
     if (!this.isElementVisible()) {
       return
     }
+    const box = this.domRef.current
+    // A tab that is still display:none, or mid-layout, reports a sliver.
+    // Fitting that locks the cell size and row count, so the session looks empty.
+    if (!box || box.clientHeight < 80 || box.clientWidth < 160) {
+      return
+    }
+    const w = box.clientWidth
+    const h = box.clientHeight
+    const font = this.term.options.fontSize
+    // A 1px layout twitch (scrollbar, padding) must not SIGWINCH the shell.
+    // That resize is what leaves a blank line between prompts.
+    if (
+      this._fitBox &&
+      this._fitBox.font === font &&
+      Math.abs(w - this._fitBox.w) < 2 &&
+      Math.abs(h - this._fitBox.h) < 2
+    ) {
+      return
+    }
     try {
-      // Font zoom updates cell size asynchronously relative to layout.
-      // Measure first so fit does not lock in a short screen.
-      this.term._core?._charSizeService?.measure?.()
       this.fitAddon.fit()
+      if (this.term.rows < 4 || this.term.cols < 20) {
+        return
+      }
+      this._fitBox = { w, h, font }
       this.term.refresh(0, Math.max(0, this.term.rows - 1))
     } catch (e) {
       console.info('resize failed', e)
@@ -58,7 +78,10 @@ export const resizeMixin = {
   // throttle each other.
   onResize () {
     if (!this._resizeThrottled) {
-      this._resizeThrottled = throttle(() => this.fitAndRefresh(), 200)
+      this._resizeThrottled = throttle(() => this.fitAndRefresh(), 200, {
+        leading: false,
+        trailing: true
+      })
     }
     this._resizeThrottled()
   },

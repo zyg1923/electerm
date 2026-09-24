@@ -259,7 +259,9 @@ export const fileActions = {
   mergeOrOverwrite: 'mergeOrOverwrite',
   rename: 'rename',
   mergeOrOverwriteAll: 'mergeOrOverwriteAll',
-  renameAll: 'renameAll'
+  renameAll: 'renameAll',
+  resume: 'resume',
+  resumeAll: 'resumeAll'
 }
 
 export const srcsSkipUpgradeCheck = [
@@ -280,6 +282,10 @@ export const checkedKeysLsKey = 'checked-keys'
 export const quickCommandLabelsLsKey = 'quick-command-label'
 export const localAddrBookmarkLsKey = 'local-addr-bookmark-keys'
 export const treeSortLsKey = 'tree-sort'
+export const opsWizardLsKey = 'ops-wizard-state'
+export const opsPlaybooksLsKey = 'ops-playbooks'
+export const opsQuickActionsLsKey = 'ops-quick-actions'
+export const opsDiaryLsKey = 'ops-diary-entries'
 export const sshTunnelHelpLink = 'https://github.com/zyg1923/electerm/wiki/How-to-use-ssh-tunnel'
 export const proxyHelpLink = 'https://github.com/zyg1923/electerm/wiki/proxy-format'
 export const regexHelpLink = 'https://github.com/zyg1923/electerm/wiki/Terminal-keywords-highlight-regular-expression-exmaples'
@@ -380,11 +386,36 @@ export const syncDataMaps = {
   workspaces: ['workspaces'],
   triggers: ['triggers']
 }
-// Extra in-memory collections included in local migrate files
+// Extra in-memory / localStorage collections included in local migrate files
 // (not gist-synced). DB collections come from dbNames.
 export const migrateMemoryKeys = [
-  'transferHistory'
+  'transferHistory',
+  'addressBookmarksLocal',
+  'batchInputs',
+  'opsCommandTemplates',
+  'opsWizardState',
+  'opsPlaybooks',
+  'opsQuickActions',
+  'opsDiaryEntries',
+  'sftpSortSetting',
+  'expandedKeys',
+  'checkedKeys',
+  'resolutions'
 ]
+
+// localStorage keys for migrate memory collections that live outside Nedb/sqlite
+export const migrateLocalStorageMap = {
+  addressBookmarksLocal: localAddrBookmarkLsKey,
+  batchInputs: batchInputLsKey,
+  sftpSortSetting: sftpDefaultSortSettingKey,
+  expandedKeys: expandedKeysLsKey,
+  checkedKeys: checkedKeysLsKey,
+  resolutions: resolutionsLsKey,
+  opsWizardState: opsWizardLsKey,
+  opsPlaybooks: opsPlaybooksLsKey,
+  opsQuickActions: opsQuickActionsLsKey,
+  opsDiaryEntries: opsDiaryLsKey
+}
 export const terminalTypes = [
   'xterm-256color',
   'xterm-new',

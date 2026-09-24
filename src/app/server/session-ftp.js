@@ -64,7 +64,7 @@ class Ftp extends TerminalBase {
 
   kill () {
     Object.values(this.transfers).forEach(transfer => {
-      transfer?.destroy?.()
+      transfer?.destroy?.({ silent: false })
     })
     this.transfers = {}
     super.onEndConn()

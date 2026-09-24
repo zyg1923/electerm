@@ -34,6 +34,7 @@ import {
   dockerDiagnose
 } from './docker-engine'
 import { openOpsFileEditor } from './ops-file-editor'
+import { findMatchIndexes, clampHit, renderHighlighted, matchLabel } from './ops-find'
 
 export default function DockerPanel () {
   const { tabs, selectedTabIds, listProps } = useOpsTabSelect()
@@ -314,14 +315,24 @@ export default function DockerPanel () {
     return <Tag title={row.status}>{row.status || row.level || '-'}</Tag>
   }
 
-  function renderLogText (text, keyword) {
-    const body = text || ''
-    if (!keyword) return body
-    const esc = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const parts = body.split(new RegExp(`(${esc})`, 'gi'))
-    return parts.map((part, i) => (
-      i % 2 === 1 ? <mark key={i}>{part}</mark> : <span key={i}>{part}</span>
-    ))
+  function renderLogText (text, keyword, hit) {
+    if (!keyword) return text || ''
+    return renderHighlighted(text || '', keyword, hit)
+  }
+
+  function stepLog (delta) {
+    if (!active) return
+    const list = findMatchIndexes(active.text || '', active.keyword || '')
+    if (!list.length) {
+      message.info('没有匹配')
+      return
+    }
+    const cur = clampHit(active.hit, list.length)
+    const next = (cur + delta + list.length) % list.length
+    patchLog(active.key, { hit: next })
+    requestAnimationFrame(() => {
+      document.querySelector('.ops-log-view mark.ops-hit-current')?.scrollIntoView({ block: 'center' })
+    })
   }
 
   const columns = [
@@ -501,8 +512,11 @@ export default function DockerPanel () {
                   style={{ width: 160 }}
                   placeholder='关键词高亮'
                   value={active.keyword || ''}
-                  onChange={e => patchLog(active.key, { keyword: e.target.value })}
+                  onChange={e => patchLog(active.key, { keyword: e.target.value, hit: 0 })}
                 />
+                <Button size='small' disabled={!active.keyword} onClick={() => stepLog(-1)}>上一个</Button>
+                <Button size='small' disabled={!active.keyword} onClick={() => stepLog(1)}>下一个</Button>
+                <span>{active.keyword ? matchLabel(active.hit, findMatchIndexes(active.text || '', active.keyword).length) : ''}</span>
                 <Input
                   style={{ width: 180 }}
                   placeholder='容器内文件路径'
@@ -522,7 +536,7 @@ export default function DockerPanel () {
                 <Button size='small' onClick={() => closeLog(active.key)}>关闭</Button>
               </Space>
               <div className='ops-log-view'>
-                {renderLogText(active.text, active.keyword)}
+                {renderLogText(active.text, active.keyword, active.hit)}
               </div>
             </div>
           )}
@@ -596,9 +610,9 @@ export default function DockerPanel () {
                   columns={[
                     { title: '机器', dataIndex: 'hostTitle', width: 100 },
                     { title: '仓库', dataIndex: 'repository' },
-                    { title: 'Tag', dataIndex: 'tag', width: 100 },
+                    { title: '标签', dataIndex: 'tag', width: 100 },
                     { title: '大小', dataIndex: 'size', width: 90 },
-                    { title: '悬空', dataIndex: 'dangling', width: 70, render: v => v ? <Tag color='orange'>yes</Tag> : '' }
+                    { title: '悬空', dataIndex: 'dangling', width: 70, render: v => v ? <Tag color='orange'>是</Tag> : '' }
                   ]}
                 />
               </div>
@@ -627,7 +641,7 @@ export default function DockerPanel () {
           },
           {
             key: 'compose',
-            label: 'Compose',
+            label: '编排',
             children: (
               <div>
                 <Space className='mg1b'>

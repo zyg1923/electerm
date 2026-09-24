@@ -6,7 +6,8 @@ import { get, pick, debounce } from 'lodash-es'
 import copy from 'json-deep-copy'
 import { action } from 'manate'
 import {
-  settingMap, packInfo, syncTypes, syncDataMaps, migrateMemoryKeys
+  settingMap, packInfo, syncTypes, syncDataMaps, migrateMemoryKeys,
+  migrateLocalStorageMap
 } from '../common/constants'
 import { update, getData, dbNames } from '../common/db'
 import fetch from '../common/fetch-from-server'
@@ -17,6 +18,7 @@ import parseJsonSafe from '../common/parse-json-safe'
 import { runImportTask } from '../common/import-task'
 import Modal from '../components/common/modal'
 import message from '../components/common/message'
+import * as ls from '../common/safe-local-storage'
 
 const e = window.translate
 
@@ -707,8 +709,18 @@ export default (Store) => {
   }, 1000)
 
   Store.prototype.getMigrateNames = function () {
+    // Keep widgets out: they are runtime plugin instances, not user config.
+    // Settings live in objs.config instead of settingMap.setting.
     return [...new Set([...dbNames, ...(migrateMemoryKeys || [])])]
       .filter(n => n && n !== settingMap.setting && n !== settingMap.widgets)
+  }
+
+  Store.prototype.persistMigrateLocalKeys = function () {
+    const { store } = window
+    for (const [key, lsKey] of Object.entries(migrateLocalStorageMap || {})) {
+      if (store[key] === undefined) continue
+      ls.setItemJSON(lsKey, store[key])
+    }
   }
 
   Store.prototype.handleExportAllData = async function () {
@@ -721,14 +733,20 @@ export default (Store) => {
     }
     for (const n of names) {
       const items = store.getItems(n)
-      objs[n] = Array.isArray(items) ? items : []
-      const order = await getData(`${n}:order`)
-      if (order && order.length && objs[n].length) {
-        objs[n].sort((a, b) => {
-          const ai = order.findIndex(r => r === a.id)
-          const bi = order.findIndex(r => r === b.id)
-          return ai - bi
-        })
+      if (Array.isArray(items)) {
+        objs[n] = items
+        const order = await getData(`${n}:order`)
+        if (order && order.length && objs[n].length) {
+          objs[n].sort((a, b) => {
+            const ai = order.findIndex(r => r === a.id)
+            const bi = order.findIndex(r => r === b.id)
+            return ai - bi
+          })
+        }
+      } else if (items != null) {
+        objs[n] = copy(items)
+      } else {
+        objs[n] = []
       }
     }
     objs.config = stripServerManagedKeys(copy(store.config))
@@ -739,7 +757,9 @@ export default (Store) => {
 
   Store.prototype.applyMigrateImport = async function (objs) {
     const { store } = window
-    const names = store.getMigrateNames().filter(n => Array.isArray(objs[n]))
+    const allNames = store.getMigrateNames().filter(n => objs[n] !== undefined)
+    const names = allNames.filter(n => Array.isArray(objs[n]))
+    const otherNames = allNames.filter(n => !Array.isArray(objs[n]) && objs[n] != null)
     const fixed = {}
     for (const n of names) {
       let arr = objs[n] || []
@@ -776,13 +796,19 @@ export default (Store) => {
         }
       })
     })
+    action(() => {
+      for (const n of otherNames) {
+        store[n] = copy(objs[n])
+      }
+    })()
+    store.persistMigrateLocalKeys()
     if (objs.config && typeof objs.config === 'object') {
       store.updateConfig(stripServerManagedKeys(objs.config))
       if (objs.config.theme) {
         store.setTheme(objs.config.theme)
       }
     }
-    message.success('导入完成，连接和历史已恢复')
+    message.success('导入完成，配置、主题、连接、历史与传输记录已恢复')
   }
 
   Store.prototype.importAll = async function (file) {
@@ -802,9 +828,11 @@ export default (Store) => {
     }
     const bm = Array.isArray(objs.bookmarks) ? objs.bookmarks.length : 0
     const hist = Array.isArray(objs.history) ? objs.history.length : 0
+    const themes = Array.isArray(objs.terminalThemes) ? objs.terminalThemes.length : 0
+    const transfers = Array.isArray(objs.transferHistory) ? objs.transferHistory.length : 0
     Modal.confirm({
       title: '确认导入并覆盖？',
-      content: `将覆盖当前数据。文件中约有 ${bm} 条连接、${hist} 条链接历史。`,
+      content: `将覆盖当前同类数据。文件中约有 ${bm} 条连接、${hist} 条链接历史、${themes} 套主题、${transfers} 条传输历史，以及全部应用设置。`,
       okText: '导入',
       cancelText: '取消',
       onOk: () => {

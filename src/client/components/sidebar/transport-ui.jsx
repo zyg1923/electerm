@@ -6,14 +6,13 @@ import Tag from '../sftp/transfer-tag'
 import { Flex } from 'antd'
 import {
   CloseCircleOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
   VerticalAlignTopOutlined
 } from '@ant-design/icons'
 import { action } from 'manate'
 import { addClass, removeClass } from '../../common/class'
 import { refsStatic } from '../common/ref'
 import { isDropAfterHalf, setDropIndicator, clearDropIndicator } from '../../common/drop-position'
+import { formatBytesPair } from '../../common/byte-format'
 import './transfer.styl'
 
 const e = window.translate
@@ -29,6 +28,9 @@ export default function Transporter (props) {
     typeFrom,
     percent,
     speed,
+    size,
+    transferred,
+    relayNote,
     pausing = false,
     leftTime,
     passedTime,
@@ -49,15 +51,6 @@ export default function Transporter (props) {
     refsStatic.get('transfer-queue')?.addToQueue(
       'delete',
       id
-    )
-  }
-  function handlePauseOrResume () {
-    refsStatic.get('transfer-queue')?.addToQueue(
-      'update',
-      id,
-      {
-        pausing: !pausing
-      }
     )
   }
 
@@ -151,9 +144,6 @@ export default function Transporter (props) {
     clearDropIndicator(dom.current)
     e && e.dataTransfer && e.dataTransfer.clearData()
   }
-  const isTransfer = typeTo !== typeFrom
-  const Icon = !pausing ? PauseCircleOutlined : PlayCircleOutlined
-  const pauseTitle = pausing ? e('resume') : e('pause')
   const cls = 'sftp-transport mg1b pd1x'
   const typeFromTitle = e(typeFrom)
   const typeToTitle = e(typeTo)
@@ -173,15 +163,6 @@ export default function Transporter (props) {
         onClick={moveToTop}
       />
       )
-  const controlIcon = isTransfer
-    ? (
-      <Icon
-        className='flex-child transfer-control-icon pointer hover-black font14'
-        onClick={handlePauseOrResume}
-        title={pauseTitle}
-      />
-      )
-    : null
   const flexProps = {
     className: cls,
     gap: 3,
@@ -213,6 +194,15 @@ export default function Transporter (props) {
           }}
         />
       </Flex>
+      {
+        relayNote
+          ? (
+            <span className='sftp-relay-note elli' title={relayNote}>
+              {relayNote}
+            </span>
+            )
+          : null
+      }
       <Flex>
         <span
           className='sftp-file sftp-local-file elli'
@@ -236,6 +226,11 @@ export default function Transporter (props) {
           className='sftp-file-percent'
         >
           {percent || 0}%
+          {
+            Number(size) > 0
+              ? ` (${formatBytesPair(transferred || 0, size)})`
+              : ''
+          }
           {speed ? `(${speed})` : null}
         </span>
       </Flex>
@@ -246,7 +241,6 @@ export default function Transporter (props) {
           {passedTime || '-'}|{leftTime || '-'}
         </span>
       </Flex>
-      <Flex>{controlIcon}</Flex>
       <Flex>{cancelIcon}</Flex>
       <Flex>{toTopIcon}</Flex>
     </Flex>

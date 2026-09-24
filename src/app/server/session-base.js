@@ -149,6 +149,10 @@ class TerminalBase {
     if (!inst) {
       return
     }
+    try {
+      const { destroySftpByTerminalId } = require('./remote-common')
+      destroySftpByTerminalId(pid)
+    } catch (e) {}
     if (this.ws) {
       delete this.ws
     }

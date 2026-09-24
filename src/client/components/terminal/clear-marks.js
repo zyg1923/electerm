@@ -33,6 +33,98 @@ function contrastFg (hex) {
   return luma > 160 ? '\x1b[30m' : '\x1b[97m'
 }
 
+const RGB_MODE = 50331648
+
+function packRgb (r, g, b) {
+  return RGB_MODE | ((r & 255) << 16) | ((g & 255) << 8) | (b & 255)
+}
+
+function hexRgb (hex) {
+  const h = String(hex || '').replace('#', '')
+  return [
+    parseInt(h.slice(0, 2), 16) || 0,
+    parseInt(h.slice(2, 4), 16) || 0,
+    parseInt(h.slice(4, 6), 16) || 0
+  ]
+}
+
+/**
+ * Paint a full-width colored bar just above the live prompt and return a
+ * marker that tracks that line as the scrollback shifts.
+ */
+export function insertClearSeparator (term, label, color) {
+  const bufferService = term?._core?._bufferService
+  const buffers = bufferService?.buffers
+  const buffer = buffers?.normal
+  if (!term || !buffer || buffers.active !== buffer) {
+    return null
+  }
+  const cols = bufferService.cols || term.cols || 80
+  if (buffer.lines.length >= buffer.lines.maxLength) {
+    buffer.lines.trimStart(1)
+    buffer.ybase = Math.max(0, buffer.ybase - 1)
+    buffer.ydisp = Math.max(0, buffer.ydisp - 1)
+  }
+  let blank
+  try {
+    blank = buffer.getNullCell()
+  } catch (e) {
+    return null
+  }
+  const line = buffer.getBlankLine(blank)
+  const [br, bg, bb] = hexRgb(color)
+  const luma = (br * 299 + bg * 587 + bb * 114) / 1000
+  const fg = luma > 160 ? packRgb(20, 20, 20) : packRgb(255, 255, 255)
+  const attr = { fg, bg: packRgb(br, bg, bb) }
+  const unicode = term._core?.unicodeService
+  let col = 0
+  for (const ch of Array.from(String(label || ''))) {
+    const width = charWidth(unicode, ch)
+    if (width === 0) {
+      continue
+    }
+    if (col + width > cols) {
+      break
+    }
+    const cp = ch.codePointAt(0) || 0
+    line.setCellFromCodepoint(col, cp, width, attr)
+    if (width === 2 && col + 1 < cols) {
+      line.setCellFromCodepoint(col + 1, 0, 0, attr)
+    }
+    col += width
+  }
+  while (col < cols) {
+    line.setCellFromCodepoint(col, 32, 1, attr)
+    col += 1
+  }
+  const at = buffer.ybase
+  try {
+    buffer.lines.splice(at, 0, line)
+  } catch (e) {
+    return null
+  }
+  buffer.ybase += 1
+  buffer.ydisp = buffer.ybase
+  let marker = null
+  try {
+    marker = term.registerMarker(-1 - (buffer.y || 0))
+  } catch (e) {
+    marker = null
+  }
+  try {
+    // scrollToBottom() does nothing when ydisp is already ybase, so the
+    // scrollbar stays on the separator and later input keeps that line at
+    // the top. Sync the viewport onto the live prompt instead.
+    const y = buffer.ydisp
+    term._core?._viewport?._sync?.(y)
+    term._core?.scrollToBottom?.(true)
+    term.refresh(0, Math.max(0, term.rows - 1))
+  } catch (e) {
+    // ignore
+  }
+  return marker || null
+}
+
 export function buildClearMarkLine (index, color, ts = Date.now(), cols = 80) {
   const time = new Date(ts).toLocaleTimeString()
   const bg = hexToAnsiBg(color)
@@ -103,11 +195,17 @@ export function cloneBufferLines (term) {
   }
 }
 
-export function restoreClonedLines (term, lines) {
+export function restoreClonedLines (term, lines, done) {
+  const finish = () => {
+    if (typeof done === 'function') {
+      done()
+    }
+  }
   const bufferService = term?._core?._bufferService
   const buffers = bufferService?.buffers
   const buffer = buffers?.normal
   if (!term || !buffer || buffers.active !== buffer || !lines?.length) {
+    finish()
     return false
   }
   let room = buffer.lines.maxLength - buffer.lines.length
@@ -122,6 +220,7 @@ export function restoreClonedLines (term, lines) {
   }
   room = buffer.lines.maxLength - buffer.lines.length
   if (room < 1) {
+    finish()
     return false
   }
   const use = lines.length > room ? lines.slice(lines.length - room) : lines
@@ -129,6 +228,7 @@ export function restoreClonedLines (term, lines) {
   let at = buffer.ybase
   const step = () => {
     if (!term._core || buffers.active !== buffer) {
+      finish()
       return
     }
     const chunk = use.slice(offset, offset + 400)
@@ -139,6 +239,7 @@ export function restoreClonedLines (term, lines) {
       } catch (e) {
         // ignore
       }
+      finish()
       return
     }
     try {
@@ -148,6 +249,7 @@ export function restoreClonedLines (term, lines) {
       buffer.ybase += chunk.length
       buffer.ydisp = buffer.ybase
     } catch (e) {
+      finish()
       return
     }
     requestAnimationFrame(step)

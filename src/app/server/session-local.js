@@ -2,14 +2,107 @@
  * terminal/sftp/serial class
  */
 
-const { resolve: pathResolve } = require('path')
+const { existsSync } = require('fs')
+const { resolve: pathResolve, delimiter } = require('path')
+const { spawn } = require('child_process')
 const { TerminalBase } = require('./session-base')
 const globalState = require('./global-state')
+const { ensureWindowsSudo } = require('./elevate-local')
 // const { MockBinding } = require('@serialport/binding-mock')
 // MockBinding.createPort('/dev/ROBOT', { echo: true, record: true })
 
+function findWindowsBash () {
+  const candidates = [
+    process.env.PROGRAMFILES && pathResolve(process.env.PROGRAMFILES, 'Git/bin/bash.exe'),
+    process.env['PROGRAMFILES(X86)'] && pathResolve(process.env['PROGRAMFILES(X86)'], 'Git/bin/bash.exe'),
+    process.env.LOCALAPPDATA && pathResolve(process.env.LOCALAPPDATA, 'Programs/Git/bin/bash.exe'),
+    'C:\\Program Files\\Git\\bin\\bash.exe',
+    'C:\\Program Files (x86)\\Git\\bin\\bash.exe'
+  ].filter(Boolean)
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      return p
+    }
+  }
+  // PATH lookup
+  const pathDirs = String(process.env.PATH || '').split(delimiter)
+  for (const dir of pathDirs) {
+    const p = pathResolve(dir, 'bash.exe')
+    if (existsSync(p)) {
+      return p
+    }
+  }
+  return ''
+}
+
+function runLocalShellCommand (cmd, options = {}) {
+  return new Promise((resolve, reject) => {
+    const { timeoutMs = 0 } = options || {}
+    const isWin = process.platform === 'win32'
+    const env = Object.assign({}, process.env)
+    delete env.ELECTRON_RUN_AS_NODE
+    delete env.NODE_OPTIONS
+    delete env.ELECTRON_NO_ATTACH_CONSOLE
+    delete env.NODE_EXTRA_CA_CERTS
+
+    let bin
+    let args
+    if (isWin) {
+      const bash = findWindowsBash()
+      if (bash) {
+        bin = bash
+        args = ['-lc', cmd]
+      } else {
+        bin = pathResolve(process.env.windir || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe')
+        args = ['-NoProfile', '-NonInteractive', '-Command', cmd]
+      }
+    } else {
+      bin = process.platform === 'darwin' ? '/bin/bash' : '/bin/bash'
+      args = ['-lc', cmd]
+    }
+
+    const child = spawn(bin, args, {
+      env,
+      windowsHide: true
+    })
+    let stdout = ''
+    let stderr = ''
+    let settled = false
+    let timer = null
+    const finish = (exitCode, timedOut) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
+      resolve({
+        stdout,
+        stderr,
+        exitCode: typeof exitCode === 'number' ? exitCode : null,
+        timedOut: !!timedOut,
+        // compat for callers that read .out / .code
+        out: stdout,
+        code: typeof exitCode === 'number' ? exitCode : null
+      })
+    }
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        try { child.kill() } catch (_) {}
+        finish(null, true)
+      }, timeoutMs)
+    }
+    child.stdout.on('data', (d) => { stdout += d.toString() })
+    child.stderr.on('data', (d) => { stderr += d.toString() })
+    child.on('error', (err) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
+      reject(err)
+    })
+    child.on('close', (code) => finish(code, false))
+  })
+}
+
 class TerminalLocal extends TerminalBase {
-  init () {
+  async init () {
     const {
       cols,
       rows,
@@ -19,6 +112,7 @@ class TerminalLocal extends TerminalBase {
       execWindowsArgs,
       execMacArgs,
       execLinuxArgs,
+      localAdmin,
       termType,
       term
     } = this.initOptions
@@ -36,10 +130,20 @@ class TerminalLocal extends TerminalBase {
       return Promise.reject(new Error('execWindows should not contain ".."'))
     }
     const arg = isWin
-      ? execWindowsArgs
-      : platform === 'darwin' ? execMacArgs : execLinuxArgs
+      ? (execWindowsArgs || [])
+      : platform === 'darwin' ? (execMacArgs || []) : (execLinuxArgs || [])
     const cwd = process.env[platform === 'win32' ? 'USERPROFILE' : 'HOME']
-    const argv = platform.startsWith('darwin') ? ['--login', ...arg] : arg
+    let spawnExec = exec
+    let spawnArgv = platform.startsWith('darwin') ? ['--login', ...arg] : arg
+    if (isWin && localAdmin) {
+      const sudo = pathResolve(process.env.windir, 'System32/sudo.exe')
+      if (!existsSync(sudo)) {
+        throw new Error('未找到 sudo.exe，无法以管理员身份打开。')
+      }
+      await ensureWindowsSudo()
+      spawnExec = sudo
+      spawnArgv = [exec, ...arg]
+    }
     const pty = require('node-pty')
     const env = Object.assign({}, process.env)
     delete env.ELECTRON_RUN_AS_NODE
@@ -49,21 +153,24 @@ class TerminalLocal extends TerminalBase {
     // not meant for user shells, and a bad keychain cert makes any Node/bun
     // tool in the terminal print "ignoring extra certs ... load failed"
     delete env.NODE_EXTRA_CA_CERTS
-    this.term = pty.spawn(exec, argv, {
+    const spawnOpts = {
       name: term,
       encoding: null,
       cols: cols || 80,
       rows: rows || 24,
       cwd,
-      env,
-      // Use the OpenConsole conpty.dll shipped with node-pty instead of the
-      // legacy Windows Console Host (kernel32 CreatePseudoConsole) conpty.
-      // The legacy console-host conpty can stall output and deliver Ctrl+C to
-      // the whole process group (killing the shell too) after a full-screen
-      // TUI like opencode exits, leaving the terminal tab unresponsive.
-      // The OpenConsole conpty.dll does not have this problem.
-      useConptyDll: true
-    })
+      env
+    }
+    try {
+      // Prefer OpenConsole conpty.dll (avoids legacy console-host stalls).
+      this.term = pty.spawn(spawnExec, spawnArgv, {
+        ...spawnOpts,
+        useConptyDll: true
+      })
+    } catch (err) {
+      // Older Windows / missing conpty.dll: fall back to default conpty.
+      this.term = pty.spawn(spawnExec, spawnArgv, spawnOpts)
+    }
     this.term.termType = termType
     globalState.setSession(this.pid, this)
     return Promise.resolve(this)
@@ -102,6 +209,16 @@ class TerminalLocal extends TerminalBase {
     }
     this.term && this.term.kill()
     this.onEndConn()
+  }
+
+  // Ops / archive / monitors call execCommand on the session pid.
+  // Local tabs have no SSH exec channel — run via OS shell instead.
+  runCmd (cmd) {
+    return runLocalShellCommand(cmd).then(r => r.stdout || r.stderr || '')
+  }
+
+  execCommand (cmd, options = {}) {
+    return runLocalShellCommand(cmd, options)
   }
 }
 

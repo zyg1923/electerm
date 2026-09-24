@@ -97,8 +97,12 @@ export const suggestionsMixin = {
     // Handle Enter - add command to history
     if (d === '\r' || d === '\n') {
       const currentCmd = this.getCurrentInput()
-      if (currentCmd && currentCmd.trim() && this.shouldUseManualHistory()) {
-        window.store.addCmdHistory(currentCmd.trim())
+      const typed = currentCmd && currentCmd.trim()
+      if (typed && this.shouldUseManualHistory()) {
+        window.store.addCmdHistory(typed)
+      }
+      if (typed && /^(cls|clear)$/i.test(typed)) {
+        this.prepareTypedLocalClear?.()
       }
       if (currentCmd && currentCmd.trim() === 'exit') {
         this.userTypeExit = true

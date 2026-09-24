@@ -538,18 +538,31 @@ if (type === 'rdp') {
 
       if (action === 'transfer-new') {
         const { sftpId, id, isFtp } = msg
-        const session = sftp(sftpId)
-        const encode = session.initOptions?.encode || 'utf8'
-        const opts = Object.assign({}, msg, {
-          sftp: session.sftp,
-          conn: session.client,
-          ftpSession: isFtp ? session : null,
-          sftpId,
-          ws,
-          encode
-        })
-        const Cls = isFtp ? FtpTransfer : Transfer
-        transfer(id, sftpId, new Cls(opts))
+        try {
+          const session = sftp(sftpId)
+          if (!session || (!isFtp && !session.sftp)) {
+            throw new Error('会话已断开，无法传输')
+          }
+          const encode = session.initOptions?.encode || 'utf8'
+          const opts = Object.assign({}, msg, {
+            sftp: session.sftp,
+            conn: session.client,
+            ftpSession: isFtp ? session : null,
+            sftpId,
+            ws,
+            encode
+          })
+          const Cls = isFtp ? FtpTransfer : Transfer
+          transfer(id, sftpId, new Cls(opts))
+        } catch (err) {
+          ws.s({
+            id: 'transfer:err:' + id,
+            error: {
+              message: err.message,
+              stack: err.stack
+            }
+          })
+        }
       } else if (action === 'transfer-func') {
         const { id, func, args, sftpId } = msg
         if (func === 'destroy') {

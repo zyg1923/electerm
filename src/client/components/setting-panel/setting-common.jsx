@@ -36,6 +36,7 @@ import DeepLinkControl from './deep-link-control'
 import HotkeySetting from './hotkey'
 import SettingLeftSidebarIcons from './setting-left-sidebar-icons'
 import FontSelect from '../common/font-select'
+import FontThemePreview from './font-theme-preview'
 import './setting.styl'
 
 const { Option } = Select
@@ -54,7 +55,8 @@ export default class SettingCommon extends Component {
   componentDidMount () {
     this.timer = setTimeout(() => {
       this.setState({
-        ready: true
+        ready: true,
+        previewThemeId: this.props.store.previewThemeId || ''
       })
     }, 0)
   }
@@ -158,6 +160,7 @@ export default class SettingCommon extends Component {
 
   handleChangeTerminalTheme = id => {
     this.setState({ previewThemeId: id })
+    this.props.store.previewThemeDraft = null
     this.props.store.previewThemeId = id
   }
 
@@ -417,6 +420,19 @@ export default class SettingCommon extends Component {
     )
   }
 
+  renderThemePreview (terminalThemes, savedTheme) {
+    const id = this.state.previewThemeId || savedTheme
+    const picked = (terminalThemes || []).find(d => d.id === id) || {}
+    return (
+      <FontThemePreview
+        fontFamily={this.props.config.fontFamily}
+        fontSize={this.props.config.fontSize}
+        themeConfig={picked.themeConfig}
+        uiThemeConfig={picked.uiThemeConfig}
+      />
+    )
+  }
+
   render () {
     const { ready } = this.state
     if (!ready) {
@@ -553,6 +569,7 @@ export default class SettingCommon extends Component {
                 )
               : null
           }
+          {this.renderThemePreview(terminalThemes, theme)}
         </div>
 
         {
@@ -571,6 +588,11 @@ export default class SettingCommon extends Component {
             />
           </div>
         </div>
+        <FontThemePreview
+          fontFamily={props.config.fontFamily}
+          fontSize={props.config.fontSize}
+          themeConfig={props.store.getThemeConfig()}
+        />
 
         <div className='pd2b'>
           <span className='inline-title mg1r'>{e('customCss')}</span>

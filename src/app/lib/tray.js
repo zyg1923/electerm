@@ -6,6 +6,7 @@ const { Tray, Menu, nativeImage, app } = require('electron')
 const { existsSync } = require('fs')
 const { trayIconPath, iconPath, packInfo } = require('../common/runtime-constants')
 const globalState = require('./glob-state')
+const { releaseInstanceLock } = require('./single-instance')
 
 let tray = null
 
@@ -32,13 +33,15 @@ function showWindow () {
 }
 
 function restartApp () {
+  // Schedule the new process before this one exits. Closing the window
+  // first quits the app (willQuit) and the new process never starts.
+  // Releasing the single-instance lock lets the new process become primary,
+  // including when this window was started from the dev script.
   globalState.set('closeAction', '')
   globalState.set('willQuit', true)
-  const win = globalState.get('win')
-  if (win && !win.isDestroyed()) {
-    win.close()
-  }
+  releaseInstanceLock()
   app.relaunch()
+  app.exit(0)
 }
 
 function quitApp () {
@@ -98,5 +101,6 @@ module.exports = {
   destroyTray,
   showWindow,
   hideWindow,
-  quitApp
+  quitApp,
+  restartApp
 }

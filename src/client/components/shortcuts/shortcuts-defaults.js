@@ -73,16 +73,14 @@ export default () => {
     },
     {
       name: 'terminal_clear',
-      shortcut: 'ctrl+l,ctrl+shift+l',
-      shortcutMac: 'meta+l'
+      shortcut: 'ctrl+shift+l',
+      shortcutMac: 'meta+shift+l'
     },
-    // {
-    //   name: 'terminal_selectAll',
-    //   shortcut: 'ctrl+a,ctrl+shift+a',
-    //   shortcutMac: 'meta+a',
-    //   skipMac: true,
-    //   readonly: true
-    // },
+    {
+      name: 'terminal_selectAll',
+      shortcut: 'ctrl+shift+a',
+      shortcutMac: 'meta+shift+a'
+    },
     {
       name: 'terminal_copy',
       shortcut: 'ctrl+shift+c',

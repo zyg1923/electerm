@@ -8,6 +8,7 @@ const {
 } = require('electron')
 const { packInfo } = require('../common/runtime-constants')
 const globalState = require('./glob-state')
+const { restartApp } = require('./tray')
 
 function buildMenu () {
   const e = globalState.get('translate')
@@ -57,7 +58,7 @@ function buildMenu () {
         },
         {
           label: e('selectall'),
-          accelerator: 'CmdOrCtrl+A',
+          accelerator: 'CmdOrCtrl+Shift+A',
           click () {
             globalState.get('win').webContents.send('selectall', null)
           }
@@ -131,9 +132,7 @@ function buildMenu () {
         {
           label: e('restart'),
           click () {
-            globalState.set('willQuit', true)
-            globalState.get('win').close()
-            app.relaunch()
+            restartApp()
           }
         }
       ]

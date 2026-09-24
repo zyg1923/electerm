@@ -110,6 +110,30 @@ export function handleTerminalSelectionReplace (event, ctx) {
   return true
 }
 
+function normalizeShortcut (name, shortcut) {
+  if (String(name).startsWith('terminal_clear') && shortcut === 'ctrl+l,ctrl+shift+l') {
+    return 'ctrl+shift+l'
+  }
+  if (String(name).startsWith('terminal_clear') && shortcut === 'meta+l') {
+    return 'meta+shift+l'
+  }
+  return shortcut
+}
+
+function formatShortcutLabel (shortcut) {
+  return String(shortcut || '').split(',').map(part => {
+    return part.split('+').map(token => {
+      if (!token) {
+        return token
+      }
+      if (token.length === 1) {
+        return token.toUpperCase()
+      }
+      return token.charAt(0).toUpperCase() + token.slice(1)
+    }).join('+')
+  }).join(', ')
+}
+
 function buildConfig (config, filter = d => d) {
   const defs = shortcutsDefaultsGen().filter(filter)
   const { shortcuts = {} } = config
@@ -123,7 +147,10 @@ function buildConfig (config, filter = d => d) {
     return {
       ...p,
       [name]: {
-        shortcut: c.readonly ? c[propName] : (shortcuts[name] || c[propName]),
+        shortcut: normalizeShortcut(
+          name,
+          c.readonly ? c[propName] : (shortcuts[name] || c[propName])
+        ),
         type,
         func,
         readonly: c.readonly
@@ -142,7 +169,10 @@ function buildConfigForSearch (config) {
     return {
       ...p,
       [name]: {
-        shortcut: c.readonly ? c[propName] : (shortcuts[name] || c[propName]),
+        shortcut: normalizeShortcut(
+          name,
+          c.readonly ? c[propName] : (shortcuts[name] || c[propName])
+        ),
         type,
         func
       }
@@ -177,6 +207,18 @@ export function shortcutExtend (Cls) {
     if (event.isComposing) {
       return
     }
+    if (
+      key === 'Escape' &&
+      type === 'keydown' &&
+      this.state?.contextMenuOpen
+    ) {
+      event.preventDefault()
+      this.setContextMenuOpen?.(false)
+      return false
+    }
+    if (type === 'keydown' && this._followOutput && this.term) {
+      this.scrollFollowBottom?.()
+    }
     if (handleTerminalSelectionReplace(event, this)) {
       return false
     }
@@ -207,6 +249,20 @@ export function shortcutExtend (Cls) {
       const shiftEnterText = processEscapeSequences(this.props.config.shiftEnterMode || '\\n')
       this.socket.send(shiftEnterText)
       this.term.scrollToBottom()
+      return false
+    } else if (
+      this.term &&
+      key === 'Enter' &&
+      type === 'keydown' &&
+      !shiftKey &&
+      !ctrlKey &&
+      !altKey &&
+      !metaKey &&
+      this.term.buffer.active.type !== 'alternate' &&
+      this.interceptViCommand?.()
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
       return false
     } else if (
       this.term &&
@@ -320,7 +376,7 @@ export function shortcutDescExtend (Cls) {
     const shortcutsConfig = buildConfigForSearch(this.props.config)
     const propName = isMacJs ? 'shortcutMac' : 'shortcut'
     const n = `${name}_${propName}`
-    return shortcutsConfig[n].shortcut
+    return formatShortcutLabel(shortcutsConfig[n].shortcut)
   }
   return Cls
 }

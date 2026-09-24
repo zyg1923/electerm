@@ -3,13 +3,13 @@
  */
 
 import { memo, useMemo, useState } from 'react'
+import { formatBytes } from '../../common/byte-format'
 import { CloseOutlined } from '@ant-design/icons'
 import { Pagination, Table } from 'antd'
 import time from '../../common/time'
 import Tag from '../sftp/transfer-tag'
 import './transfer-history.styl'
 import { get as _get } from 'lodash-es'
-import { filesize } from 'filesize'
 
 const e = window.translate
 const timeRender = t => time(t)
@@ -94,7 +94,7 @@ export default memo(function TransferHistoryModal (props) {
     dataIndex: 'size',
     key: 'size',
     sorter: sorterFactory('size'),
-    render: (v) => filesize(v || 0)
+    render: (v) => formatBytes(v || 0)
   }, {
     title: e('speed'),
     dataIndex: 'speed',

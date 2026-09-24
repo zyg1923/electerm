@@ -17,7 +17,9 @@ export default function FloatWindow (props) {
     children,
     width = 880,
     height = 520,
-    zIndex = 1200
+    zIndex = 960,
+    className,
+    revealKey
   } = props
   const [minimized, setMinimized] = useState(false)
   const [maximized, setMaximized] = useState(false)
@@ -27,27 +29,10 @@ export default function FloatWindow (props) {
 
   useEffect(() => {
     if (!open) {
-      return undefined
+      return
     }
     setMinimized(false)
-    setMaximized(false)
-    setPos(null)
-    const onKey = (ev) => {
-      if (ev.key !== 'Escape') {
-        return
-      }
-      if (ev.target?.closest?.('input, textarea, [contenteditable="true"]')) {
-        return
-      }
-      ev.preventDefault()
-      ev.stopPropagation()
-      onClose && onClose()
-    }
-    document.addEventListener('keydown', onKey, true)
-    return () => {
-      document.removeEventListener('keydown', onKey, true)
-    }
-  }, [open, onClose])
+  }, [open, revealKey])
 
   useEffect(() => {
     const onMove = (ev) => {
@@ -115,7 +100,7 @@ export default function FloatWindow (props) {
     style.top = pos.top
   }
 
-  const cls = classnames('float-window', {
+  const cls = classnames('float-window', className, {
     'is-min': minimized,
     'is-max': maximized,
     'is-centered': !pos && !maximized
@@ -126,6 +111,16 @@ export default function FloatWindow (props) {
       ref={boxRef}
       className={cls}
       style={style}
+      onKeyDown={(ev) => {
+        if (ev.key !== 'Escape') {
+          return
+        }
+        if (ev.target?.closest?.('input, textarea, [contenteditable="true"]')) {
+          return
+        }
+        ev.stopPropagation()
+        onClose && onClose()
+      }}
     >
       <div
         className='float-window-header'
@@ -165,15 +160,12 @@ export default function FloatWindow (props) {
           </button>
         </div>
       </div>
-      {
-        minimized
-          ? null
-          : (
-            <div className='float-window-body'>
-              {children}
-            </div>
-            )
-      }
+      <div
+        className='float-window-body'
+        style={minimized ? { display: 'none' } : undefined}
+      >
+        {children}
+      </div>
     </div>,
     document.body
   )

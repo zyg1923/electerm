@@ -113,17 +113,31 @@ class Transfer {
     this.pausing = false
   }
 
-  destroy () {
+  destroy ({ silent = false } = {}) {
     this.onDestroy = true
     if (this.ftpClient) {
-      this.ftpClient.trackProgress() // Remove progress tracking
+      this.ftpClient.trackProgress()
       this.ftpClient.close?.().catch?.(() => {})
     }
     this.ftpClient = null
     this.src = null
     this.dst = null
+    if (!silent && !this._notified && this.ws) {
+      this._notified = true
+      try {
+        this.ws.s({
+          id: `transfer:err:${this.id}`,
+          error: {
+            message: '连接已断开',
+            stack: ''
+          }
+        })
+      } catch (e) {}
+    }
     if (this.ws) {
-      this.ws.close()
+      try {
+        this.ws.close()
+      } catch (e) {}
       this.ws = null
     }
   }

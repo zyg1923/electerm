@@ -4,22 +4,22 @@
 
 import { Table, Tag } from 'antd'
 import { auto } from 'manate/react'
-import { ot } from './ops-i18n'
+import { ot, otEnum } from './ops-i18n'
 
 export default auto(function HistoryPanel () {
   const store = window.store
   const taskCols = [
-    { title: 'id', dataIndex: 'id', key: 'id', width: 100, ellipsis: true },
-    { title: ot('type'), dataIndex: 'type', key: 'type', width: 100 },
+    { title: ot('taskId'), dataIndex: 'id', key: 'id', width: 100, ellipsis: true },
+    { title: ot('type'), dataIndex: 'type', key: 'type', width: 120, render: (v) => otEnum(v) },
     {
       title: ot('status'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: s => <Tag>{s}</Tag>
+      render: s => <Tag>{otEnum(s)}</Tag>
     },
     {
-      title: 'created',
+      title: ot('createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: t => t ? new Date(t).toLocaleString() : ''
@@ -27,15 +27,15 @@ export default auto(function HistoryPanel () {
   ]
   const auditCols = [
     {
-      title: 'at',
+      title: ot('at'),
       dataIndex: 'at',
       key: 'at',
       width: 160,
       render: t => t ? new Date(t).toLocaleString() : ''
     },
-    { title: 'action', dataIndex: 'action', key: 'action', width: 140 },
+    { title: ot('action'), dataIndex: 'action', key: 'action', width: 140 },
     {
-      title: 'detail',
+      title: ot('detail'),
       key: 'detail',
       ellipsis: true,
       render: (_, r) => JSON.stringify(r.detail || r).slice(0, 120)

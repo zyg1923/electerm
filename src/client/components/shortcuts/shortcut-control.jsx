@@ -31,6 +31,9 @@ class ShortcutControl extends React.PureComponent {
   }
 
   onEvent = (e) => {
+    if (e.target?.closest?.('.ops-file-editor')) {
+      return
+    }
     // First check SFTP shortcuts
     this.handleSftpKeyboardEvent(e)
     // Then handle extended shortcuts

@@ -24,12 +24,11 @@ export default class Remote2RemoteHandlers extends Component {
     this.handlers.clear()
   }
 
-  canHandle = ({ fromFile, targetHost }) => {
+  canHandle = ({ fromFile, targetTabId }) => {
     return fromFile?.type === typeMap.remote &&
-      fromFile?.host &&
-      targetHost &&
-      fromFile.host !== targetHost &&
-      fromFile?.tabId
+      fromFile?.tabId &&
+      targetTabId &&
+      fromFile.tabId !== targetTabId
   }
 
   createHandler = ({ fromFile, targetPathBase, targetTab }) => {
@@ -57,12 +56,29 @@ export default class Remote2RemoteHandlers extends Component {
     }
   }
 
+  relayToDirectory = ({ fromFiles, targetDir, targetTab }) => {
+    const targetTabId = targetTab?.id
+    let handled = 0
+    for (const fromFile of fromFiles) {
+      if (!this.canHandle({ fromFile, targetTabId })) {
+        continue
+      }
+      handled += 1
+      this.createHandler({
+        fromFile,
+        targetPathBase: targetDir,
+        targetTab
+      })
+    }
+    return handled
+  }
+
   onRemote2RemoteDrop = ({ fromFiles, toFile, targetTab }) => {
     const targetPathBase = resolve(toFile.path, toFile.name)
-    const targetHost = targetTab?.host
+    const targetTabId = targetTab?.id
     let handled = false
     for (const fromFile of fromFiles) {
-      if (!this.canHandle({ fromFile, targetHost })) {
+      if (!this.canHandle({ fromFile, targetTabId })) {
         continue
       }
       handled = true

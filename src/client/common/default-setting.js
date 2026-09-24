@@ -88,6 +88,7 @@ export default {
   apiPathAI: '/chat/completions',
   proxyAI: '',
   sessionLogPath: '',
+  transferTempDir: '',
   sshSftpSplitView: true,
   showCmdSuggestions: true,
   autoReconnectTerminal: false,

@@ -78,6 +78,7 @@ class Term extends Component {
       totalLines: 0,
       reconnectCountdown: null,
       terminalError: null,
+      contextMenuOpen: false,
       dropFileModalVisible: false,
       droppedFiles: [],
       fontSizeChanged: false,
@@ -151,7 +152,32 @@ class Term extends Component {
     }
   }
 
-  componentDidUpdate (prevProps) {
+  applyLoadingCursor = (loading) => {
+    const term = this.term
+    if (!term) {
+      return
+    }
+    if (loading) {
+      if (!this._cursorBackup) {
+        this._cursorBackup = {
+          cursorStyle: term.options.cursorStyle,
+          cursorBlink: term.options.cursorBlink
+        }
+      }
+      term.options.cursorBlink = false
+      return
+    }
+    if (this._cursorBackup) {
+      term.options.cursorStyle = this._cursorBackup.cursorStyle || 'block'
+      term.options.cursorBlink = !!this._cursorBackup.cursorBlink
+      this._cursorBackup = null
+    }
+  }
+
+  componentDidUpdate (prevProps, prevState) {
+    if (prevState?.loading !== this.state.loading) {
+      this.applyLoadingCursor(this.state.loading)
+    }
     const shouldChange = (
       prevProps.currentBatchTabId !== this.props.currentBatchTabId &&
       this.props.tab.id === this.props.currentBatchTabId &&
@@ -205,7 +231,9 @@ class Term extends Component {
     // which means the WebGL background needs to change even though
     // themeConfig (terminal colours) is identical.
     const themeIdChanged = prevProps.config?.theme !== this.props.config?.theme
-    if ((themeChanged || themeIdChanged) && this.term) {
+    const previewChanged = prevProps.previewThemeId !== this.props.previewThemeId ||
+      prevProps.previewThemeDraft !== this.props.previewThemeDraft
+    if ((themeChanged || themeIdChanged || previewChanged) && this.term) {
       this.registerTerminalColorQueryHandlers(this.term, this.props.themeConfig)
       this.applyTerminalTheme(true)
     }
@@ -225,6 +253,10 @@ class Term extends Component {
     if (window.store.activeTerminalId === this.props.tab.id) {
       window.store.activeTerminalId = ''
     }
+    if (this._escMenu) {
+      document.removeEventListener('keydown', this._escMenu, true)
+      this._escMenu = null
+    }
     if (this._clearWheelEl && this._clearWheel) {
       this._clearWheelEl.removeEventListener('wheel', this._clearWheel, true)
     }
@@ -237,6 +269,12 @@ class Term extends Component {
       }
     }
     clearTimeout(this._restoreTimer)
+    clearTimeout(this._clsScrollTimer)
+    clearTimeout(this._suppressCopyTimer)
+    clearTimeout(this._sepTimer)
+    this._sepArmed = false
+    this._clearWriteDisp?.dispose?.()
+    this._clearWriteDisp = null
     this._fitObserver?.disconnect()
     this._fitObserver = null
     this._clearKeepDisp?.dispose?.()
@@ -371,6 +409,25 @@ class Term extends Component {
     return Math.ceil(fontSize * Math.max(lineHeight, 1))
   }
 
+  setContextMenuOpen = (open) => {
+    if (this._escMenu) {
+      document.removeEventListener('keydown', this._escMenu, true)
+      this._escMenu = null
+    }
+    if (open) {
+      this._escMenu = (ev) => {
+        if (ev.key !== 'Escape') {
+          return
+        }
+        ev.preventDefault()
+        ev.stopPropagation()
+        this.setContextMenuOpen(false)
+      }
+      document.addEventListener('keydown', this._escMenu, true)
+    }
+    this.setState({ contextMenuOpen: open })
+  }
+
   render () {
     const { loading } = this.state
     const { height, width, left, top, fullscreen } = this.props
@@ -380,7 +437,8 @@ class Term extends Component {
       'term-wrap',
       'tw-' + id,
       {
-        'terminal-not-active': !isActive
+        'terminal-not-active': !isActive,
+        'terminal-loading': loading
       }
     )
     const prps1 = {
@@ -390,7 +448,8 @@ class Term extends Component {
         width,
         left,
         top,
-        zIndex: 10
+        zIndex: 10,
+        '--term-pad': `${this.terminalContentPad()}px`
       },
       onDrop: this.onDrop,
       onContextMenu: this.onContextMenuInner,
@@ -420,6 +479,10 @@ class Term extends Component {
       menu: {
         items: this.renderContextMenu(),
         onClick: this.onContextMenu
+      },
+      open: !!this.state.contextMenuOpen,
+      onOpenChange: (next) => {
+        this.setContextMenuOpen(!!next)
       },
       trigger: this.props.config.pasteWhenContextMenu ? [] : ['contextMenu']
     }

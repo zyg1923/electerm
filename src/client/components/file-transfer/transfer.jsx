@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { message } from 'antd'
 import copy from 'json-deep-copy'
 import { isFunction } from 'lodash-es'
 import generate from '../../common/uid'
@@ -49,10 +50,15 @@ export default class TransportAction extends Component {
   }
 
   componentDidUpdate (prevProps) {
+    if (this.props.transfer?.tabId && this.props.transfer.tabId !== this.tabId) {
+      this.tabId = this.props.transfer.tabId
+    }
     if (
       prevProps.inited !== this.props.inited &&
       this.props.inited === true
     ) {
+      this.started = false
+      this.onCancel = false
       this.initTransfer()
     }
     if (
@@ -60,7 +66,7 @@ export default class TransportAction extends Component {
     ) {
       if (this.props.pausing) {
         this.pause()
-      } else {
+      } else if (!this.props.transfer?.error) {
         this.resume()
       }
     }
@@ -96,6 +102,99 @@ export default class TransportAction extends Component {
     return this[type + 'CheckExist'](path, tabId)
   }
 
+  partSuffix = '.electerm.part'
+
+  getPartPath = (finalPath) => {
+    return String(finalPath || '') + this.partSuffix
+  }
+
+  shouldUsePartFile = (fromFile = this.fromFile) => {
+    return !this.isFtp && fromFile && !fromFile.isDirectory
+  }
+
+  removePath = async (type, path, tabId) => {
+    if (!path) {
+      return
+    }
+    if (type === typeMap.local) {
+      await window.fs.unlink(path).catch(() => window.fs.rmrf(path).catch(() => null))
+      return
+    }
+    const sftp = refs.get('sftp-' + tabId)?.sftp
+    if (!sftp) {
+      return
+    }
+    await sftp.rm(path).catch(() => null)
+  }
+
+  movePath = async (type, from, to, tabId) => {
+    if (type === typeMap.local) {
+      await window.fs.unlink(to).catch(() => null)
+      await window.fs.mv(from, to)
+      return
+    }
+    const sftp = refs.get('sftp-' + tabId)?.sftp
+    if (!sftp) {
+      throw new Error('会话已断开，无法完成续传收尾')
+    }
+    await sftp.rm(to).catch(() => null)
+    await sftp.rename(from, to)
+  }
+
+  /**
+   * Prefer an existing .electerm.part half-file. If only an incomplete final
+   * exists, rename it to .part so resume never corrupts a "finished" name.
+   */
+  prepareResumeTarget = async (transfer) => {
+    const {
+      typeTo,
+      toPath,
+      tabId
+    } = transfer
+    const fromFile = transfer.fromFile || this.fromFile || {}
+    if (!this.shouldUsePartFile(fromFile)) {
+      const toFile = await this.checkExist(typeTo, toPath, tabId)
+      return { finalPath: toPath, partPath: toPath, toFile, usingPart: false }
+    }
+    const partPath = this.getPartPath(toPath)
+    let partFile = await this.checkExist(typeTo, partPath, tabId)
+    const finalFile = await this.checkExist(typeTo, toPath, tabId)
+    const fromSize = Number(fromFile.size) || Number(transfer.size) || 0
+    if (!partFile && finalFile && !finalFile.isDirectory) {
+      const finalSize = Number(finalFile.size) || 0
+      if (fromSize > 0 && finalSize > 0 && finalSize < fromSize) {
+        await this.movePath(typeTo, toPath, partPath, tabId)
+        partFile = await this.checkExist(typeTo, partPath, tabId)
+        return {
+          finalPath: toPath,
+          partPath,
+          toFile: partFile || null,
+          finalFile: null,
+          usingPart: true
+        }
+      }
+    }
+    return {
+      finalPath: toPath,
+      partPath,
+      toFile: partFile || null,
+      finalFile: finalFile || null,
+      usingPart: true
+    }
+  }
+
+  finalizePartFile = async () => {
+    if (!this.usingPart || !this.partPath || !this.finalPath) {
+      return
+    }
+    if (this.partPath === this.finalPath) {
+      return
+    }
+    const { typeTo, tabId } = this.props.transfer
+    await this.movePath(typeTo, this.partPath, this.finalPath, tabId)
+    this.partPath = null
+  }
+
   update = (up) => {
     const { id } = this.props.transfer
     refsStatic.get('transfer-queue')?.addToQueue(
@@ -118,6 +217,7 @@ export default class TransportAction extends Component {
     assign(tr, {
       host: tr.host,
       error: errorMsg,
+      statusText: '错误',
       finishTime: Date.now()
     })
     store.addTransferHistory(tr)
@@ -155,14 +255,26 @@ export default class TransportAction extends Component {
     const finishTime = Date.now()
     if (!config.disableTransferHistory) {
       const fromFile = transfer.fromFile || this.fromFile
-      const size = update.size ?? update.transferred ?? fromFile.size
+      const size = update.size ?? update.transferred ?? fromFile?.size
+      const failed = !!(update && update.error)
       const r = copy(transfer)
+      const baseName = (p) => {
+        const s = String(p || '').replace(/[\\/]+$/, '')
+        if (!s) return ''
+        const parts = s.split(/[\\/]/)
+        return parts[parts.length - 1] || s
+      }
       assign(r, {
         finishTime,
         startTime: this.startTime,
         size,
+        percent: failed ? (Number(transfer.percent) || 0) : 100,
+        statusText: failed ? '错误' : '完成',
+        error: failed ? update.error : '',
         next: null,
-        speed: format(size, this?.startTime)
+        speed: format(size, this?.startTime),
+        fromName: r.fromName || fromFile?.name || baseName(r.fromPathReal || r.fromPath),
+        toName: r.toName || r.toFile?.name || baseName(r.toPathReal || r.toPath)
       })
       window.store.addTransferHistory(
         r
@@ -186,18 +298,22 @@ export default class TransportAction extends Component {
     const transferredValue = typeof transferred === 'object' && transferred !== null
       ? transferred.transferred
       : transferred
+    const known = Number(fromFile.size) || Number(transfer.size) || Number(this.total) || 0
     const total = typeof transferred === 'object' && transferred !== null
-      ? (transferred.total || fromFile.size || 0)
-      : (fromFile.size || 0)
+      ? (transferred.total || known)
+      : known
     const up = {}
     let percent = total === 0
-      ? 100
+      ? (transferredValue > 0 ? 0 : 100)
       : Math.floor(100 * transferredValue / total)
     percent = percent >= 100 ? 100 : percent
-    this.total = total
+    if (total > 0) {
+      this.total = total
+    }
     up.percent = percent
     up.status = 'active'
     up.transferred = transferredValue
+    up.size = this.total || known || total
     up.startTime = this.startTime
     up.speed = format(transferredValue, up.startTime)
     assign(
@@ -286,22 +402,59 @@ export default class TransportAction extends Component {
     const fromMode = fromFile.mode
     const transferType = typeFrom === typeMap.local ? transferTypeMap.upload : transferTypeMap.download
     const isDown = transferType === transferTypeMap.download
+    const usePart = this.shouldUsePartFile(fromFile)
+    const partPath = this.getPartPath(toPath)
+    this.usingPart = usePart
+    this.finalPath = toPath
+    this.partPath = usePart ? partPath : toPath
+
+    // Half-done data lives in .electerm.part; rename to final only after success.
     const localPath = isDown
-      ? toPath
+      ? (usePart ? partPath : toPath)
       : fromPath
     const remotePath = isDown
       ? fromPath
-      : toPath
+      : (usePart ? partPath : toPath)
+
+    let startFrom = Math.max(
+      0,
+      Number(this.startFrom) ||
+      Number(transfer.startFrom) ||
+      0
+    )
+    if (usePart && startFrom <= 0) {
+      const existing = await this.checkExist(
+        isDown ? typeMap.local : typeMap.remote,
+        partPath,
+        transfer.tabId
+      )
+      startFrom = Number(existing?.size) || 0
+      this.startFrom = startFrom
+    }
+
     const mode = toFile.mode || fromMode
-    const sftp = refs.get('sftp-' + this.tabId).sftp
+    const sftp = refs.get('sftp-' + this.tabId)?.sftp
+    if (!sftp) {
+      return this.tagTransferError(transfer.id, '会话已断开，无法传输')
+    }
+    const finish = async (arg) => {
+      try {
+        if (usePart) {
+          await this.finalizePartFile()
+        }
+      } catch (e) {
+        return this.onError(e)
+      }
+      return onEnd(arg)
+    }
     this.transport = await sftp[transferType]({
       remotePath,
       localPath,
       isDirectory: !!fromFile.isDirectory,
-      options: { mode },
+      options: { mode, startFrom },
       onData: this.onData,
       onError: this.onError,
-      onEnd
+      onEnd: finish
     })
   }
 
@@ -314,6 +467,14 @@ export default class TransportAction extends Component {
       return
     }
     this.started = true
+    try {
+      await this.runTransfer()
+    } catch (e) {
+      this.onError(e)
+    }
+  }
+
+  runTransfer = async () => {
     const { transfer } = this.props
     const {
       id,
@@ -345,10 +506,27 @@ export default class TransportAction extends Component {
       return this.tagTransferError(id, 'file not exist')
     }
     this.fromFile = fromFile
+    let size = Number(fromFile.size) || Number(transfer.size) || 0
+    if (!size && typeFrom === typeMap.local && !fromFile.isDirectory) {
+      const info = await getLocalFileInfo(fromPath).catch(() => null)
+      size = Number(info?.size) || 0
+    }
+    this.total = size
     this.update({
-      fromFile
+      fromFile: size && !fromFile.size
+        ? { ...fromFile, size }
+        : fromFile,
+      size
     })
     if (fromPath === toPath && typeFrom === typeTo) {
+      if (operation === fileOperationsMap.cp) {
+        const picked = await this.pickKeepBothPath(toPath, typeTo, transfer.tabId)
+        this.newPath = picked.newPath
+        this.newName = picked.newName
+        this.update({
+          toPath: picked.newPath
+        })
+      }
       return this.mvOrCp()
     }
     const hasConflict = await this.checkConflict()
@@ -363,61 +541,161 @@ export default class TransportAction extends Component {
   }
 
   checkConflict = async (transfer = this.props.transfer) => {
-    const {
-      typeTo,
-      toPath,
-      tabId
-    } = transfer
     const transferStillExists = window.store.fileTransfers.some(t => t.id === transfer.id)
     if (!transferStillExists) {
       return false
     }
-    const toFile = await this.checkExist(typeTo, toPath, tabId)
+    const fromFile = transfer.fromFile || this.fromFile || {}
+    const prepared = await this.prepareResumeTarget(transfer)
+    this.usingPart = prepared.usingPart
+    this.partPath = prepared.partPath
+    this.finalPath = prepared.finalPath
 
-    if (toFile) {
-      this.update({
-        toFile
-      })
-      if (transfer.resolvePolicy) {
-        this.onDecision(transfer.resolvePolicy)
-        return true
-      }
-      if (this.resolvePolicy) {
-        this.onDecision(this.resolvePolicy)
-        return true
-      }
-      const transferWithToFile = {
-        ...copy(transfer),
-        toFile,
-        fromFile: copy(transfer.fromFile || this.fromFile)
-      }
-      refsStatic.get('transfer-conflict')?.addConflict(transferWithToFile)
+    const partFile = prepared.toFile
+    const finalFile = prepared.usingPart
+      ? prepared.finalFile
+      : prepared.toFile
+    const conflictFile = partFile || finalFile
+    if (!conflictFile) {
+      // No final/part yet — still write into .part for clean finalize later.
+      return false
+    }
+
+    const fromSize = Number(fromFile.size) || Number(transfer.size) || 0
+    const toSize = Number(conflictFile.size) || 0
+    const canResume = !fromFile.isDirectory &&
+      toSize > 0 &&
+      fromSize > 0 &&
+      toSize < fromSize
+
+    this.update({
+      toFile: conflictFile,
+      partPath: prepared.usingPart ? prepared.partPath : '',
+      startFrom: canResume ? toSize : 0
+    })
+
+    // Incomplete .electerm.part → auto resume (fake cut already on disk)
+    if (canResume && partFile && prepared.usingPart) {
+      this.startFrom = toSize
+      this.onDecision(fileActions.resume)
       return true
     }
-    return false
+    if (canResume && (
+      transfer.resolvePolicy === fileActions.resume ||
+      Number(transfer.startFrom) > 0 ||
+      Number(transfer.transferred) > 0
+    )) {
+      this.startFrom = toSize
+      this.onDecision(fileActions.resume)
+      return true
+    }
+    if (transfer.resolvePolicy) {
+      this.onDecision(transfer.resolvePolicy)
+      return true
+    }
+    if (this.resolvePolicy) {
+      this.onDecision(this.resolvePolicy)
+      return true
+    }
+
+    const transferWithToFile = {
+      ...copy(transfer),
+      toFile: conflictFile,
+      fromFile: copy(fromFile),
+      partPath: prepared.usingPart ? prepared.partPath : ''
+    }
+    const conflict = refsStatic.get('transfer-conflict')
+    if (!conflict) {
+      if (canResume) {
+        this.startFrom = toSize
+        this.onDecision(fileActions.resume)
+        return true
+      }
+      this.tagTransferError(transfer.id, '无法确认是否覆盖已有文件')
+      return true
+    }
+    this.update({
+      waitingConfirm: true
+    })
+    conflict.addConflict(transferWithToFile)
+    return true
   }
 
-  onDecision = (policy) => {
+  onDecision = async (policy) => {
+    this.update({
+      waitingConfirm: false
+    })
     if (policy === fileActions.skip || policy === fileActions.cancel) {
       return this.onEnd()
     }
 
+    const {
+      typeTo,
+      toPath,
+      tabId
+    } = this.props.transfer
+    const finalPath = this.newPath || toPath
+    const partPath = this.getPartPath(finalPath)
+
+    if (policy === fileActions.resume) {
+      if (this.isFtp) {
+        message.warning('FTP 暂不支持断点续传，将整文件重新传输')
+        this.startFrom = 0
+        this.update({
+          startFrom: 0,
+          resolvePolicy: fileActions.mergeOrOverwrite
+        })
+      } else {
+        const toSize = Number(this.props.transfer.toFile?.size) || Number(this.startFrom) || 0
+        this.startFrom = toSize
+        this.usingPart = true
+        this.partPath = partPath
+        this.finalPath = finalPath
+        this.update({
+          startFrom: toSize,
+          resolvePolicy: fileActions.resume,
+          transferred: toSize,
+          partPath
+        })
+      }
+    } else {
+      this.startFrom = 0
+      if (policy === fileActions.mergeOrOverwrite) {
+        if (this.shouldUsePartFile()) {
+          await this.removePath(typeTo, partPath, tabId)
+          await this.removePath(typeTo, finalPath, tabId)
+          this.usingPart = true
+          this.partPath = partPath
+          this.finalPath = finalPath
+        }
+        this.update({
+          startFrom: 0,
+          partPath: this.shouldUsePartFile() ? partPath : ''
+        })
+      } else if (policy === fileActions.rename) {
+        this.update({
+          startFrom: 0
+        })
+      }
+    }
+
     if (policy === fileActions.rename) {
-      const {
-        typeTo,
-        toPath
-      } = this.props.transfer
       this.oldPath = toPath
-      const { newPath, newName } = this.handleRename(toPath, typeTo === typeMap.remote)
+      const { newPath, newName } = await this.pickKeepBothPath(toPath, typeTo, tabId)
       this.update({
         toPath: newPath
       })
       this.newPath = newPath
       this.newName = newName
+      if (this.shouldUsePartFile()) {
+        this.usingPart = true
+        this.partPath = this.getPartPath(newPath)
+        this.finalPath = newPath
+      }
     }
 
-    const { typeFrom, typeTo } = this.props.transfer
-    if (typeFrom === typeTo) {
+    const { typeFrom, typeTo: tTo } = this.props.transfer
+    if (typeFrom === tTo) {
       return this.mvOrCp()
     }
     this.startTransfer()
@@ -553,13 +831,27 @@ export default class TransportAction extends Component {
     return sftp[type + 'List'](true, path)
   }
 
-  handleRename = (fromPath, isRemote) => {
+  handleRename = (fromPath, isRemote, index = 2) => {
     const { path, base, ext } = getFolderFromFilePath(fromPath, isRemote)
-    const newName = `${base}(rename-${generate()})${ext ? '.' + ext : ''}`
+    const newName = ext
+      ? `${base} (${index}).${ext}`
+      : `${base} (${index})`
     return {
       newPath: resolve(path, newName),
       newName
     }
+  }
+
+  pickKeepBothPath = async (toPath, typeTo, tabId) => {
+    const isRemote = typeTo === typeMap.remote
+    for (let i = 2; i < 100; i++) {
+      const picked = this.handleRename(toPath, isRemote, i)
+      const exists = await this.checkExist(typeTo, picked.newPath, tabId)
+      if (!exists) {
+        return picked
+      }
+    }
+    return this.handleRename(toPath, isRemote, Date.now() % 100000)
   }
 
   onFolderData = (transferred) => {
@@ -806,9 +1098,28 @@ export default class TransportAction extends Component {
   }
 
   onError = (e) => {
+    const msg = e?.message || String(e || '传输失败')
+    const disconnected = /连接已断开|会话已断开|会话已|ECONNRESET|ECONNREFUSED|not found|closed|disconnect|SSH connection/i.test(msg)
+    if (disconnected) {
+      try {
+        this.transport && this.transport.destroy()
+      } catch (err) {}
+      this.transport = null
+      this.started = false
+      this.onCancel = false
+      this.update({
+        error: msg,
+        statusText: '错误',
+        pausing: true,
+        inited: false,
+        waitingConfirm: false,
+        speed: ''
+      })
+      return
+    }
     const up = {
       status: 'exception',
-      error: e.message
+      error: msg
     }
     this.onEnd(up)
     window.store.onError(e)

@@ -15,7 +15,7 @@ import {
   Collapse
 } from 'antd'
 import Modal from '../common/modal'
-import { ot } from './ops-i18n'
+import { ot, otEnum } from './ops-i18n'
 import { OpsTabSelect, useOpsTabSelect } from './ops-tab-select'
 import {
   builtinTemplates,
@@ -147,7 +147,7 @@ export default function CommandCenterPanel () {
           style={{ width: 140 }}
           value={category}
           onChange={setCategory}
-          options={[{ value: 'all', label: '全部' }, ...commandCategories.map(c => ({ value: c, label: c }))]}
+          options={[{ value: 'all', label: '全部' }, ...commandCategories.map(c => ({ value: c, label: otEnum(c) }))]}
         />
         <Select
           style={{ width: 280 }}
@@ -157,7 +157,7 @@ export default function CommandCenterPanel () {
             value: t.id,
             label: (
               <span>
-                <Tag color={dangerColor[t.danger]}>{t.danger}</Tag>
+                <Tag color={dangerColor[t.danger]}>{otEnum(t.danger)}</Tag>
                 {t.name}
               </span>
             )
@@ -276,9 +276,9 @@ export default function CommandCenterPanel () {
           pagination={false}
           dataSource={snapshot.items}
           columns={[
-            { title: 'Tab', dataIndex: 'tabId', ellipsis: true },
-            { title: '状态', dataIndex: 'status', width: 90 },
-            { title: 'exit', dataIndex: 'exitCode', width: 60 },
+            { title: ot('terminal'), dataIndex: 'tabId', ellipsis: true },
+            { title: '状态', dataIndex: 'status', width: 90, render: (v) => otEnum(v) },
+            { title: ot('exitCode'), dataIndex: 'exitCode', width: 70 },
             {
               title: '输出',
               key: 'out',

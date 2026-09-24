@@ -2,11 +2,12 @@ import { auto } from 'manate/react'
 import {
   Select,
   Dropdown,
-  Badge
+  Badge,
+  Switch
 } from 'antd'
 import { BarChartOutlined, TranslationOutlined, DoubleRightOutlined, FunctionOutlined } from '@ant-design/icons'
 import './footer.styl'
-import { statusMap, minTerminalFontSize } from '../../common/constants'
+import { statusMap, minTerminalFontSize, isWin } from '../../common/constants'
 import BatchInput from './batch-input'
 import encodes from '../bookmark-form/common/encodes'
 import { refs } from '../common/ref'
@@ -224,6 +225,65 @@ export default auto(function FooterEntry (props) {
     })
   }
 
+  function localShellOf (tab) {
+    if (tab?.localShell === 'cmd' || tab?.localShell === 'powershell') {
+      return tab.localShell
+    }
+    return /cmd\.exe$/i.test(String(tab?.execWindows || '')) ? 'cmd' : 'powershell'
+  }
+
+  function isLocalWindowsTab (tab) {
+    if (!isWin || !tab || tab.host) {
+      return false
+    }
+    return !tab.type || tab.type === 'local'
+  }
+
+  function reopenLocalShell (shell, admin) {
+    const id = props.store.activeTabId
+    const execWindows = shell === 'cmd'
+      ? 'System32/cmd.exe'
+      : 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    window.store.updateTab(id, {
+      execWindows,
+      execWindowsArgs: [],
+      localShell: shell,
+      localAdmin: !!admin
+    })
+    window.store.reloadTab(id)
+  }
+
+  function renderLocalShell () {
+    const tab = props.store.currentTab
+    // Show even when status is error/processing — otherwise a failed local
+    // shell leaves an empty pane with no way to switch CMD/PowerShell.
+    if (!isLocalWindowsTab(tab)) {
+      return null
+    }
+    const shell = localShellOf(tab)
+    const admin = !!tab.localAdmin
+    return (
+      <div className='terminal-footer-unit terminal-footer-shell'>
+        <Select
+          size='small'
+          value={shell}
+          popupMatchSelectWidth={false}
+          options={[
+            { value: 'powershell', label: 'PowerShell' },
+            { value: 'cmd', label: 'CMD' }
+          ]}
+          onChange={(next) => reopenLocalShell(next, admin)}
+        />
+        <span className='terminal-footer-shell-admin'>管理员</span>
+        <Switch
+          size='small'
+          checked={admin}
+          onChange={(next) => reopenLocalShell(shell, next)}
+        />
+      </div>
+    )
+  }
+
   function renderZoomRatio () {
     const { store } = props
     const ui = Math.round((store.uiZoom || store.config?.zoom || 1) * 100)
@@ -319,6 +379,7 @@ export default auto(function FooterEntry (props) {
         {renderBatchInputs()}
         {renderEncodingInfo()}
         {renderInfoIcon()}
+        {renderLocalShell()}
         {renderZoomRatio()}
       </div>
     </div>

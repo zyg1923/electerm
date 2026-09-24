@@ -170,13 +170,13 @@ export default auto(function ApprovalPanel () {
               <div>
                 <Space className='mg1b' wrap>
                   <Input
-                    placeholder='type: host|group|commandTemplate|user'
+                    placeholder='类型：主机 / 分组 / 命令模板 / 用户'
                     value={wlForm.type}
                     onChange={e => setWlForm({ ...wlForm, type: e.target.value })}
                     style={{ width: 200 }}
                   />
                   <Input
-                    placeholder='refId'
+                    placeholder='对象编号'
                     value={wlForm.refId}
                     onChange={e => setWlForm({ ...wlForm, refId: e.target.value })}
                   />
@@ -194,7 +194,7 @@ export default auto(function ApprovalPanel () {
                   dataSource={store.opsApprovalWhitelist || []}
                   columns={[
                     { title: ot('type'), dataIndex: 'type', key: 'type' },
-                    { title: 'refId', dataIndex: 'refId', key: 'refId' },
+                    { title: ot('refId'), dataIndex: 'refId', key: 'refId' },
                     { title: ot('reason'), dataIndex: 'reason', key: 'reason' }
                   ]}
                   locale={{ emptyText: ot('empty') }}

@@ -11,7 +11,11 @@ import {
   expandedKeysLsKey,
   resolutionsLsKey,
   localAddrBookmarkLsKey,
-  syncServerDataKey
+  syncServerDataKey,
+  opsWizardLsKey,
+  opsPlaybooksLsKey,
+  opsQuickActionsLsKey,
+  opsDiaryLsKey
 } from '../common/constants'
 import * as ls from '../common/safe-local-storage'
 import { debounce, isEmpty } from 'lodash-es'
@@ -24,8 +28,8 @@ export default store => {
     // ai chat history changes on every streaming tick (200ms polls,
     // per-chunk agent updates); debounce to coalesce them into one
     // db write after the stream pauses
-    const schedule = name === 'aiChatHistory'
-      ? func => debounce(func, 1000)
+    const schedule = name === 'aiChatHistory' || name === 'fileTransfers'
+      ? func => debounce(func, name === 'fileTransfers' ? 1500 : 1000)
       : undefined
     window[`watch${name}`] = autoRun(async () => {
       const n = store.getItems(name)
@@ -130,6 +134,26 @@ export default store => {
     ls.setItemJSON(localAddrBookmarkLsKey, store.addressBookmarksLocal)
     return store.addressBookmarksLocal
   }).start()
+
+  autoRun(() => {
+    ls.setItemJSON(opsWizardLsKey, store.opsWizardState || { activeTool: 'chmod', forms: {} })
+    return store.opsWizardState
+  }, func => debounce(func, 300)).start()
+
+  autoRun(() => {
+    ls.setItemJSON(opsPlaybooksLsKey, store.opsPlaybooks || [])
+    return store.opsPlaybooks
+  }, func => debounce(func, 300)).start()
+
+  autoRun(() => {
+    ls.setItemJSON(opsQuickActionsLsKey, store.opsQuickActions || [])
+    return store.opsQuickActions
+  }, func => debounce(func, 300)).start()
+
+  autoRun(() => {
+    ls.setItemJSON(opsDiaryLsKey, store.opsDiaryEntries || [])
+    return store.opsDiaryEntries
+  }, func => debounce(func, 300)).start()
 
   autoRun(() => {
     ls.setItemJSON(checkedKeysLsKey, store.checkedKeys)

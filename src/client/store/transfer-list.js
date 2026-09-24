@@ -6,6 +6,25 @@ import uid from '../common/uid'
 
 const { assign } = Object
 
+function pathBasename (p) {
+  const s = String(p || '').replace(/[\\/]+$/, '')
+  if (!s) {
+    return ''
+  }
+  const parts = s.split(/[\\/]/)
+  return parts[parts.length - 1] || s
+}
+
+function ensureTransferNames (t) {
+  if (!t.fromName) {
+    t.fromName = t.fromFile?.name || pathBasename(t.fromPathReal || t.fromPath)
+  }
+  if (!t.toName) {
+    t.toName = t.toFile?.name || pathBasename(t.toPathReal || t.toPath)
+  }
+  return t
+}
+
 export default Store => {
   Store.prototype.handleTransferTab = function (tab) {
     window.store.transferTab = tab
@@ -18,6 +37,9 @@ export default Store => {
       return
     }
     assign(fileTransfers[index], update)
+    if (update && (update.toPath || update.toPathReal || update.fromPath || update.fromPathReal)) {
+      ensureTransferNames(fileTransfers[index])
+    }
   }
 
   Store.prototype.addTransferList = function (items) {
@@ -26,7 +48,7 @@ export default Store => {
     const transferBatch = uid()
     const nextItems = items.map(t => {
       t.transferBatch = transferBatch
-      return t
+      return ensureTransferNames(t)
     })
     fileTransfers.push(...nextItems)
   }

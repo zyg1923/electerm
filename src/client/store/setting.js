@@ -156,6 +156,8 @@ export default Store => {
 
   Store.prototype.hideSettingModal = function () {
     const { store } = window
+    store.previewThemeId = ''
+    store.previewThemeDraft = null
     store.showModal = modals.hide
     store.setSettingItem({})
     // reset so a later open starts from the menu on mobile
@@ -171,8 +173,29 @@ export default Store => {
     window.et.fonts = fonts
   }
 
+  Store.prototype.openTransferHistory = function () {
+    const { store } = window
+    if (
+      store.settingTab === 'transferHistory' &&
+      store.showModal === modals.setting
+    ) {
+      return store.hideSettingModal()
+    }
+    store.storeAssign({
+      settingTab: 'transferHistory'
+    })
+    store.setSettingItem({ id: 'transfer-history', name: 'transferHistory' })
+    store.openSettingModal()
+  }
+
   Store.prototype.handleChangeSettingTab = function (settingTab) {
     const { store } = window
+    if (settingTab === 'transferHistory') {
+      store.storeAssign({ settingTab })
+      store.setSettingItem({ id: 'transfer-history', name: 'transferHistory' })
+      store.settingMobileView = 'menu'
+      return
+    }
     const arr = store.getItems(settingTab)
     const item = getInitItem(arr, settingTab)
     store.storeAssign({

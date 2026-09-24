@@ -5,9 +5,8 @@
 
 import { Component } from 'react'
 import Transports from './transports-ui-store'
-import { maxTransport } from '../../common/constants'
-import { refsStatic } from '../common/ref'
-// import { action } from 'manate'
+import { maxTransport, statusMap } from '../../common/constants'
+import { refs, refsStatic, refsTransfers } from '../common/ref'
 
 export default class TransportsActionStore extends Component {
   constructor (props) {
@@ -17,6 +16,14 @@ export default class TransportsActionStore extends Component {
 
   componentDidMount () {
     this.control()
+    this._sessionWatch = setInterval(() => {
+      this.failDeadSessionTransfers()
+    }, 1500)
+  }
+
+  componentWillUnmount () {
+    clearInterval(this._sessionWatch)
+    this._sessionWatch = null
   }
 
   componentDidUpdate (prevProps) {
@@ -24,6 +31,40 @@ export default class TransportsActionStore extends Component {
       prevProps.fileTransferChanged !== this.props.fileTransferChanged
     ) {
       this.control()
+    }
+  }
+
+  failDeadSessionTransfers = () => {
+    const { store } = window
+    const list = store.fileTransfers || []
+    for (const t of list) {
+      if (t.error || t.pausing || !t.inited) {
+        continue
+      }
+      if (t.typeFrom !== 'remote' && t.typeTo !== 'remote') {
+        continue
+      }
+      const tab = (store.tabs || []).find(row => row.id === t.tabId)
+      const sftp = refs.get('sftp-' + t.tabId)
+      const sftpDead = !sftp || !sftp.sftp
+      const tabDead = !tab || tab.status === statusMap.error
+      if (!sftpDead && !tabDead) {
+        continue
+      }
+      const trid = `tr-${t.transferBatch || ''}-${t.id}`
+      const inst = refsTransfers.get(trid)
+      if (inst && typeof inst.onError === 'function') {
+        inst.onError(new Error('连接已断开'))
+      } else {
+        refsStatic.get('transfer-queue')?.addToQueue('update', t.id, {
+          error: '连接已断开',
+          statusText: '错误',
+          pausing: true,
+          inited: false,
+          waitingConfirm: false,
+          speed: ''
+        })
+      }
     }
   }
 
@@ -64,9 +105,13 @@ export default class TransportsActionStore extends Component {
         typeTo,
         typeFrom,
         inited,
-        pausing
+        pausing,
+        error
       } = t
-      return typeTo !== typeFrom && (inited || this.pendingInitIds.has(t.id)) && pausing !== true
+      return typeTo !== typeFrom &&
+        !error &&
+        (inited || this.pendingInitIds.has(t.id)) &&
+        pausing !== true
     }).length
 
     if (count >= maxTransport) {
@@ -87,7 +132,13 @@ export default class TransportsActionStore extends Component {
 
       const isTransfer = typeTo !== typeFrom
 
-      if (inited || this.pendingInitIds.has(id) || !isTransfer) {
+      if (
+        inited ||
+        this.pendingInitIds.has(id) ||
+        !isTransfer ||
+        tr.pausing === true ||
+        tr.error
+      ) {
         continue
       }
 

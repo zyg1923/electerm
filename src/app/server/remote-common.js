@@ -38,10 +38,29 @@ function onDestroySftp (id) {
   inst && inst.kill && inst.kill()
 }
 
-function onDestroyTransfer (id, sftpId) {
+function destroySftpByTerminalId (terminalId) {
+  if (!terminalId) {
+    return
+  }
+  const { sessions } = globalState.data
+  for (const id of Object.keys(sessions || {})) {
+    const inst = sessions[id]
+    if (!inst || !inst.transfers) {
+      continue
+    }
+    const linked = inst.initOptions?.terminalId || inst.terminalId
+    if (linked === terminalId && typeof inst.kill === 'function') {
+      try {
+        inst.kill()
+      } catch (e) {}
+    }
+  }
+}
+
+function onDestroyTransfer (id, sftpId, { silent = true } = {}) {
   const sftpInst = sftp(sftpId)
   const inst = transfer(id, sftpId)
-  inst && inst.destroy && inst.destroy()
+  inst && inst.destroy && inst.destroy({ silent })
   sftpInst && delete sftpInst.transfers[id]
 }
 
@@ -59,6 +78,7 @@ module.exports = {
   onDestroySftp,
   onDestroyTerminal: onDestroySftp,
   onDestroyTransfer,
+  destroySftpByTerminalId,
   terminals,
   cleanAllSessions
 }

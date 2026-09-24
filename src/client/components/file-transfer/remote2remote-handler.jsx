@@ -4,6 +4,24 @@ import uid from '../../common/uid'
 import resolve from '../../common/resolve'
 import { typeMap } from '../../common/constants'
 import { getFolderFromFilePath, getLocalFileInfo } from '../sftp/file-read'
+import message from '../common/message'
+
+async function ensureRelayTempDir () {
+  const custom = String(window.store?.config?.transferTempDir || '').trim()
+  if (!custom) {
+    return window.pre.tempDir
+  }
+  const info = await getLocalFileInfo(custom).catch(() => null)
+  if (info) {
+    return custom
+  }
+  const made = await window.fs.mkdir(custom).then(() => true).catch(() => false)
+  if (made) {
+    return custom
+  }
+  message.warning('中转临时目录不可用，已改用系统临时目录')
+  return window.pre.tempDir
+}
 
 export default class Remote2RemoteHandler {
   constructor (props) {
@@ -28,13 +46,13 @@ export default class Remote2RemoteHandler {
     return this.props.toPath
   }
 
-  buildTempPath = () => {
+  buildTempPath = (dir) => {
     const { name, ext, base } = getFolderFromFilePath(this.fromPath, true)
     const tail = uid()
     const tempName = ext
       ? `${base}-${tail}.${ext}`
       : `${name}-${tail}`
-    return resolve(window.pre.tempDir, tempName)
+    return resolve(dir || window.pre.tempDir, tempName)
   }
 
   buildStep1Transfer = () => {
@@ -56,7 +74,12 @@ export default class Remote2RemoteHandler {
       tabType,
       operation: '',
       remote2remoteStep: 1,
-      remote2remoteId: this.id
+      remote2remoteId: this.id,
+      size: this.fromFile?.size || 0,
+      transferred: 0,
+      sourceMachine: title || sourceHost || '远程',
+      targetMachine: '本机',
+      relayNote: `经本机中转，先保存到 ${this.tempPath}`
     }
     return transfer
   }
@@ -82,14 +105,22 @@ export default class Remote2RemoteHandler {
       operation: '',
       remote2remoteStep: 2,
       remote2remoteId: this.id,
-      originalId: this.step1Transfer?.id
+      originalId: this.step1Transfer?.id,
+      size: fromFile?.size || 0,
+      transferred: 0,
+      sourceMachine: '本机',
+      targetMachine: targetTitle || targetHost || '远程',
+      relayNote: `从本机 ${this.tempPath} 上传到 ${this.toPath}`
     }
     return transfer
   }
 
-  start = () => {
-    this.tempPath = this.buildTempPath()
+  start = async () => {
+    const dir = await ensureRelayTempDir()
+    this.tempDir = dir
+    this.tempPath = this.buildTempPath(dir)
     this.step1Transfer = this.buildStep1Transfer()
+    message.info(`经本机中转：${this.tempPath}`, 6)
     this.store.addTransferList([copy(this.step1Transfer)])
     this.startWatch()
   }
@@ -124,7 +155,7 @@ export default class Remote2RemoteHandler {
       const localFromFile = await getLocalFileInfo(this.tempPath).catch(() => null)
       if (!localFromFile) {
         this.creatingStep2 = false
-        return this.finish('local temp file/folder not found')
+        return this.finish('本机临时文件已经不在了（可能被系统或手动删除），中转已停止')
       }
       this.step2Transfer = this.buildStep2Transfer(localFromFile)
       this.creatingStep2 = false
@@ -151,6 +182,10 @@ export default class Remote2RemoteHandler {
 
   cleanup = async () => {
     if (!this.tempPath) {
+      return
+    }
+    const info = await getLocalFileInfo(this.tempPath).catch(() => null)
+    if (!info) {
       return
     }
     await window.fs.rmrf(this.tempPath).catch(() => {})

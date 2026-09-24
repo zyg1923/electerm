@@ -123,13 +123,21 @@ export default class TermSearch extends PureComponent {
 
   renderMatchData = () => {
     const {
+      termSearch,
       termSearchMatchCount,
       termSearchMatchIndex
     } = this.props
-    if (!termSearchMatchCount) {
+    if (!termSearch) {
       return null
     }
-    return <span className='mg1x'>({termSearchMatchIndex + 1}/{termSearchMatchCount})</span>
+    if (!termSearchMatchCount) {
+      return <span className='mg1x'>没有匹配</span>
+    }
+    const index = Number(termSearchMatchIndex)
+    const current = Number.isFinite(index) && index >= 0 && index < termSearchMatchCount
+      ? index
+      : 0
+    return <span className='mg1x'>第 {current + 1} 个 / 共 {termSearchMatchCount} 个</span>
   }
 
   renderAfter = () => {

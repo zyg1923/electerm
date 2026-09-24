@@ -201,12 +201,19 @@ export const socketMixin = {
     this.setState({
       loading: false
     })
-    if (!r) {
+    if (!r || !r.port) {
       if (isAutoReconnect) {
         this.scheduleAutoReconnect(3000)
         return
       }
       this.setStatus(statusMap.error)
+      this.handleError({
+        message: r
+          ? '本地终端已创建但未返回端口，请切换 CMD/PowerShell 后重试'
+          : '本地终端启动失败，请切换 CMD/PowerShell 后重试，或关掉「管理员」',
+        from,
+        srcId
+      })
       return
     }
     this.port = r.port

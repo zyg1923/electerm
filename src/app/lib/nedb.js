@@ -71,7 +71,9 @@ function createDb (appPath, defaultUserName, { enc, dec } = {}) {
   'opsAuditLogs',
   'opsApprovalRequests',
   'opsApprovalRules',
-  'opsApprovalWhitelist'
+  'opsApprovalWhitelist',
+  'transferHistory',
+  'fileTransfers'
 ]
 
   tables.forEach(table => {

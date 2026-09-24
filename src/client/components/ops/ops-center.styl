@@ -1,4 +1,14 @@
 .ops-center-modal
+  .float-window-body
+    padding 0 12px 12px
+  .ant-tabs
+    height 100%
+    display flex
+    flex-direction column
+  .ant-tabs-content-holder
+    flex 1
+    min-height 0
+    overflow auto
   .ops-preview-pre
     max-height 240px
     overflow auto
@@ -33,6 +43,227 @@
       background rgba(250, 173, 20, 0.45)
       color inherit
       padding 0 1px
+    mark.ops-hit-current
+      background #fa8c16
+      color #fff
   .ops-docker-detail
     line-height 1.7
     word-break break-all
+
+.ops-file-editor
+  .ops-editor-box
+    position relative
+  .ops-editor-hl
+    position absolute
+    z-index 1
+    inset 0
+    margin 0
+    overflow hidden
+    pointer-events none
+    white-space pre-wrap
+    word-break break-word
+    box-sizing border-box
+    font-family ui-monospace, SFMono-Regular, Menlo, Consolas, monospace
+    font-size 13px
+    line-height 1.5715
+    padding 4px 11px
+    color transparent
+    border 1px solid transparent
+    mark
+      color transparent
+      background rgba(250, 173, 20, 0.55)
+      padding 0
+    mark.ops-hit-current
+      background #fa8c16
+  textarea.ant-input.ops-editor-input
+    position relative
+    z-index 2
+    background transparent
+    font-family ui-monospace, SFMono-Regular, Menlo, Consolas, monospace
+    font-size 13px
+    line-height 1.5715
+    &:hover
+      background transparent
+    &:focus
+      background transparent
+
+.jt-wrap
+  border 1px solid rgba(127, 127, 127, 0.25)
+  border-radius 4px
+  padding 8px
+  background rgba(0, 0, 0, 0.03)
+
+.jt-toolbar
+  display flex
+  align-items center
+  gap 8px
+  margin-bottom 8px
+  flex-wrap wrap
+
+.jt-btn
+  border 1px solid rgba(127, 127, 127, 0.35)
+  background transparent
+  border-radius 4px
+  padding 2px 10px
+  cursor pointer
+  font-size 12px
+  &:hover
+    border-color var(--colorPrimary, #1677ff)
+    color var(--colorPrimary, #1677ff)
+
+.jt-hint
+  font-size 12px
+  opacity 0.65
+
+.jt-tree
+  max-height 360px
+  overflow auto
+  font-family ui-monospace, SFMono-Regular, Menlo, Consolas, monospace
+  font-size 12px
+  line-height 1.65
+
+.jt-row
+  display flex
+  align-items center
+  gap 2px
+  min-height 22px
+  border-radius 2px
+  &:hover
+    background rgba(22, 119, 255, 0.06)
+
+.jt-row-click
+  cursor pointer
+
+.jt-caret
+  width 14px
+  flex-shrink 0
+  font-size 10px
+  opacity 0.7
+  text-align center
+
+.jt-caret-leaf
+  width 14px
+
+.jt-key
+  color #0550ae
+  font-weight 600
+
+.jt-root
+  opacity 0.75
+
+.jt-colon
+  opacity 0.5
+
+.jt-type
+  color #8250df
+  opacity 0.9
+
+.jt-str
+  color #0a3069
+
+.jt-num
+  color #0550ae
+
+.jt-bool-true
+  color #1a7f37
+  font-weight 600
+
+.jt-bool-false
+  color #cf222e
+  font-weight 600
+
+.jt-null
+  color #6e7781
+  font-style italic
+
+.jt-color
+  display inline-flex
+  align-items center
+  gap 6px
+
+.jt-color-swatch
+  width 14px
+  height 14px
+  border-radius 3px
+  border 1px solid rgba(0, 0, 0, 0.25)
+  flex-shrink 0
+
+.jt-link
+  color #0969da
+  text-decoration underline
+  word-break break-all
+  &:hover
+    opacity 0.85
+
+.jt-date
+  color #953800
+  border-bottom 1px dashed rgba(149, 56, 0, 0.45)
+  cursor help
+
+.jt-empty
+  padding 16px
+  opacity 0.6
+  font-size 12px
+
+.ops-diary-panel
+  .ops-diary-layout
+    display flex
+    gap 16px
+    align-items flex-start
+    flex-wrap wrap
+  .ops-diary-cal
+    flex 0 0 320px
+    max-width 100%
+  .ops-diary-side
+    flex 1
+    min-width 260px
+    max-height 420px
+    overflow auto
+  .ops-diary-meta
+    font-size 12px
+    line-height 1.8
+    opacity 0.9
+  .ops-diary-empty
+    opacity 0.6
+    font-size 12px
+    padding 12px 0
+  .ops-diary-card
+    border 1px solid rgba(127, 127, 127, 0.25)
+    border-radius 6px
+    padding 10px
+    margin-bottom 8px
+  .ops-diary-card-title
+    font-weight 600
+    margin-bottom 4px
+  .ops-diary-card-body
+    white-space pre-wrap
+    word-break break-word
+    font-size 12px
+    max-height 120px
+    overflow auto
+  .ops-diary-card-foot
+    opacity 0.65
+    margin-top 6px
+  .ops-diary-cell
+    position relative
+    min-height 18px
+  .ops-diary-cell-rest
+    font-size 10px
+    line-height 1
+    opacity 0.55
+    &.is-rest
+      color #cf1322
+      opacity 0.9
+  .ops-diary-dot
+    position absolute
+    right 0
+    top 0
+    min-width 14px
+    height 14px
+    border-radius 7px
+    background #1677ff
+    color #fff
+    font-size 10px
+    line-height 14px
+    text-align center
+    padding 0 3px

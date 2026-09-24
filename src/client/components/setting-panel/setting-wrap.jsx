@@ -74,10 +74,6 @@ export default class SettingWrap extends Component {
         {...pops}
       >
         {this.renderRightClose()}
-        <CloseCircleOutlined
-          className='close-setting-wrap alt-close-setting-wrap'
-          onClick={this.props.onCancel}
-        />
         {
           this.props.useSystemTitleBar ? null : <AppDrag />
         }

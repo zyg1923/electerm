@@ -26,10 +26,14 @@ export default Store => {
   }
 
   Store.prototype.selectall = function () {
+    const inst = refs.get('term-' + window.store.activeTabId)
+    if (inst?.term) {
+      inst.onSelectAll?.()
+      return
+    }
     document.activeElement &&
     document.activeElement.select &&
     document.activeElement.select()
-    refs.get('term-' + window.store.activeTabId)?.term?.selectAll()
   }
 
   Store.prototype.triggerResize = function () {

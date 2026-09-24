@@ -40,6 +40,7 @@ import AutoSync from '../setting-sync/auto-sync'
 import BatchOpRunner from '../batch-op/batch-op-runner'
 import OpsCenter from '../ops/ops-center'
 import OpsFileEditorModal from '../ops/ops-file-editor'
+import ArchiveDialogHost from '../ops/archive-modal'
 import UnixTimestampTooltip from '../terminal/unix-timestamp-tooltip'
 import ImportProgress from '../common/import-progress.jsx'
 import { pick } from 'lodash-es'
@@ -198,8 +199,13 @@ export default auto(function Index (props) {
       }
     })
   }
+  // Read preview fields here so the shell repaints before the theme is saved.
+  const previewThemeId = store.previewThemeId
+  const previewThemeDraft = store.previewThemeDraft
   const themeProps = {
-    themeConfig: store.getUiThemeConfig()
+    themeConfig: store.getUiThemeConfig(),
+    previewThemeId,
+    previewThemeDraft
   }
   const copiedTransfer = deepCopy(fileTransfers)
   const copiedHistory = deepCopy(transferHistory)
@@ -360,6 +366,7 @@ export default auto(function Index (props) {
         <BatchOpRunner />
         <OpsCenter />
         <OpsFileEditorModal />
+        <ArchiveDialogHost />
         <ImportProgress />
         <ShortcutBarEntry store={store} />
         {!isAIDisabled() && store.showAIConfigModal && (

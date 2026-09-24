@@ -17,6 +17,7 @@ export default Store => {
     const { store } = window
     store.opsCenterTab = tab
     store.opsCenterVisible = true
+    store.opsCenterReveal = (store.opsCenterReveal || 0) + 1
   }
 
   Store.prototype.closeOpsCenter = function () {

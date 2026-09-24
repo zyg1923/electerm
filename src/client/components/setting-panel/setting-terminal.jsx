@@ -29,6 +29,7 @@ import mapper from '../../common/auto-complete-data-mapper'
 import KeywordForm from './keywords-form'
 import Link from '../common/external-link'
 import FontSelect from '../common/font-select'
+import FontThemePreview from './font-theme-preview'
 import HelpIcon from '../common/help-icon'
 import KeywordsTransport from './keywords-transport'
 import uid from '../../common/uid'
@@ -161,6 +162,60 @@ export default class SettingTerminal extends Component {
     if (path) {
       this.handleLogChange(path)
     }
+  }
+
+  handleTransferTempChange = (v) => {
+    this.onChangeValue(v, 'transferTempDir')
+  }
+
+  handleChooseTransferTemp = async () => {
+    const path = await chooseSaveDirectory()
+    if (path) {
+      this.handleTransferTempChange(path)
+    }
+  }
+
+  renderTransferTempControl = () => {
+    const { transferTempDir = '' } = this.props.config
+    const placeholder = window.pre?.tempDir || '系统临时目录'
+    const inputProps = {
+      value: transferTempDir,
+      placeholder,
+      onChange: this.handleTransferTempChange,
+      addonAfter: (
+        <>
+          <Button
+            onClick={this.handleChooseTransferTemp}
+            className='mg1r'
+            type='text'
+            size='small'
+          >
+            {e('chooseFolder')}
+          </Button>
+          <Button
+            size='small'
+            type='text'
+            onClick={() => this.handleTransferTempChange('')}
+          >
+            {e('reset')}
+          </Button>
+        </>
+      ),
+      prefix: '中转临时目录',
+      addonBefore: (
+        <Space.Addon>
+          <ShowItem to={transferTempDir || placeholder} />
+        </Space.Addon>
+      )
+    }
+    return (
+      <div className='pd2b'>
+        <InputConfirm {...inputProps} />
+        <div className='font12 pd1t'>
+          两台 SSH 互传时先落到这里，传完会删除。留空则使用 Windows 临时目录。
+        </div>
+      </div>
+    )
   }
 
   renderLogPathControl = () => {
@@ -518,6 +573,11 @@ export default class SettingTerminal extends Component {
             <Flex flex='auto'>{this.renderFontFamily()}</Flex>
           </Flex>
         </div>
+        <FontThemePreview
+          fontFamily={this.props.config.fontFamily}
+          fontSize={this.props.config.fontSize}
+          themeConfig={getThemeConfig()}
+        />
         <div>
           <div className='pd1b'>
             <span className='inline-title mg1r'>{e('keywordsHighlight')}</span>
@@ -582,6 +642,9 @@ export default class SettingTerminal extends Component {
         }
         {
           this.renderLogPathControl()
+        }
+        {
+          this.renderTransferTempControl()
         }
         {
           this.renderToggle('saveTerminalLogToFile')

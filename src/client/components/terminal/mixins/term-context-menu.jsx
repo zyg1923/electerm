@@ -1,6 +1,6 @@
 import Modal from '../../common/modal'
 import { readClipboardAsync, readClipboard, copy } from '../../../common/clipboard.js'
-import { isWin, isMac, isMacJs, connectionMap } from '../../../common/constants.js'
+import { isWin, isMac, connectionMap } from '../../../common/constants.js'
 import iconsMap from '../../sys-menu/icons-map.jsx'
 import { refsStatic } from '../../common/ref.js'
 import AIIcon from '../../icons/ai-icon.jsx'
@@ -11,7 +11,8 @@ import {
   dumpTerminalText,
   insertAboveViewport,
   cloneBufferLines,
-  restoreClonedLines
+  restoreClonedLines,
+  insertClearSeparator
 } from '../clear-marks.js'
 
 const e = window.translate
@@ -39,7 +40,7 @@ export const contextMenuMixin = {
     const pasteShortcut = this.getShortcut('terminal_paste')
     const clearShortcut = this.getShortcut('terminal_clear')
     const searchShortcut = this.getShortcut('terminal_search')
-    const selectAllShortcut = isMacJs ? 'meta+a' : 'ctrl+shift+a'
+    const selectAllShortcut = this.getShortcut('terminal_selectAll')
     const isSerial = this.props.tab?.type === connectionMap.serial
     const items = [
       {
@@ -96,8 +97,7 @@ export const contextMenuMixin = {
       {
         key: 'scrollToPrevClearMark',
         icon: <iconsMap.ReloadOutlined />,
-        label: '跳到上一个 Clear',
-        disabled: !(this.clearMarks && this.clearMarks.length)
+        label: '定位上一个 Clear'
       },
       this.renderClearHistoryMenu(),
       {
@@ -116,14 +116,6 @@ export const contextMenuMixin = {
         icon: recording ? <iconsMap.StopOutlined /> : <iconsMap.PlayCircleFilled />,
         label: e(recording ? 'stopRecord' : 'record')
       },
-      {
-        type: 'divider'
-      },
-      {
-        key: 'onRestartApp',
-        icon: <iconsMap.RedoOutlined />,
-        label: '重启'
-      }
     ]
     if (isSerial) {
       items.push(
@@ -197,7 +189,6 @@ export const contextMenuMixin = {
 
   onSelection () {
     if (this._suppressCopyOnce) {
-      this._suppressCopyOnce = false
       return false
     }
     if (
@@ -236,12 +227,32 @@ export const contextMenuMixin = {
 
   onCopy () {
     const selected = this.term.getSelection()
+    if (!selected) {
+      return
+    }
     copy(selected)
     this.term.focus()
   },
 
+  suppressAutoCopy () {
+    this._suppressCopyOnce = true
+    clearTimeout(this._suppressCopyTimer)
+    this._suppressCopyTimer = setTimeout(() => {
+      this._suppressCopyOnce = false
+    }, 150)
+  },
+
   onSelectAll () {
+    this.suppressAutoCopy()
     this.term.selectAll()
+    this.term.focus()
+  },
+
+  selectAllShortcut (event) {
+    event?.preventDefault?.()
+    event?.stopPropagation?.()
+    this.onSelectAll()
+    return false
   },
 
   pasteNeedsConfirm (text) {
@@ -315,10 +326,6 @@ export const contextMenuMixin = {
     this.term.focus()
   },
 
-  onRestartApp () {
-    window.store.restart()
-  },
-
   onPasteSelected () {
     const selected = this.term.getSelection()
     if (!selected) {
@@ -389,9 +396,13 @@ export const contextMenuMixin = {
     if (localWindows) {
       this._clearKeepsScrollback = false
       this._clearKeepDisp = term.parser.registerCsiHandler({ final: 'J' }, params => {
-        if (this.csiEraseParam(params) === 3 && this._menuClearLines) {
+        const n = this.csiEraseParam(params)
+        if (n === 3 && this._menuClearLines) {
           clearTimeout(this._restoreTimer)
           this._restoreTimer = setTimeout(() => this.finishMenuClearRestore(), 150)
+        } else if (n === 2 || n === 3) {
+          clearTimeout(this._clsScrollTimer)
+          this._clsScrollTimer = setTimeout(() => this.scrollLivePrompt(), 40)
         }
         return false
       })
@@ -400,8 +411,114 @@ export const contextMenuMixin = {
     term.options.scrollOnEraseInDisplay = true
     this._clearKeepsScrollback = true
     this._clearKeepDisp = term.parser.registerCsiHandler({ final: 'J' }, params => {
-      return this.csiEraseParam(params) === 3
+      if (this.csiEraseParam(params) === 3) {
+        this.armClearSeparator()
+        return true
+      }
+      return false
     })
+    if (term.onWriteParsed) {
+      this._clearWriteDisp = term.onWriteParsed(() => {
+        if (!this._sepArmed) {
+          return
+        }
+        clearTimeout(this._sepTimer)
+        this._sepTimer = setTimeout(() => this.flushClearSeparator(), 80)
+      })
+    }
+  },
+
+  armClearSeparator () {
+    if (this.props.config.clearMarkEnabled === false) {
+      return
+    }
+    this._sepArmed = true
+    clearTimeout(this._sepTimer)
+    this._sepTimer = setTimeout(() => this.flushClearSeparator(), 400)
+  },
+
+  flushClearSeparator () {
+    if (!this._sepArmed || !this.term) {
+      return
+    }
+    this._sepArmed = false
+    if (this.term.buffer?.active?.type !== 'normal') {
+      return
+    }
+    this.pushClearSeparator()
+  },
+
+  pushClearSeparator () {
+    if (!this.term || this.props.config.clearMarkEnabled === false) {
+      return
+    }
+    if (this.term.buffer?.active?.type !== 'normal') {
+      return
+    }
+    if (!this.clearMarks) {
+      this.clearMarks = []
+      this.clearMarkIndex = 0
+    }
+    this.clearMarkIndex = (this.clearMarkIndex || 0) + 1
+    const index = this.clearMarkIndex
+    const color = nextClearColor(index - 1)
+    const time = new Date().toLocaleTimeString()
+    const label = ` CLEAR #${index}   ${time}   以上是上一段 `
+    const marker = insertClearSeparator(this.term, label, color)
+    if (!marker) {
+      this.clearMarkIndex -= 1
+      return
+    }
+    this.clearMarks.push({
+      index,
+      ts: Date.now(),
+      color,
+      marker
+    })
+    if (this.clearMarks.length > 30) {
+      const dropped = this.clearMarks.shift()
+      dropped?.marker?.dispose?.()
+    }
+    this.setState({ clearMarkCount: this.clearMarks.length })
+  },
+
+  livingClearMarks () {
+    return (this.clearMarks || []).filter(mark => mark?.marker && mark.marker.line >= 0)
+  },
+
+  revealClearMark (mark) {
+    const line = mark?.marker?.line
+    if (line == null || line < 0 || !this.term) {
+      message.info('这段 Clear 已经滚出缓冲区了')
+      return
+    }
+    this.term.scrollToLine(line)
+    this.term.focus()
+    message.success(`已定位 Clear #${mark.index}`)
+  },
+
+  prepareTypedLocalClear () {
+    if (!this.isLocal() || !isWin || !this.term) {
+      return
+    }
+    if (this._menuClearLines) {
+      return
+    }
+    this._menuClearLines = cloneBufferLines(this.term)
+    this._menuClearLen = this.bufferLineCount()
+    this.scheduleMenuClearRestore()
+  },
+
+  scrollLivePrompt () {
+    if (!this.term) {
+      return
+    }
+    try {
+      this.term._core?.scrollToBottom?.(true)
+      this.term.focus()
+    } catch (e) {
+      this.term.scrollToBottom()
+    }
   },
 
   bufferLineCount () {
@@ -412,15 +529,14 @@ export const contextMenuMixin = {
     const lines = this._menuClearLines
     this._menuClearLines = null
     if (!lines?.length || !this.term) {
+      this.pushClearSeparator()
+      this.scrollLivePrompt()
       return
     }
-    restoreClonedLines(this.term, lines)
-    try {
-      this.term.scrollToBottom()
-      this.term.focus()
-    } catch (e) {
-      // ignore
-    }
+    restoreClonedLines(this.term, lines, () => {
+      this.pushClearSeparator()
+      this.scrollLivePrompt()
+    })
   },
 
   scheduleMenuClearRestore () {
@@ -440,7 +556,7 @@ export const contextMenuMixin = {
       if (Date.now() - started > 1500) {
         // 3J never arrived, so the existing scrollback is still there.
         this._menuClearLines = null
-        this.term.focus()
+        this.scrollLivePrompt()
         return
       }
       this._restoreTimer = setTimeout(attempt, 100)
@@ -648,79 +764,75 @@ export const contextMenuMixin = {
     this.term.selectLines(line, line)
   },
 
-  onClearHistoryWheel (ev) {
-    if (!ev || ev.deltaY >= 0) {
+  scrollFollowBottom () {
+    if (!this._followOutput || !this.term) {
       return
     }
-    const top = this.term?.buffer?.active?.viewportY ?? 0
-    if (top > 0) {
-      return
+    this._followLock = true
+    try {
+      this.term._core?.scrollToBottom?.(true)
+    } catch (e) {
+      this.term.scrollToBottom()
     }
-    const next = this.clearLoadNext == null
-      ? (this.clearMarks || []).length
-      : this.clearLoadNext
-    if (next <= 0) {
-      return
-    }
-    ev.preventDefault()
-    ev.stopPropagation()
-    if (this._clearWheelLock) {
-      return
-    }
-    this._clearWheelLock = true
-    setTimeout(() => {
-      this._clearWheelLock = false
-    }, 280)
-    this.loadPreviousClear()
+    requestAnimationFrame(() => {
+      this._followLock = false
+    })
   },
 
-  loadPreviousClear () {
-    const marks = this.clearMarks || []
-    if (this.clearLoadNext == null) {
-      this.clearLoadNext = marks.length
-    }
-    if (this.clearLoadNext <= 0) {
-      message.info('已经是最早的 Clear')
+  syncFollowFromViewport () {
+    if (this._followLock) {
       return
     }
-    const mark = marks[this.clearLoadNext - 1]
-    if (!mark?.text || !insertAboveViewport(this.term, mark.text)) {
-      message.info('回滚区已满，放不下这段历史')
+    const buf = this.term?.buffer?.active
+    if (!buf) {
       return
     }
-    mark.loaded = true
-    this.clearLoadNext -= 1
-    this.term.focus()
+    this._followOutput = buf.viewportY >= buf.baseY
+  },
+
+  onClearHistoryWheel (ev) {
+    if (!this.term) {
+      return
+    }
+    if (ev.deltaY < 0) {
+      this._followOutput = false
+      return
+    }
+    requestAnimationFrame(() => this.syncFollowFromViewport())
   },
 
   jumpToClearMark (index) {
-    const marks = this.clearMarks || []
-    const pos = marks.findIndex(item => item.index === index)
-    if (pos < 0 || !marks[pos].text) {
-      message.info('这条 Clear 已经不在缓存里')
+    const mark = (this.clearMarks || []).find(item => item.index === index)
+    if (!mark) {
+      message.info('这条 Clear 已经不在记录里')
       return
     }
-    if (marks[pos].loaded) {
-      message.info('这段内容已经在上面，继续往上翻')
-      return
-    }
-    if (!insertAboveViewport(this.term, marks[pos].text)) {
-      message.info('回滚区已满，放不下这段历史')
-      return
-    }
-    marks[pos].loaded = true
-    if (this.clearLoadNext == null || this.clearLoadNext > pos) {
-      this.clearLoadNext = pos
-    }
-    this.term.focus()
+    this.revealClearMark(mark)
   },
 
   scrollToPrevClearMark () {
-    if (!(this.clearMarks || []).length) {
-      message.info('暂无 Clear 历史')
+    const marks = this.livingClearMarks().sort((a, b) => a.marker.line - b.marker.line)
+    if (!marks.length || !this.term) {
+      message.info('还没有 Clear 记录')
+      this.term?.scrollToTop?.()
+      this.term?.focus()
       return
     }
-    this.loadPreviousClear()
+    const top = this.term.buffer?.active?.viewportY || 0
+    let target = null
+    for (let i = marks.length - 1; i >= 0; i--) {
+      if (marks[i].marker.line < top) {
+        target = marks[i]
+        break
+      }
+    }
+    if (!target) {
+      message.info('这是第一次 Clear，上面没有更早的内容')
+      this.term.scrollToTop()
+      this.term.focus()
+      return
+    }
+    this.revealClearMark(target)
   },
 
   onXmodemSend () {

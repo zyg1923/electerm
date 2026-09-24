@@ -71,6 +71,42 @@
     border-color var(--primary)
   &.open
     color var(--primary)
+.sftp-panels
+  display flex
+  flex-direction column
+  flex 1
+  min-height 0
+  min-width 0
+  overflow hidden
+.sftp-panels.sftp-panels-side
+  flex-direction row
+  .sftp-panel-resizer
+    width 8px
+    height auto
+    align-self stretch
+    flex 0 0 8px
+    cursor ew-resize
+  .sftp-section
+    position relative
+    top auto !important
+    left auto !important
+    height 100% !important
+    min-width 0
+  .sftp-local-section
+    border-top none
+    border-left 1px solid var(--border)
+.sftp-wrap.ssh-sftp-split .sftp-panels-side .sftp-section
+  width auto !important
+  flex none
+.sftp-panel-resizer
+  flex 0 0 8px
+  height 8px
+  cursor ns-resize
+  background var(--border)
+  position relative
+  z-index 3
+  &:hover
+    background var(--primary)
 .sftp-section
   flex 1
   overflow hidden

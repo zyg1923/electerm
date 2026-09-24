@@ -47,11 +47,31 @@ class Transfer {
         id: 'transfer:data:' + id,
         data
       })
-    }, 3000)
+    }, 1000)
     this.timers = {}
 
     this.ws = ws
     this.initTransfer(type)
+  }
+
+  bindConnLifeCycle = () => {
+    const conn = this.conn
+    if (!conn || this._connBound) {
+      return
+    }
+    this._connBound = true
+    this._onConnGone = () => {
+      if (this._notified || this.onDestroy) {
+        return
+      }
+      this.onError(new Error('连接已断开'))
+      this.destroy({ silent: true })
+    }
+    try {
+      conn.once('close', this._onConnGone)
+      conn.once('end', this._onConnGone)
+      conn.once('error', this._onConnGone)
+    } catch (e) {}
   }
 
   shouldUseSsh2ScpTransfer = () => {
@@ -62,6 +82,7 @@ class Transfer {
   }
 
   initTransfer = async (type) => {
+    this.bindConnLifeCycle()
     // For regular file transfers (not folder transfers, not SSH FS fallback),
     // create a separate SFTP channel on the same SSH connection so that
     // directory listing and other SFTP operations remain responsive.
@@ -73,7 +94,19 @@ class Transfer {
     ) {
       try {
         const separateSftp = await new Promise((resolve, reject) => {
+          let settled = false
+          const timer = setTimeout(() => {
+            settled = true
+            reject(new Error('sftp channel timeout'))
+          }, 8000)
           this.conn.sftp((err, sftp) => {
+            clearTimeout(timer)
+            if (settled) {
+              if (sftp && sftp.end) {
+                sftp.end()
+              }
+              return
+            }
             if (err) {
               return reject(err)
             }
@@ -85,6 +118,11 @@ class Transfer {
         const isd = type === 'download'
         this.src = isd ? separateSftp : fs
         this.dst = isd ? fs : separateSftp
+        try {
+          separateSftp.on?.('close', this._onConnGone)
+          separateSftp.on?.('end', this._onConnGone)
+          separateSftp.on?.('error', this._onConnGone)
+        } catch (e) {}
       } catch (e) {
         // Fallback to the shared SFTP channel (src/dst already set in constructor)
       }
@@ -93,7 +131,8 @@ class Transfer {
     if (this.shouldUseFolderTransfer(type)) {
       return this.ssh2ScpFolderTransfer(type)
     }
-    if (this.shouldUseSsh2ScpTransfer()) {
+    // Byte resume needs fastXfer; ssh2-scp path always rewrites from 0
+    if (this.shouldUseSsh2ScpTransfer() && !(Number(this.options?.startFrom) > 0)) {
       return this.ssh2ScpTransfer(type)
     }
     this.fastXfer(type)
@@ -207,6 +246,32 @@ class Transfer {
       return th.onError(err)
     }
     this.fsize = attrs.size
+    let startFrom = Math.max(0, Number(this.options?.startFrom) || 0)
+    if (startFrom > attrs.size) {
+      startFrom = 0
+    }
+    if (attrs.size > 0 && startFrom >= attrs.size) {
+      this.startFrom = attrs.size
+      this.onData({
+        transferred: attrs.size,
+        total: attrs.size
+      })
+      return this.onEnd({
+        transferred: attrs.size,
+        size: attrs.size
+      })
+    }
+    this.startFrom = startFrom
+    if (startFrom > 0) {
+      dst.open(dstPath, 'r+', (err, handle) => {
+        if (err) {
+          this.startFrom = 0
+          return dst.open(dstPath, 'w', this.onDstOpen)
+        }
+        this.onDstOpen(null, handle)
+      })
+      return
+    }
     dst.open(dstPath, 'w', this.onDstOpen)
   }
 
@@ -224,16 +289,23 @@ class Transfer {
       chunkSize,
       mode
     } = this
-    const onstep = this.onData
+    const onstep = (transferred, _nb, fileSize) => {
+      this.onData({
+        transferred,
+        total: fileSize || this.fsize || 0
+      })
+    }
     const { src, dst, dstPath } = this
     const th = this
 
-    // internal state variables
-    let pdst = 0
-    let total = 0
+    // internal state variables — startFrom enables byte-level resume
+    const startFrom = Math.max(0, Number(th.startFrom) || 0)
+    let pdst = startFrom
+    let total = startFrom
     let bufsize = chunkSize * concurrency
 
     const { fsize } = this
+    const remaining = Math.max(0, fsize - startFrom)
 
     th.dstHandle = destHandle
 
@@ -281,14 +353,14 @@ class Transfer {
       closeHandles()
     }
 
-    if (fsize <= 0) {
+    if (fsize <= 0 || remaining <= 0) {
       return onerror()
     }
 
     // Use less memory where possible
-    while (bufsize > fsize) {
+    while (bufsize > remaining) {
       if (concurrency === 1) {
-        bufsize = fsize
+        bufsize = remaining
         break
       }
       bufsize -= chunkSize
@@ -298,6 +370,10 @@ class Transfer {
     const readbuf = th.tryCreateBuffer(bufsize)
     if (readbuf instanceof Error) {
       return th.onError(readbuf)
+    }
+
+    if (startFrom > 0) {
+      onstep(total, 0, fsize)
     }
 
     if (mode !== undefined) {
@@ -400,7 +476,29 @@ class Transfer {
     }
   }
 
+  closeOwnedSftp = () => {
+    if (!(this.ownsSftp && this.sftp && this.sftp.end)) {
+      return
+    }
+    const channel = this.sftp
+    this.ownsSftp = false
+    this.sftp = null
+    try {
+      channel.end()
+    } catch (e) {
+      log.error(e)
+    }
+  }
+
   onEnd = (data = null, id = this.id, ws = this.ws) => {
+    if (this._notified) {
+      return
+    }
+    this._notified = true
+    if (this.onData && this.onData.flush) {
+      this.onData.flush()
+    }
+    this.closeOwnedSftp()
     ws?.s({
       id: 'transfer:end:' + id,
       data
@@ -411,6 +509,11 @@ class Transfer {
     if (!err) {
       return this.onEnd()
     }
+    if (this._notified) {
+      return
+    }
+    this._notified = true
+    this.closeOwnedSftp()
     ws && ws.s({
       id: 'transfer:err:' + id,
       error: {
@@ -447,12 +550,17 @@ class Transfer {
     this.dstHandle = null
   }
 
-  destroy = () => {
+  destroy = ({ silent = false } = {}) => {
     this.onDestroy = true
     this.scpTransfer && this.scpTransfer.destroy && this.scpTransfer.destroy()
     setTimeout(this.kill, 200)
+    if (!silent && !this._notified && this.ws) {
+      this.onError(new Error('连接已断开'))
+    }
     if (this.ws) {
-      this.ws.close()
+      try {
+        this.ws.close()
+      } catch (e) {}
       this.ws = null
     }
     if (this.timers) {

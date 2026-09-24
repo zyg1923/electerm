@@ -82,6 +82,8 @@ export default class Sessions extends Component {
           'fullscreen'
         ]),
         config,
+        previewThemeId: window.store.previewThemeId,
+        previewThemeDraft: window.store.previewThemeDraft,
         ...pick(this, [
           'reloadTab',
           'computeHeight',

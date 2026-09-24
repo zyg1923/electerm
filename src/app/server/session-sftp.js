@@ -87,7 +87,7 @@ class Sftp extends TerminalBase {
     const keys = Object.keys(this.transfers || {})
     for (const k of keys) {
       const jj = this.transfers[k]
-      jj && jj.destroy && jj.destroy()
+      jj && jj.destroy && jj.destroy({ silent: false })
       delete this.transfers[k]
     }
     this.sftp && this.sftp.end && this.sftp.end()

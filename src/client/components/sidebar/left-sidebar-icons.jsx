@@ -7,7 +7,6 @@
  * (sidebar/index.jsx). Live transfers stay in TransferList.
  */
 
-import { useState } from 'react'
 import {
   AppstoreOutlined,
   CloudServerOutlined,
@@ -22,8 +21,6 @@ import {
 import { Badge, Popover } from 'antd'
 import SideIcon from './side-icon'
 import QuickConnect from '../tabs/quick-connect'
-import TransportHistory from './transfer-history-modal'
-import FloatWindow from '../common/float-window'
 import { settingMap } from '../../common/constants'
 import { defaultLeftSideBarIcons } from '../../common/left-sidebar-icon-defs'
 
@@ -45,10 +42,8 @@ export default function LeftSidebarIcons (props) {
     syncActive,
     widgetsActive,
     isSyncingSetting,
-    widgetInstancesLength,
-    transferHistory
+    widgetInstancesLength
   } = props
-  const [historyOpen, setHistoryOpen] = useState(false)
 
   const ids = Array.isArray(iconIds) && iconIds.length
     ? iconIds
@@ -100,7 +95,7 @@ export default function LeftSidebarIcons (props) {
       >
         <HistoryOutlined
           className='font20 iblock control-icon'
-          onClick={() => setHistoryOpen(true)}
+          onClick={() => window.store.openTransferHistory()}
         />
       </SideIcon>
     ),
@@ -177,23 +172,6 @@ export default function LeftSidebarIcons (props) {
   return (
     <>
       {ids.map(id => registry[id] || null)}
-      {
-        ids.includes('transferHistory')
-          ? (
-            <FloatWindow
-              open={historyOpen}
-              title={e('transferHistory')}
-              width={Math.min(980, Math.round(window.innerWidth * 0.8))}
-              height={Math.min(640, Math.round(window.innerHeight * 0.8))}
-              onClose={() => setHistoryOpen(false)}
-            >
-              <TransportHistory
-                transferHistory={transferHistory || []}
-              />
-            </FloatWindow>
-            )
-          : null
-      }
     </>
   )
 }

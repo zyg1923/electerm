@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Input, Form, Tabs, Flex } from 'antd'
 import {
   BgColorsOutlined,
@@ -39,7 +39,39 @@ export default function ThemeForm (props) {
     action.current = 'saveOnly'
     form.submit()
   }
+  function publishDraft (themeText) {
+    if (!themeText) {
+      return
+    }
+    try {
+      const converted = convertTheme(themeText)
+      if (!converted.uiThemeConfig || !converted.themeConfig) {
+        return
+      }
+      if (
+        converted.uiThemeConfig.main &&
+        converted.uiThemeConfig.main !== converted.themeConfig.background
+      ) {
+        converted.themeConfig.background = converted.uiThemeConfig.main
+      }
+      window.store.previewThemeDraft = {
+        uiThemeConfig: converted.uiThemeConfig,
+        themeConfig: converted.themeConfig
+      }
+    } catch (err) {
+      console.log('theme preview skipped', err)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      window.store.previewThemeDraft = null
+    }
+  }, [])
+
   function applyOnly () {
+    window.store.previewThemeDraft = null
+    window.store.previewThemeId = ''
     props.store.setTheme(props.formData.id)
   }
   // A function to validate the input text
@@ -105,6 +137,7 @@ export default function ThemeForm (props) {
     }
     // Return an object with the flag and the message
     setTxt(value)
+    publishDraft(value)
     return Promise.resolve()
   }
 
@@ -138,7 +171,9 @@ export default function ThemeForm (props) {
         item: update1
       })
     }
+    window.store.previewThemeDraft = null
     if (action.current !== 'saveOnly') {
+      window.store.previewThemeId = ''
       props.store.setTheme(
         formData.id || update1.id
       )
@@ -176,6 +211,7 @@ export default function ThemeForm (props) {
       themeText: tt
     })
     setTxt(tt)
+    publishDraft(tt)
   }
 
   function handleAiGenerated (text) {
@@ -183,6 +219,7 @@ export default function ThemeForm (props) {
       themeText: text
     })
     setTxt(text)
+    publishDraft(text)
     // jump to the text editor so the user can review/adjust the result
     setEditor('theme-editor-txt')
   }
@@ -236,7 +273,9 @@ export default function ThemeForm (props) {
     form.setFieldsValue({
       themeText: convertThemeToText(obj)
     })
-    setTxt(convertThemeToText(obj))
+    const next = convertThemeToText(obj)
+    setTxt(next)
+    publishDraft(next)
   }
 
   function renderTxt () {

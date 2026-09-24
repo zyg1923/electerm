@@ -9,12 +9,19 @@ export const contentMixin = {
   },
 
   onSearchResultsChange ({ resultIndex, resultCount }) {
+    const count = resultCount || 0
+    let index = resultIndex
+    if (!count || !Number.isFinite(index) || index < 0) {
+      index = 0
+    } else if (index >= count) {
+      index = count - 1
+    }
     window.store.storeAssign({
-      termSearchMatchCount: resultCount,
-      termSearchMatchIndex: resultIndex
+      termSearchMatchCount: count,
+      termSearchMatchIndex: index
     })
 
-    this.updateSearchResults(resultIndex)
+    this.updateSearchResults(index)
   },
 
   updateSearchResults (resultIndex) {
@@ -39,6 +46,46 @@ export const contentMixin = {
     this.searchAddon.findNext(
       searchInput, options
     )
+  },
+
+  scheduleSearchRefresh () {
+    if (!window.store.termSearchOpen || !window.store.termSearch) {
+      return
+    }
+    clearTimeout(this._searchRefreshTimer)
+    this._searchRefreshTimer = setTimeout(() => {
+      this._searchRefreshTimer = null
+      this.refreshOpenSearch()
+    }, 400)
+  },
+
+  refreshOpenSearch () {
+    const query = window.store.termSearch
+    const tracker = this.searchAddon?._resultTracker
+    if (!window.store.termSearchOpen || !query || !tracker) {
+      return
+    }
+    const count = tracker.searchResults?.length || 0
+    let index = -1
+    const selected = tracker.selectedDecoration?.match
+    if (selected && tracker.findResultIndex) {
+      index = tracker.findResultIndex(selected)
+    }
+    if (!count || index < 0) {
+      index = 0
+    } else if (index >= count) {
+      index = count - 1
+    }
+    if (
+      count === window.store.termSearchMatchCount &&
+      index === window.store.termSearchMatchIndex
+    ) {
+      return
+    }
+    window.store.storeAssign({
+      termSearchMatchCount: count,
+      termSearchMatchIndex: index
+    })
   },
 
   openNormalBuffer () {

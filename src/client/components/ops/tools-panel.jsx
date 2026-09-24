@@ -18,6 +18,7 @@ import { OpsTabSelect, useOpsTabSelect } from './ops-tab-select'
 import { execCmd } from '../terminal/terminal-apis'
 import { ot } from './ops-i18n'
 import { openOpsFileEditor } from './ops-file-editor'
+import PathField from './path-field'
 
 async function run (tabId, cmd, timeoutMs = 60000) {
   try {
@@ -57,7 +58,7 @@ function LogTool ({ tabId }) {
   return (
     <div>
       <Space wrap className='mg1b'>
-        <Input style={{ width: 280 }} value={path} onChange={e => setPath(e.target.value)} placeholder='日志路径' />
+        <PathField style={{ width: 320 }} tabId={tabId} value={path} onChange={setPath} placeholder='日志路径' />
         <Input style={{ width: 160 }} value={kw} onChange={e => setKw(e.target.value)} placeholder='关键词' />
         <Button type='primary' onClick={load}>查看</Button>
         <Button loading={follow} onClick={startFollow}>跟踪(~8s)</Button>
@@ -188,7 +189,7 @@ function DiagnoseTool ({ tabId }) {
         dataSource={rows}
         columns={[
           { title: '项', dataIndex: 'name', width: 100 },
-          { title: 'OK', dataIndex: 'ok', width: 60, render: v => v ? <Tag color='green'>Y</Tag> : <Tag color='red'>N</Tag> },
+          { title: '结果', dataIndex: 'ok', width: 70, render: v => v ? <Tag color='green'>成功</Tag> : <Tag color='red'>失败</Tag> },
           { title: '输出', dataIndex: 'out', render: t => <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{t}</pre> }
         ]}
       />
@@ -219,8 +220,8 @@ function BackupTool ({ tabId }) {
   return (
     <div>
       <Space wrap className='mg1b'>
-        <Input style={{ width: 200 }} value={src} onChange={e => setSrc(e.target.value)} addonBefore='源' />
-        <Input style={{ width: 200 }} value={dst} onChange={e => setDst(e.target.value)} addonBefore='目标目录' />
+        <PathField style={{ width: 240 }} tabId={tabId} value={src} onChange={setSrc} placeholder='源路径' />
+        <PathField style={{ width: 240 }} tabId={tabId} value={dst} onChange={setDst} placeholder='目标目录' />
         <Button type='primary' onClick={backup}>创建备份</Button>
       </Space>
       <Table
@@ -231,7 +232,7 @@ function BackupTool ({ tabId }) {
           { title: '时间', dataIndex: 'at', render: t => new Date(t).toLocaleString() },
           { title: '源', dataIndex: 'src' },
           { title: '输出', dataIndex: 'out', ellipsis: true },
-          { title: 'OK', dataIndex: 'ok', render: v => v ? 'Y' : 'N' }
+          { title: '结果', dataIndex: 'ok', render: v => v ? '成功' : '失败' }
         ]}
       />
     </div>
@@ -264,7 +265,7 @@ function ConfigRollbackTool ({ tabId }) {
   return (
     <div>
       <Space className='mg1b'>
-        <Input style={{ width: 360 }} value={path} onChange={e => setPath(e.target.value)} />
+        <PathField style={{ width: 400 }} tabId={tabId} value={path} onChange={setPath} placeholder='配置文件路径' />
         <Button onClick={listBak}>列出备份</Button>
         <Button onClick={() => {
           openOpsFileEditor({ tabId, path })
@@ -284,7 +285,7 @@ function ConfigRollbackTool ({ tabId }) {
             width: 160,
             render: (_, r) => (
               <Space>
-                <Button size='small' onClick={() => showDiff(r.path)}>diff</Button>
+                <Button size='small' onClick={() => showDiff(r.path)}>对比</Button>
                 <Button size='small' type='primary' onClick={() => restore(r.path)}>恢复</Button>
               </Space>
             )

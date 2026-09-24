@@ -7,6 +7,7 @@ import { pick } from 'lodash-es'
 import { Tabs, Spin } from 'antd'
 import { lazy, Suspense } from 'react'
 import SettingModal from './setting-wrap'
+import TransferCenter from '../sidebar/transfer-center'
 import LazyBoundary from '../common/lazy-boundary'
 import {
   settingMap,
@@ -41,7 +42,7 @@ export default auto(function SettingModalWrap (props) {
       settingMap.bookmarks,
       settingMap.terminalThemes
     ]
-    const { settingTab, settingItem, bookmarkSelectMode } = store
+    const { settingTab, settingItem, bookmarkSelectMode, previewThemeId } = store
     // settingSidebarList deep-copies the whole collection; the bookmarks tab
     // ignores `list` (it renders from treeProps), so skip it there — with
     // thousands of bookmarks that copy is the most expensive part of the render
@@ -172,6 +173,7 @@ export default auto(function SettingModalWrap (props) {
               formProps={formProps}
               store={store}
               settingTab={settingTab}
+              previewThemeId={previewThemeId}
             />
             <TabProfiles
               listProps={props0}
@@ -197,12 +199,16 @@ export default auto(function SettingModalWrap (props) {
     showModal,
     hideSettingModal,
     innerWidth,
-    useSystemTitleBar
+    useSystemTitleBar,
+    settingTab,
+    fileTransfers,
+    transferHistory
   } = props.store
   const show = showModal === modals.setting
   if (!show) {
     return null
   }
+  const queue = fileTransfers || []
   return (
     <SettingModal
       onCancel={hideSettingModal}
@@ -210,7 +216,26 @@ export default auto(function SettingModalWrap (props) {
       useSystemTitleBar={useSystemTitleBar}
       innerWidth={innerWidth}
     >
-      {renderTabs()}
+      {
+        settingTab === 'transferHistory'
+          ? (
+            <TransferCenter
+              fileTransfers={queue}
+              transferHistory={transferHistory || []}
+              tick={
+                queue.map(item => {
+                  return `${item.id}:${item.percent || 0}:${item.speed || ''}:${item.size || 0}:${item.transferred || 0}:${item.pausing ? 1 : 0}:${item.inited ? 1 : 0}:${item.waitingConfirm ? 1 : 0}:${item.error || ''}`
+                }).join('|') +
+                '#' +
+                (transferHistory || [])
+                  .filter(h => h.archiveOp && !h.finishTime)
+                  .map(h => `${h.id}:${h.percent || 0}:${h.statusText || ''}`)
+                  .join('|')
+              }
+            />
+            )
+          : renderTabs()
+      }
     </SettingModal>
   )
 })

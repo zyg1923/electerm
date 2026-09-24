@@ -5,7 +5,6 @@
 import { useState } from 'react'
 import {
   Button,
-  Input,
   Select,
   Progress,
   Space,
@@ -16,6 +15,7 @@ import Modal from '../common/modal'
 import { ot } from './ops-i18n'
 import { useOpsTabSelect } from './ops-tab-select'
 import { startRelayTransfer } from './relay-transfer'
+import PathField from './path-field'
 import { opsTaskStatus } from '../../common/ops-constants'
 
 export default function RelayPanel () {
@@ -90,8 +90,8 @@ export default function RelayPanel () {
           />
         </div>
         <div>
-          <div className='pd1b'>{ot('remotePath')} (from)</div>
-          <Input value={fromPath} onChange={e => setFromPath(e.target.value)} />
+          <div className='pd1b'>{ot('remotePath')}（源）</div>
+          <PathField tabId={sourceTabId} value={fromPath} onChange={setFromPath} />
         </div>
         <div>
           <div className='pd1b'>目标机器</div>
@@ -103,8 +103,8 @@ export default function RelayPanel () {
           />
         </div>
         <div>
-          <div className='pd1b'>{ot('remotePath')} (to)</div>
-          <Input value={toPath} onChange={e => setToPath(e.target.value)} />
+          <div className='pd1b'>{ot('remotePath')}（目标）</div>
+          <PathField tabId={targetTabId} value={toPath} onChange={setToPath} />
         </div>
       </Space>
       <Button type='primary' onClick={handleStart}>{ot('start')}</Button>

@@ -9,6 +9,7 @@ import FileSection from './file-item'
 import { filesRef } from '../common/ref'
 import findParent from '../../common/find-parent'
 import { removeClass } from '../../common/class'
+import { beginSlideSelect, blockSlideDrag, consumeSuppressClick } from './slide-select'
 import resolve, { osResolve, normalizeWinLocalPath } from '../../common/resolve'
 import { typeMap } from '../../common/constants'
 
@@ -58,14 +59,29 @@ export default class FileTreeTable extends Component {
       return
     }
     target = findParent(target, '.' + fileItemCls)
-    if (!target) {
-      return
+    if (target) {
+      const id = target.getAttribute('data-id')
+      const ref = filesRef.get('file-' + id)
+      if (ref) {
+        ref.onDrop(e)
+        return
+      }
     }
-    const id = target.getAttribute('data-id')
-    const ref = filesRef.get('file-' + id)
-    if (ref) {
-      ref.onDrop(e)
+    const inst = this.findPanelFile()
+    if (inst) {
+      inst.onDrop(e, { intoCurrent: true })
     }
+  }
+
+  findPanelFile = () => {
+    const tabId = this.props.tab?.id
+    const type = this.props.type
+    for (const inst of window.filesRef.values()) {
+      if (inst?.props?.tab?.id === tabId && inst?.props?.file?.type === type) {
+        return inst
+      }
+    }
+    return null
   }
 
   onDragEnd = () => {
@@ -86,6 +102,11 @@ export default class FileTreeTable extends Component {
   }
 
   handleClick = (e) => {
+    if (consumeSuppressClick(this)) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
     if (e.target.closest('.sftp-tree-toggle') || e.target.closest('.sftp-file-info-btn')) {
       return
     }
@@ -127,11 +148,12 @@ export default class FileTreeTable extends Component {
   }
 
   onContextMenuFile = ({ key }) => {
-    if (key !== 'more-submenu') {
-      const inst = this.getClickedFile()
-      if (inst) {
-        inst[key]()
-      }
+    if (key === 'more-submenu' || key === 'new-submenu') {
+      return
+    }
+    const inst = this.getClickedFile()
+    if (inst && typeof inst[key] === 'function') {
+      inst[key]()
     }
   }
 
@@ -236,7 +258,9 @@ export default class FileTreeTable extends Component {
       onDragEnter: this.onDragEnter,
       onDragLeave: this.onDragLeave,
       onDrop: this.onDrop,
-      onDragEnd: this.onDragEnd
+      onDragEnd: this.onDragEnd,
+      onMouseDown: (event) => beginSlideSelect(this, event),
+      onDragStartCapture: (event) => blockSlideDrag(this, event)
     }
     const ddProps = {
       menu: {

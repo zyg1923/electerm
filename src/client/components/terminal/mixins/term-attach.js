@@ -55,10 +55,22 @@ export const attachMixin = {
 
   cd (p) {
     if (isUnsafeFilename(p)) {
-      return message.error('File name contains unsafe characters')
+      return message.error('路径里有不能用的字符')
     }
-    const isWinPath = /^[a-zA-Z]:\\/.test(p)
-    this.runQuickCommand(isWinPath ? `cd /d "${p}"` : `cd "${p}"`)
+    if (this.state?.loading || !this.attachAddon) {
+      return message.warning('终端还在连接，等它出来再进入这个目录')
+    }
+    let cmd = `cd "${p}"`
+    const winPath = /^[a-zA-Z]:[\\/]/.test(String(p || ''))
+    if (winPath && this.isLocal?.() && isWin) {
+      const shell = this.props.tab?.localShell
+      const exec = String(this.props.tab?.execWindows || '')
+      const isCmd = shell === 'cmd' || (!shell && /cmd\.exe$/i.test(exec))
+      cmd = isCmd
+        ? `cd /d "${p}"`
+        : `Set-Location -LiteralPath '${String(p).replace(/'/g, "''")}'`
+    }
+    this.runQuickCommand(cmd)
   },
 
   initTriggerManager () {

@@ -4,7 +4,7 @@
  */
 
 import { Component } from 'react'
-import { Button } from 'antd'
+import { Button, Checkbox } from 'antd'
 import Modal from '../common/modal'
 import { isString } from 'lodash-es'
 import AnimateText from '../common/animate-text'
@@ -31,13 +31,29 @@ export default class ConfirmModalStore extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      transferToConfirm: null
+      transferToConfirm: null,
+      applyRest: false
     }
     this.queue = []
     this.queuedTransferIds = new Set()
     this.activeTransferId = null
     this.id = 'transfer-conflict'
     refsStatic.add(this.id, this)
+  }
+
+  dismiss = (id) => {
+    if (!id) {
+      return
+    }
+    this.queue = this.queue.filter(item => item.id !== id)
+    this.queuedTransferIds.delete(id)
+    if (this.activeTransferId !== id) {
+      return
+    }
+    this.activeTransferId = null
+    this.setState({
+      transferToConfirm: null
+    }, this.showNext)
   }
 
   addConflict = (transfer) => {
@@ -70,8 +86,20 @@ export default class ConfirmModalStore extends Component {
     }
     this.activeTransferId = next?.id || null
     this.setState({
-      transferToConfirm: next
+      transferToConfirm: next,
+      applyRest: false
     })
+  }
+
+  decide = (action) => {
+    const { applyRest } = this.state
+    if (applyRest && action === fileActions.cancel) {
+      return this.act(fileActions.skipAll)
+    }
+    if (applyRest && !String(action).includes('All')) {
+      return this.act(action + 'All')
+    }
+    return this.act(action)
   }
 
   act = (action) => {
@@ -137,37 +165,40 @@ export default class ConfirmModalStore extends Component {
         type: typeTo
       }
     } = transferToConfirm
-    const action = isDirectory ? e('merge') : e('replace')
     const typeTxt = isDirectory ? e('folder') : e('file')
     const Icon = isDirectory ? FolderOutlined : FileOutlined
-    const typeTitle = e(typeTo)
-    const otherTypeTitle = e(typeFrom)
+    const card = (title, fileName, size, mtime, filePath) => (
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p className='bold font13'>{title}</p>
+        <p className='bold font14'>
+          <Icon className='mg1r' />{fileName}
+        </p>
+        <p className='font13'>
+          {typeTxt} · {e('size')}: {size ?? '-'}
+        </p>
+        <p className='font13'>
+          {e('modifyTime')}: {mtime ? formatTimeAuto(mtime) : '-'}
+        </p>
+        <p className='font12 elli' title={filePath}>{filePath}</p>
+      </div>
+    )
     return (
       <div className='confirms-content-wrap'>
         <AnimateText>
-          <p className='pd1b color-red font13'>
-            {action}
-          </p>
-          <p className='bold font14'>
-            {typeTitle} {typeTxt}: <Icon className='mg1r' />{name}
-          </p>
-          <p className='font13'>
-            {e('size')}: {sizeTo}, {e('modifyTime')}: {formatTimeAuto(modifyTimeTo)}
-          </p>
           <p className='pd1b'>
-            ({toPath})
+            目标位置已经有同名{typeTxt}。选择替换、跳过，或保留两者（新文件会命名为「{name} (2)」）。
+            {
+              !isDirectory && sizeTo > 0 && sizeFrom > 0 && sizeTo < sizeFrom
+                ? ' 目标文件更小，也可以断点续传（半截会写在 .electerm.part，传完再改名并清掉临时文件）。'
+                : ''
+            }
           </p>
-          <p>
-            with
-          </p>
-          <p className='bold font14'>
-            {otherTypeTitle} {typeTxt}: <Icon className='mg1r' />{name}
-          </p>
-          <p className='font13'>
-            {e('size')}: {sizeFrom}, {e('modifyTime')}: {formatTimeAuto(modifyTimeFrom)}
-          </p>
-          <p className='pd1b'>
-            ({fromPath})
+          <div style={{ display: 'flex', gap: 16 }}>
+            {card('正在复制', name, sizeFrom, modifyTimeFrom, fromPath)}
+            {card('目标已有', name, sizeTo, modifyTimeTo, toPath)}
+          </div>
+          <p className='font12 pd1t'>
+            {e(typeFrom)} → {e(typeTo)}
           </p>
         </AnimateText>
       </div>
@@ -182,79 +213,57 @@ export default class ConfirmModalStore extends Component {
       return null
     }
     const {
-      fromFile: {
-        isDirectory
-      }
+      fromFile,
+      toFile
     } = transferToConfirm
+    const isDirectory = !!fromFile?.isDirectory
+    const sizeFrom = Number(fromFile?.size) || 0
+    const sizeTo = Number(toFile?.size) || 0
+    const canResume = !isDirectory && sizeTo > 0 && sizeFrom > 0 && sizeTo < sizeFrom
+    const rest = this.queue.length
     return (
-      <div className='mgq1t pd1y alignright'>
-        <Button
-          type='dashed'
-          className='mg1l'
-          onClick={() => this.act(fileActions.skipAll)}
-        >
-          {e('cancel')}
-        </Button>
-        <Button
-          type='dashed'
-          className='mg1l'
-          onClick={() => this.act(fileActions.skip)}
-        >
-          {e('skip')}
-        </Button>
-        <Button
-          danger
-          className='mg1l'
-          onClick={
-            () => this.act(fileActions.mergeOrOverwrite)
-          }
-        >
-          {isDirectory ? e('merge') : e('overwrite')}
-        </Button>
-        <Button
-          type='primary'
-          className='mg1l'
-          onClick={
-            () => this.act(fileActions.rename)
-          }
-        >
-          {e('rename')}
-        </Button>
-        <div className='pd1t'>
+      <div className='pd1y'>
+        <div className='pd1b'>
+          <Checkbox
+            checked={this.state.applyRest}
+            onChange={ev => this.setState({ applyRest: ev.target.checked })}
+          >
+            对后续冲突都这样处理{rest ? `（还有 ${rest} 个）` : ''}
+          </Checkbox>
+        </div>
+        <div className='alignright'>
           <Button
-            type='dashed'
+            className='mg1l'
+            onClick={() => this.decide(fileActions.skip)}
+          >
+            跳过
+          </Button>
+          <Button
+            className='mg1l'
+            onClick={() => this.decide(fileActions.rename)}
+          >
+            保留两者
+          </Button>
+          {
+            canResume
+              ? (
+                <Button
+                  type='primary'
+                  className='mg1l'
+                  onClick={() => this.decide(fileActions.resume)}
+                >
+                  断点续传
+                </Button>
+                )
+              : null
+          }
+          <Button
+            type='primary'
             danger
             className='mg1l'
-            title={
-              isDirectory
-                ? e('mergeDesc')
-                : e('overwriteDesc')
-            }
-            onClick={
-              () => this.act(fileActions.mergeOrOverwriteAll)
-            }
+            onClick={() => this.decide(fileActions.mergeOrOverwrite)}
           >
-            {isDirectory ? e('mergeAll') : e('overwriteAll')}
-          </Button>
-          <Button
-            type='primary'
-            className='mg1l'
-            title={e('renameDesc')}
-            onClick={
-              () => this.act(fileActions.renameAll)
-            }
-          >
-            {e('renameAll')}
-          </Button>
-          <Button
-            type='primary'
-            className='mg1l'
-            title={e('skipAll')}
-            onClick={
-              () => this.act(fileActions.skipAll)
-            }
-          >
-            {e('skipAll')}
+            {isDirectory ? '合并' : '替换'}
           </Button>
         </div>
       </div>
@@ -270,10 +279,11 @@ export default class ConfirmModalStore extends Component {
     }
     const modalProps = {
       open: true,
-      width: 500,
-      title: e('fileConflict'),
+      width: 560,
+      zIndex: 1300,
+      title: '替换或跳过文件',
       footer: this.renderFooter(),
-      onCancel: () => this.act(fileActions.cancel)
+      onCancel: () => this.decide(fileActions.cancel)
     }
     return (
       <Modal

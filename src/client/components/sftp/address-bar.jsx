@@ -33,14 +33,19 @@ function splitPathCrumbs (fullPath, type) {
   }
   const isRemote = type === typeMap.remote
   if (isRemote || fullPath.startsWith('/')) {
-    const crumbs = [{ label: '/', path: '/' }]
+    // Root crumb uses empty label so the following "/" separator
+    // renders "/root" instead of "//root".
+    if (fullPath === '/') {
+      return [{ label: '/', path: '/' }]
+    }
+    const crumbs = [{ label: '', path: '/' }]
     const parts = fullPath.split('/').filter(Boolean)
     let acc = ''
     for (const part of parts) {
       acc += '/' + part
       crumbs.push({ label: part, path: acc })
     }
-    return fullPath === '/' ? crumbs.slice(0, 1) : crumbs
+    return crumbs
   }
   const sep = window.pre?.sep || '\\'
   const normalized = String(fullPath).replace(/\//g, sep)

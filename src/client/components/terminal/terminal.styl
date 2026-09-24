@@ -5,9 +5,13 @@
   height 100%
   width 100%
   overflow hidden
-.loading-wrapper
-  padding 30px
+.term-wrap > .loading-wrapper
+  position absolute
   z-index 100
+  left 8px
+  top calc(var(--term-pad, 20px) + (48px / var(--app-zoom, 1)))
+  margin 0
+  padding 0
 .term-search-box
   position absolute
   right 5px
@@ -23,13 +27,20 @@
   background var(--main)
   position absolute
   overflow hidden
+  &.terminal-loading
+    .xterm-cursor
+    .xterm-cursor-block
+    .xterm-cursor-bar
+    .xterm-cursor-underline
+    .xterm-cursor-layer
+      visibility hidden !important
 .term-wrap-2
   top 0
   box-sizing border-box
   .xterm
     // Cell height plus a physical-pixel cushion. Small page zoom must not
     // shrink that cushion, or the first row gets clipped again.
-    padding-top calc(var(--term-pad, 20px) + (22px / var(--app-zoom, 1))) !important
+    padding-top calc(var(--term-pad, 20px) + (48px / var(--app-zoom, 1))) !important
 
 .vertical
   .term-wrap.not-first-term

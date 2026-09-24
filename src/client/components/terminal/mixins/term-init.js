@@ -12,6 +12,7 @@ import { Osc52Addon } from '../osc52-addon.js'
 import { rendererTypes } from '../../../common/constants.js'
 import { refsStatic } from '../../common/ref.js'
 import keyControlPressed from '../../../common/key-control-pressed.js'
+import { parseViCommand } from '../../ops/ops-vi.js'
 
 /**
  * Terminal bootstrap: create the xterm instance, load every addon and wire
@@ -34,12 +35,24 @@ export const initMixin = {
       cursorStyle: config.cursorStyle,
       cursorBlink: config.cursorBlink,
       fontSize: tab.fontSize || config.fontSize,
-      screenReaderMode: config.screenReaderMode
+      screenReaderMode: config.screenReaderMode,
+      // Follow is handled ourselves: stay at the bottom until the wheel leaves it.
+      scrollOnUserInput: false
     })
 
     term.parent = this
     term.onSelectionChange(this.onSelection)
     term.open(this.domRef.current, true)
+    this._followOutput = true
+    term.onWriteParsed(() => {
+      if (this._followOutput) {
+        this.scrollFollowBottom()
+      }
+      this.scheduleSearchRefresh()
+    })
+    term.onScroll(() => {
+      this.syncFollowFromViewport()
+    })
     this.bindClearHistoryWheel(term)
     this.bindLineSelect(term)
     this.bindKeepScrollbackOnClear(term)
@@ -95,15 +108,56 @@ export const initMixin = {
     }
     term.onData(this.onData)
     this.term = term
+    if (this.state?.loading) {
+      this.applyLoadingCursor?.(true)
+    }
     term.onSelectionChange(this.onSelectionChange)
     term.attachCustomKeyEventHandler(this.handleKeyboardEvent.bind(this))
-    // 容器不可见（隐藏标签 display:none）时不 fit，避免算出 0 列把 shell
-    // 提示符逐字符错误换行；待标签激活可见后由 fitAndRefresh 重新适配。
-    if (this.isElementVisible()) {
-      this.fitAddon.fit()
+    // Don't open the shell while the pane is still a sliver. A 2–3 row pty
+    // keeps only the prompt, and a later resize does not reprint the banner.
+    await this.waitForTerminalSize(term)
+    if (this.onClose) {
+      return
     }
     await this.restoreReloadScreen(term)
     await this.remoteInit(term)
+  },
+
+  terminalBoxReady () {
+    const box = this.domRef?.current
+    return !!(
+      box &&
+      box.clientHeight >= 80 &&
+      box.clientWidth >= 160
+    )
+  },
+
+  async waitForTerminalSize (term) {
+    const fitNow = () => {
+      if (!this.fitAddon || !this.terminalBoxReady()) {
+        return false
+      }
+      try {
+        this.fitAddon.fit()
+      } catch (e) {
+        return false
+      }
+      return term.rows >= 8 && term.cols >= 40
+    }
+    if (fitNow()) {
+      return
+    }
+    await new Promise((resolve) => {
+      const started = Date.now()
+      const tick = () => {
+        if (this.onClose || fitNow() || Date.now() - started > 1600) {
+          resolve()
+          return
+        }
+        requestAnimationFrame(tick)
+      }
+      tick()
+    })
   },
 
   onSelectionChange () {
@@ -111,6 +165,49 @@ export const initMixin = {
     const txt = hasSelection ? this.term.getSelection().trim() : ''
     this.setState({ hasSelection })
     refsStatic.get('unix-timestamp-tooltip')?.onSelection(txt)
+  },
+
+  guessPromptCwd () {
+    const buffer = this.term?.buffer?.active
+    if (!buffer) {
+      return ''
+    }
+    const line = buffer.getLine(buffer.baseY + buffer.cursorY)
+    const text = line?.translateToString?.(true) || ''
+    const matched = text.match(/(?:^|[\s\[:])((?:~|\/)[^\]\s#$%>:]*)\s*[#$%>]\s/)
+    return matched ? matched[1] : ''
+  },
+
+  interceptViCommand () {
+    const enabled = this.props.config?.opsViIntercept !== false &&
+      window.store.opsViIntercept !== false
+    if (!enabled || !this.term || this.term.buffer.active.type === 'alternate') {
+      return false
+    }
+    const raw = (this.getCurrentInput?.() || '').trim()
+    const parsed = parseViCommand(raw)
+    if (!parsed) {
+      return false
+    }
+    window.store.addCmdHistory?.(raw)
+    let path = parsed.path || ''
+    if (path && !path.startsWith('/') && !path.startsWith('~')) {
+      const cwd = this.cmdAddon?.getCwd?.() || this.guessPromptCwd()
+      if (cwd) {
+        const base = cwd === '~' ? '~' : cwd.replace(/\/$/, '')
+        path = base + '/' + path
+      }
+    }
+    try {
+      this.socket?.send?.('\x15')
+    } catch (e) {}
+    import('../../ops/ops-file-editor.jsx').then(({ openOpsFileEditor }) => {
+      openOpsFileEditor({
+        tabId: this.props.tab?.id,
+        path
+      })
+    }).catch(() => {})
+    return true
   },
 
   maybeInterceptVi (cmd) {

@@ -5,7 +5,6 @@
 import { useState } from 'react'
 import {
   Button,
-  Input,
   Select,
   Space,
   Tag,
@@ -16,6 +15,7 @@ import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import Modal from '../common/modal'
 import { ot } from './ops-i18n'
 import { OpsTabSelect, useOpsTabSelect } from './ops-tab-select'
+import PathField from './path-field'
 import {
   compareConfigAcrossHosts,
   compareDirectories
@@ -114,11 +114,11 @@ export default function ConfigDiffPanel () {
   const hostColumns = [
     { title: ot('host'), dataIndex: 'title', key: 'title' },
     {
-      title: 'hash',
+      title: ot('summary'),
       dataIndex: 'hash',
       key: 'hash',
       ellipsis: true,
-      render: (h, row) => row.ok ? (h || '').slice(0, 12) : <Tag color='red'>err</Tag>
+      render: (h, row) => row.ok ? (h || '').slice(0, 12) : <Tag color='red'>失败</Tag>
     },
     {
       title: ot('identical'),
@@ -156,7 +156,7 @@ export default function ConfigDiffPanel () {
       <OpsTabSelect listProps={listProps} />
       <div className='pd1b'>{ot('remotePath')}</div>
       <Space.Compact style={{ width: '100%' }} className='mg1b'>
-        <Input value={remotePath} onChange={e => setRemotePath(e.target.value)} />
+        <PathField tabId={selectedTabIds[0]} value={remotePath} onChange={setRemotePath} />
         <Button type='primary' loading={loading} onClick={handleFetch}>{ot('fetch')}</Button>
       </Space.Compact>
       {result && (
@@ -192,20 +192,20 @@ export default function ConfigDiffPanel () {
       <Space wrap className='mg1b'>
         <Select
           style={{ width: 180 }}
-          placeholder='left'
+          placeholder={ot('leftSide')}
           options={tabs.map(t => ({ value: t.id, label: t.title || t.id }))}
           value={leftTab || undefined}
           onChange={setLeftTab}
         />
-        <Input style={{ width: 160 }} value={leftPath} onChange={e => setLeftPath(e.target.value)} />
+        <PathField style={{ width: 220 }} tabId={leftTab} value={leftPath} onChange={setLeftPath} placeholder='左侧路径' />
         <Select
           style={{ width: 180 }}
-          placeholder='right'
+          placeholder={ot('rightSide')}
           options={tabs.map(t => ({ value: t.id, label: t.title || t.id }))}
           value={rightTab || undefined}
           onChange={setRightTab}
         />
-        <Input style={{ width: 160 }} value={rightPath} onChange={e => setRightPath(e.target.value)} />
+        <PathField style={{ width: 220 }} tabId={rightTab} value={rightPath} onChange={setRightPath} placeholder='右侧路径' />
         <Button loading={loading} onClick={handleDirCompare}>{ot('dirCompare')}</Button>
       </Space>
       {dirResult && (

@@ -46,13 +46,13 @@ export function TabSelectList (props) {
           className='mg1r pointer'
           onClick={onSelectAll}
         >
-          All
+          全选
         </span>
         <span
           className='pointer'
           onClick={onSelectNone}
         >
-          None
+          全不选
         </span>
       </div>
     )

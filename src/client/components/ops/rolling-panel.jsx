@@ -14,7 +14,7 @@ import {
   message
 } from 'antd'
 import Modal from '../common/modal'
-import { ot } from './ops-i18n'
+import { ot, otEnum } from './ops-i18n'
 import { OpsTabSelect, useOpsTabSelect } from './ops-tab-select'
 import RollingEngine from './rolling-engine'
 import {
@@ -130,10 +130,10 @@ export default function RollingPanel () {
 
   const prog = snapshot?.progress
   const columns = [
-    { title: 'Tab', dataIndex: 'tabId', key: 'tabId', ellipsis: true },
-    { title: ot('status'), dataIndex: 'status', key: 'status', width: 100 },
-    { title: 'exit', dataIndex: 'exitCode', key: 'code', width: 70 },
-    { title: 'error', dataIndex: 'error', key: 'error', ellipsis: true }
+    { title: ot('terminal'), dataIndex: 'tabId', key: 'tabId', ellipsis: true },
+    { title: ot('status'), dataIndex: 'status', key: 'status', width: 100, render: (v) => otEnum(v) },
+    { title: ot('exitCode'), dataIndex: 'exitCode', key: 'code', width: 70 },
+    { title: ot('error'), dataIndex: 'error', key: 'error', ellipsis: true }
   ]
 
   return (

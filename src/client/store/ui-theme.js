@@ -14,6 +14,10 @@ import copy from 'json-deep-copy'
 export default Store => {
   Store.prototype.getUiThemeConfig = function () {
     const { store } = window
+    const draft = store.previewThemeDraft
+    if (draft && draft.uiThemeConfig) {
+      return copy(draft.uiThemeConfig)
+    }
     const themeId = store.previewThemeId || store.config.theme
     const theme = store.getSidebarList(settingMap.terminalThemes)
       .find(d => d.id === themeId)

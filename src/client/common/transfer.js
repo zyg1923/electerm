@@ -16,6 +16,7 @@ class Transfer {
   }) {
     const id = generate()
     this.id = id
+    this._done = false
     const th = this
     const {
       sftpId,
@@ -23,6 +24,7 @@ class Transfer {
       port
     } = rest
     const ws = await initWs('transfer', id, sftpId, undefined, port)
+    this.ws = ws
     ws.s({
       action: 'transfer-new',
       ...rest,
@@ -44,6 +46,23 @@ class Transfer {
       }
     })
 
+    const finishOk = (arg) => {
+      if (th._done) {
+        return
+      }
+      th._done = true
+      onEnd(arg)
+      th.onDestroy(ws)
+    }
+    const finishErr = (err) => {
+      if (th._done) {
+        return
+      }
+      th._done = true
+      onError(err instanceof Error ? err : new Error(String(err?.message || err || '连接已断开')))
+      th.onDestroy(ws)
+    }
+
     const did = 'transfer:data:' + id
     this.onData = (evt) => {
       const arg = JSON.parse(evt.data)
@@ -53,20 +72,34 @@ class Transfer {
     }
     ws.addEventListener('message', this.onData)
     ws.once((arg) => {
-      onEnd(arg)
-      th.onDestroy(ws)
+      finishOk(arg)
     }, 'transfer:end:' + id)
     ws.once((arg) => {
       console.debug('sftp transfer error')
-      console.debug(arg.error.stack)
-      onError(new Error(arg.error.message))
-      th.onDestroy(ws)
+      console.debug(arg.error?.stack)
+      finishErr(new Error(arg.error?.message || '传输失败'))
     }, 'transfer:err:' + id)
+    // Session/SFTP teardown often closes the socket without transfer:err
+    const prevClose = ws.onclose
+    ws.onclose = () => {
+      try {
+        prevClose && prevClose.call(ws)
+      } catch (e) {}
+      finishErr(new Error('连接已断开'))
+    }
   }
 
   onDestroy (ws) {
-    ws.removeEventListener('message', this.onData)
-    ws.close()
+    if (this._destroyed) {
+      return
+    }
+    this._destroyed = true
+    this._done = true
+    if (ws) {
+      ws.onclose = () => {}
+      ws.removeEventListener('message', this.onData)
+      ws.close()
+    }
   }
 }
 

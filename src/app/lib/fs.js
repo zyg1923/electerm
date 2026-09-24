@@ -442,29 +442,32 @@ const fsExport = Object.assign(
       }
       const dirents = await fss.readdir(dir, { withFileTypes: true })
       return Promise.all(dirents.map(async (d) => {
+        const full = path.join(dir, d.name)
         let isDirectory = d.isDirectory()
         const isSymbolicLink = d.isSymbolicLink()
         let target = ''
+        let st = null
         if (isSymbolicLink) {
-          const p = path.join(dir, d.name)
-          target = await fss.readlink(p).catch(() => '')
-          const followed = await fss.stat(p).catch(() => null)
-          if (followed) {
-            isDirectory = followed.isDirectory()
+          target = await fss.readlink(full).catch(() => '')
+          st = await fss.stat(full).catch(() => null)
+          if (st) {
+            isDirectory = st.isDirectory()
           }
+        } else {
+          st = await fss.lstat(full).catch(() => null)
         }
         return {
           name: d.name,
-          size: 0,
-          accessTime: 0,
-          modifyTime: 0,
-          mode: 0,
-          owner: 0,
-          group: 0,
+          size: st ? Number(st.size) || 0 : 0,
+          accessTime: st ? Number(st.atimeMs) || 0 : 0,
+          modifyTime: st ? Number(st.mtimeMs) || 0 : 0,
+          mode: st ? st.mode || 0 : 0,
+          owner: st ? st.uid || 0 : 0,
+          group: st ? st.gid || 0 : 0,
           isDirectory,
           isSymbolicLink,
           target,
-          hasChildren: isDirectory ? await dirHasChildren(path.join(dir, d.name)) : false
+          hasChildren: isDirectory ? await dirHasChildren(full) : false
         }
       }))
     },

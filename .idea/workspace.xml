@@ -4,106 +4,127 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="41630144-c123-4a86-870c-ce91bf9e1ab7" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/google-java-format.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PROGRESS-FULL.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PROGRESS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/common/ops-constants.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/approval-gate.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/approval-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/bandwidth-gate.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/cache-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/command-center-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/command-templates.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-engine.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/cron-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-engine.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/docker-engine.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/docker-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/history-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-engine.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-cache.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.styl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-file-editor.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-i18n.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-tab-select.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-crypto.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/relay-transfer.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/resume-upload.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-engine.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/tools-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/ops/wizards-panel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-migrate.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components/terminal/clear-marks.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/store/ops.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+    <list default="true" id="41630144-c123-4a86-870c-ce91bf9e1ab7" name="更改" comment="1">
+      <change afterPath="$PROJECT_DIR$/src/app/server/elevate-local.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/file-editor-panel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/ops-vi.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/ops/path-field.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/setting-panel/font-theme-preview.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/sftp/slide-select.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer-center.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PROGRESS-FULL.md" beforeDir="false" afterPath="$PROJECT_DIR$/PROGRESS-FULL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PROGRESS.md" beforeDir="false" afterPath="$PROJECT_DIR$/PROGRESS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/fs.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/fs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/ipc.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/ipc.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/menu.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/lib/nedb.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/nedb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/single-instance.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/single-instance.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/lib/sqlite.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/sqlite.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/lib/window-drag-move.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/window-drag-move.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/server/session-api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/server/session-common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/lib/tray.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/lib/tray.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/ftp-transfer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/ftp-transfer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/remote-common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/remote-common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-base.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-base.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-ftp.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-ftp.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/server/session-local.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-local.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/session-server.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-server.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/server/session-sftp.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session-sftp.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/server/session.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/session.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/server/terminal-api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/terminal-api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/server/transfer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/server/transfer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/clipboard.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/common/constants.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/constants.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/common/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/db.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/common/default-setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/default-setting.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/common/left-sidebar-icon-defs.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/left-sidebar-icon-defs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/common/new-terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/new-terminal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/common/setting-list.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/setting-list.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/ops-constants.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/ops-constants.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/common/transfer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/common/transfer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/common/float-window.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/common/float-window.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/conflict-resolve.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/conflict-resolve.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/remote2remote-handler.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/remote2remote-handler.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/remote2remote-handlers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/remote2remote-handlers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/transfer-speed-format.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/transfer-speed-format.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/transfer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/transfer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/file-transfer/transports-action-store.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/file-transfer/transports-action-store.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/footer/footer-entry.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/footer-entry.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/footer/footer.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/footer.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/footer/multi-tab-run-modal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/multi-tab-run-modal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/footer/tab-select.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/footer/tab-select.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/main/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/main/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/remote-monitor-bar.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/remote-monitor/session-monitor.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/remote-monitor/session-monitor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/session/session.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/session/session.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/list.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/list.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/approval-gate.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/approval-gate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/approval-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/approval-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/bandwidth-gate.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/bandwidth-gate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/cache-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/cache-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/command-center-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/command-center-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/command-templates.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/command-templates.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/config-diff-engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/config-diff-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/config-diff-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/cron-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/cron-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/distribute-engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/distribute-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/distribute-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/docker-engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/docker-engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/docker-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/docker-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/history-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/history-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/machine-status-engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/machine-status-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/machine-status-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-cache.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-cache.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-center.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-center.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-center.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-file-editor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-file-editor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-i18n.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-i18n.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/ops-tab-select.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/ops-tab-select.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/relay-crypto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/relay-crypto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/relay-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/relay-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/relay-transfer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/relay-transfer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/resume-upload.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/resume-upload.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/rolling-engine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-engine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/rolling-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/rolling-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/tools-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/tools-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/ops/wizards-panel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/ops/wizards-panel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/session/sessions.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/session/sessions.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-common.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-common.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-migrate.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-migrate.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-modal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-modal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-terminal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-terminal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/tab-settings.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/tab-settings.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/owner-list.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/owner-list.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/setting-wrap.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/setting-wrap.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/setting-panel/tab-themes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/setting-panel/tab-themes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/address-bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/address-bar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/file-item.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/file-item.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/file-tree-ui.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/file-tree-ui.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sftp/list-table-ui.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/list-table-ui.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sftp/sftp-entry.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/sftp-entry.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sftp/sftp.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sftp/sftp.styl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-control.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-control.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-handler.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/shortcuts/shortcut-handler.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/shortcuts/shortcuts-defaults.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/shortcuts/shortcuts-defaults.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/history.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/history.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/index.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/left-sidebar-icons.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/left-sidebar-icons.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history-modal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history-modal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer-history.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/app-drag.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/app-drag.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/no-session.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/no-session.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/tabs/no-session.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/tabs/no-session.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transfer.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transfer.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/sidebar/transport-ui.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/sidebar/transport-ui.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/clear-marks.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/clear-marks.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-attach.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-attach.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-content.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-content.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-context-menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-context-menu.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-init.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-init.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-resize.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-resize.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-socket.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-socket.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-suggestions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/mixins/term-suggestions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal-command-dropdown.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal-command-dropdown.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/shell.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/shell.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/terminal/term-search.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/term-search.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/terminal/terminal.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/terminal/terminal.styl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/theme/theme-form.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/theme/theme-form.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/components/theme/theme-list-item.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/theme/theme-list-item.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/entry/basic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/entry/basic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components/theme/theme-list.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components/theme/theme-list.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/event.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/event.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/store/init-state.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/init-state.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/store/load-data.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/load-data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/store/session.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/session.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/store/store.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/store.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/ops.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/ops.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/setting.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/store/sync.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/sync.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/store/system-menu.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/system-menu.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/store/terminal-theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/terminal-theme.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/transfer-list.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/transfer-list.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/store/ui-theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/ui-theme.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/store/watch.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/store/watch.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,12 +134,22 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/zyg1923/electerm.git",
-    "accountId": "7217ec96-fa00-4701-95bd-a132c704a086"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;assignee&quot;: &quot;zyg1923&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {
+    &quot;assignee&quot;: &quot;zyg1923&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/zyg1923/electerm.git&quot;,
+    &quot;accountId&quot;: &quot;7217ec96-fa00-4701-95bd-a132c704a086&quot;
+  }
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -248,8 +279,19 @@
       <workItem from="1789693787316" duration="2475000" />
       <workItem from="1789867432560" duration="595000" />
       <workItem from="1789965601557" duration="1419000" />
-      <workItem from="1790039607102" duration="1269000" />
+      <workItem from="1790039607102" duration="2848000" />
+      <workItem from="1790126400018" duration="594000" />
+      <workItem from="1790244556183" duration="141000" />
     </task>
+    <task id="LOCAL-00001" summary="1">
+      <option name="closed" value="true" />
+      <created>1790057216852</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1790057216852</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -273,6 +315,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="1" />
+    <option name="LAST_COMMIT_MESSAGE" value="1" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

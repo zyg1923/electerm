@@ -46,6 +46,10 @@ export default Store => {
 
   Store.prototype.getThemeConfig = function () {
     const { store } = window
+    const draft = store.previewThemeDraft
+    if (draft && draft.themeConfig) {
+      return copy(draft.themeConfig)
+    }
     const all = store.getSidebarList(settingMap.terminalThemes)
     const themeId = store.previewThemeId || store.config.theme
     return (all.find(d => d.id === themeId) || {}).themeConfig || {}
